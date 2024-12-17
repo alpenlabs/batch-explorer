@@ -1,3 +1,6 @@
+/// This module contains the `StrataFetcher` struct, which is responsible for 
+/// fetching checkpoint data from the Strata API.
+/// 
 use crate::models::RpcCheckpointInfo;
 use reqwest::Client;
 use serde_json::{json, Value};
@@ -9,6 +12,15 @@ pub struct StrataFetcher {
 }
 
 impl StrataFetcher {
+    /// Creates a new StrataFetcher instance.
+    ///
+    /// # Parameters
+    /// * `endpoint` - Base URL of the Strata fullnode
+    ///
+    /// # Examples
+    /// ```
+    /// let fetcher = StrataFetcher::new("http://fullnode.example.com".to_string());
+    /// ```
     pub fn new(endpoint: String) -> Self {
         Self {
             client: Client::new(),
@@ -16,7 +28,28 @@ impl StrataFetcher {
         }
     }
 
-
+    /// Fetches checkpoint information from the Strata fullnode.
+    ///
+    /// Makes a JSON-RPC call to `strata_getCheckpointInfo` endpoint
+    /// and deserializes the response into a checkpoint object.
+    ///
+    /// # Parameters
+    /// * `idx` - Checkpoint index to fetch
+    ///
+    /// # Returns
+    /// * `Result<RpcCheckpointInfo>` - Checkpoint data if successful
+    ///
+    /// # Errors
+    /// * Network request failures
+    /// * Invalid response format
+    /// * Missing checkpoint data
+    /// * Deserialization errors
+    ///
+    /// # Examples
+    /// ```
+    /// let checkpoint = fetcher.fetch_checkpoint(1234).await?;
+    /// println!("Fetched checkpoint: {:?}", checkpoint);
+    /// ```
     pub async fn fetch_checkpoint(&self, idx: u64) -> Result<RpcCheckpointInfo> {
         let payload = json!({
             "jsonrpc": "2.0",

@@ -6,7 +6,7 @@ mod fetcher;
 use axum::{routing::get, routing::post, Router};
 // use db::Database;
 // use fetcher::StrataFetcher;
-use routes::{fetch_and_store_checkpoint, get_checkpoint, generate_sample_data};
+use routes::{fetch_and_store_checkpoint, get_checkpoint, generate_sample_data, get_checkpoints_paginated};
 use std::sync::Arc;
 // use tokio::net::TcpListener;
 use tracing::{info, Level};
@@ -38,10 +38,15 @@ async fn main() {
         .route("/generate_data/:start_idx", get(generate_sample_data))
         .with_state((db.clone(), fetcher.clone()));
 
+    let checkpoints_paginated = Router::new()
+        .route("/checkpoints_paginated", get(get_checkpoints_paginated))
+        .with_state(db.clone());
+    
     // Combine sub-routers into the main app
     let app = db_router
         .merge(fetch_router)
-        .merge(temp_generate_data);
+        .merge(temp_generate_data)
+        .merge(checkpoints_paginated);
 
     // Start server
     info!("Server started at: http://localhost:3000");

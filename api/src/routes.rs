@@ -1,13 +1,13 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, State, Query},
     http::StatusCode,
     response::IntoResponse,
-    Json,
+    Json
 };
 use crate::{db::Database, fetcher::StrataFetcher, models::RpcCheckpointInfo};
 // use crate::models::Batch;
 use std::sync::Arc;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use tracing::{info, error};
 
 #[derive(Serialize)]
@@ -84,7 +84,7 @@ pub async fn generate_sample_data(
     match fetcher.fetch_checkpoint(start_idx).await {
         Ok(original_checkpoint) => {
             // Replicate the checkpoint data 500 times with increasing `idx`
-            for i in 0..1000000 {
+            for i in 0..100000 {
                 let mut new_checkpoint = original_checkpoint.clone();
                 new_checkpoint.idx = start_idx + i; // Set the new idx for each replica
 
@@ -114,4 +114,50 @@ pub async fn generate_sample_data(
             (StatusCode::INTERNAL_SERVER_ERROR, Json(response))
         }
     }
+}
+
+
+#[derive(Deserialize)]
+pub struct PaginationParams {
+    page: Option<u64>,    // Default page 1
+    page_size: Option<u64>, // Default page size 20
+}
+
+#[derive(serde::Serialize)]
+pub struct PaginatedResponse {
+    current_page: u64,
+    total_pages: u64,
+    total_checkpoints: u64,
+    checkpoints: Vec<RpcCheckpointInfo>,
+}
+
+pub async fn get_checkpoints_paginated(
+    State(db): State<Arc<Database>>,
+    Query(params): Query<PaginationParams>,
+) -> impl IntoResponse {
+    // Set default values for pagination
+    let page = params.page.unwrap_or(1);
+    let page_size = params.page_size.unwrap_or(20);
+
+    // Calculate offset and limit for fetching from the database
+    let offset = (page - 1) * page_size;
+    let limit = page_size;
+
+    // Fetch paginated checkpoints and total count
+    let (checkpoints, total_checkpoints) = db.get_paginated_checkpoints(offset, limit).await;
+
+    // Calculate total pages based on total checkpoints
+    let total_pages = if total_checkpoints % page_size == 0 {
+        total_checkpoints / page_size
+    } else {
+        total_checkpoints / page_size + 1
+    };
+
+    // Return the paginated response
+    Json(PaginatedResponse {
+        current_page: page,
+        total_pages,
+        total_checkpoints,
+        checkpoints,
+    })
 }
