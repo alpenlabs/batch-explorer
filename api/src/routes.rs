@@ -9,7 +9,7 @@ use crate::{db::Database, fetcher::StrataFetcher, models::RpcCheckpointInfo};
 use std::sync::Arc;
 use serde::{Serialize, Deserialize};
 use tracing::{info, error};
-
+use crate::helper::generate_random_l2_blockid;
 #[derive(Serialize)]
 #[serde(untagged)] // Removes the enum tag in the serialized JSON
 pub enum CheckpointResponse {
@@ -40,25 +40,19 @@ pub async fn fetch_and_store_checkpoint(
     }
 }
 
-/// get a checkpoint by its index
+
 pub async fn get_checkpoint(
     State(db): State<Arc<Database>>,
-    Path(idx): Path<u64>,
+    Path(q): Path<String>,
 ) -> impl IntoResponse {
-    if let Some(checkpoint) = db.get_checkpoint(idx) {
-        return (
-            StatusCode::CREATED,
-            Json(CheckpointResponse::Success(checkpoint)),
-        );
+    let checkpoint = db.search_exact_match(&q);
+    match checkpoint {
+        Some(ckpt) =>  (StatusCode::OK, Json(CheckpointResponse::Success(ckpt))),
+        None =>  (StatusCode::NOT_FOUND, Json(CheckpointResponse::Error {
+            error: "Checkpoint not found".to_string()
+        }))
     }
-    (
-        StatusCode::NOT_FOUND,
-        Json(CheckpointResponse::Error {
-            error: "Checkpoint not found".to_string(),
-        }),
-    )
 }
-
 use serde_json::{json, Value};
 /// Temporary struct for 
 #[derive(Serialize)]
@@ -87,6 +81,7 @@ pub async fn generate_sample_data(
             for i in 0..100000 {
                 let mut new_checkpoint = original_checkpoint.clone();
                 new_checkpoint.idx = start_idx + i; // Set the new idx for each replica
+                new_checkpoint.l2_blockid = generate_random_l2_blockid();
 
                 // Insert into database
                 db.insert_checkpoint(&new_checkpoint);

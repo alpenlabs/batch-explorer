@@ -2,6 +2,7 @@ mod db;
 mod models;
 mod routes;
 mod fetcher;
+mod helper;
 
 use axum::{routing::get, routing::post, Router};
 // use db::Database;
@@ -27,7 +28,7 @@ async fn main() {
 
     // Create sub-routers with their respective states
     let db_router = Router::new()
-        .route("/checkpoint/:idx", get(get_checkpoint))
+        .route("/checkpoint/:q", get(get_checkpoint))
         .with_state(db.clone());
 
     let fetch_router = Router::new()
@@ -41,7 +42,7 @@ async fn main() {
     let checkpoints_paginated = Router::new()
         .route("/checkpoints_paginated", get(get_checkpoints_paginated))
         .with_state(db.clone());
-    
+
     // Combine sub-routers into the main app
     let app = db_router
         .merge(fetch_router)
