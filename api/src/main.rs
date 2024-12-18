@@ -3,18 +3,19 @@ mod models;
 mod routes;
 mod fetcher;
 mod helper;
+mod cache;
 
 use axum::{routing::get, routing::post, Router};
-// use db::Database;
-// use fetcher::StrataFetcher;
+use fetcher::StrataFetcher;
 use routes::{fetch_and_store_checkpoint, get_checkpoint, generate_sample_data, get_checkpoints_paginated};
-use std::sync::Arc;
-// use tokio::net::TcpListener;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
+use std::sync::Arc ;
+use db::Database;
 
+// TODO: get this from config
 const STRATA_FULLNODE: &str = "http://fnclient675f9eff3a682b8c0ea7423.devnet-annapurna.stratabtc.org/";
-
+const CACHE_SIZE: usize = 1000;
 #[tokio::main]
 async fn main() {
     // Initialize logging
@@ -23,25 +24,24 @@ async fn main() {
     .init();
     
     // Initialize RocksDB and Fetcher
-    let db = Arc::new(db::Database::new("batches_db"));
-    let fetcher = Arc::new(fetcher::StrataFetcher::new(STRATA_FULLNODE.to_string()));
+    let dbs = Arc::new(Database::new("batches_db", CACHE_SIZE));
+    let fetcher = Arc::new(StrataFetcher::new(STRATA_FULLNODE.to_string()));
 
-    // Create sub-routers with their respective states
     let db_router = Router::new()
         .route("/checkpoint/:q", get(get_checkpoint))
-        .with_state(db.clone());
+        .with_state(dbs.clone());
 
     let fetch_router = Router::new()
         .route("/fetch/:idx", post(fetch_and_store_checkpoint))
-        .with_state((db.clone(), fetcher.clone()));
+        .with_state((dbs.clone(), fetcher.clone()));
 
     let temp_generate_data = Router::new()
         .route("/generate_data/:start_idx", get(generate_sample_data))
-        .with_state((db.clone(), fetcher.clone()));
+        .with_state((dbs.clone(), fetcher.clone()));
 
     let checkpoints_paginated = Router::new()
         .route("/checkpoints_paginated", get(get_checkpoints_paginated))
-        .with_state(db.clone());
+        .with_state(dbs.clone());
 
     // Combine sub-routers into the main app
     let app = db_router

@@ -1,6 +1,6 @@
-/// This module contains the `StrataFetcher` struct, which is responsible for 
-/// fetching checkpoint data from the Strata API.
-/// 
+//! This module contains the `StrataFetcher` struct, which is responsible for 
+//! fetching checkpoint data from the Strata API.
+ 
 use crate::models::RpcCheckpointInfo;
 use reqwest::Client;
 use serde_json::{json, Value};
@@ -81,7 +81,6 @@ impl StrataFetcher {
                     .context("Failed to deserialize checkpoint data")?;
                 Ok(checkpoint)
             }
-            _ => anyhow::bail!("Invalid response format"),
         }
     }
 }

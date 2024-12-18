@@ -5,78 +5,73 @@ use crate::models::RpcCheckpointInfo;
 use rocksdb::{Options, DB, IteratorMode};
 use std::sync::Arc;
 use tracing::info;
-
-/// Database wrapper for RocksDB operations on checkpoints.
-/// Handles serialization/deserialization of checkpoint data and provides
-/// a high-level interface for checkpoint management.
-pub struct Database {
-    pub db: Arc<DB>,
-}
+use crate::cache::lib::Cache;
 
 impl Database {
-    pub fn new(path: &str) -> Self {
+    pub fn new(path: &str, cache_size: usize) -> Self {
         let mut opts = Options::default();
         opts.create_if_missing(true);
         let db = Arc::new(DB::open(&opts, path).expect("Failed to open RocksDB"));
-        Self { db }
+
+        // Initialize caches using the Cache struct
+        let cache_by_idx = Cache::new(cache_size);
+        let cache_by_l2_blockid = Cache::new(cache_size);
+
+        Self {
+            db,
+            cache_by_idx,
+            cache_by_l2_blockid,
+        }
     }
-    /// Inserts a checkpoint into the database.
-    ///
-    /// Uses big-endian byte ordering for numeric keys to maintain
-    /// natural sorting order in RocksDB.
-    ///
-    /// # Parameters
-    /// * `checkpoint` - The checkpoint information to store
-    ///
-    /// # Examples
-    /// ```
-    /// let db = CheckpointDB::new("path/to/db");
-    /// db.insert_checkpoint(&checkpoint_info);
-    /// ```
+
     pub fn insert_checkpoint(&self, checkpoint: &RpcCheckpointInfo) {
-        // Use big-endian bytes for numeric key ordering
-        let key = checkpoint.idx.to_be_bytes(); 
-        let value = serde_json::to_vec(checkpoint).unwrap(); // Serialize to binary
+        let key = checkpoint.idx.to_be_bytes();
+        let value = serde_json::to_vec(checkpoint).unwrap();
         self.db.put(key, value).unwrap();
 
         let key_l2_blockid = &checkpoint.l2_blockid;
         self.db.put(key_l2_blockid, key).unwrap();
+
         info!("Checkpoint added: {:?}", checkpoint.idx);
     }
 
-
-    /// Retrieves a checkpoint by its index.
-    ///
-    /// # Parameters
-    /// * `idx` - The checkpoint index to retrieve
-    ///
-    /// # Returns
-    /// * `Option<RpcCheckpointInfo>` - The checkpoint if found, None otherwise
     pub fn get_checkpoint_by_idx(&self, idx: u64) -> Option<RpcCheckpointInfo> {
-        let key = idx.to_be_bytes();
-        match self.db.get(key).unwrap() {
-            Some(value) => serde_json::from_slice(&value).ok(),
-            None => None,
+        // Check cache
+        if let Some(cached) = self.cache_by_idx.get(&idx) {
+            info!("Cache hit for idx: {}", idx);
+            return Some(cached);
         }
-    }
 
-    pub fn get_checkpoint_by_l2_blockid(&self, l2_blockid: &str) -> Option<RpcCheckpointInfo> {
-        if let Ok(Some(value_idx)) = self.db.get(l2_blockid.as_bytes()) {
-            let idx = u64::from_be_bytes(value_idx.try_into().unwrap());
-            return self.get_checkpoint_by_idx(idx);
+        // Cache miss
+        let key = idx.to_be_bytes();
+        if let Some(value) = self.db.get(key).unwrap() {
+            if let Ok(checkpoint) = serde_json::from_slice::<RpcCheckpointInfo>(&value) {
+                self.cache_by_idx.insert(idx, checkpoint.clone());
+                return Some(checkpoint);
+            }
         }
         None
     }
-    /// Retrieves a paginated list of checkpoints.
-    ///
-    /// # Parameters
-    /// * `offset` - Starting index for pagination
-    /// * `limit` - Maximum number of checkpoints to return
-    ///
-    /// # Returns
-    /// * `(Vec<RpcCheckpointInfo>, u64)` - Tuple containing:
-    ///   - Vector of checkpoint information
-    ///   - Total count of checkpoints in the database
+
+    pub fn get_checkpoint_by_l2_blockid(&self, l2_blockid: &str) -> Option<RpcCheckpointInfo> {
+        // Check cache
+        if let Some(cached) = self.cache_by_l2_blockid.get(&l2_blockid.to_string()) {
+            info!("Cache hit for l2_blockid: {}", l2_blockid);
+            return Some(cached);
+        }
+
+        // Cache miss
+        if let Ok(Some(value_idx)) = self.db.get(l2_blockid.as_bytes()) {
+            let idx = u64::from_be_bytes(value_idx.try_into().unwrap());
+            if let Some(checkpoint) = self.get_checkpoint_by_idx(idx) {
+                self.cache_by_l2_blockid
+                    .insert(l2_blockid.to_string(), checkpoint.clone());
+                return Some(checkpoint);
+            }
+        }
+        None
+    }
+
     pub async fn get_paginated_checkpoints(
         &self,
         offset: u64,
@@ -88,7 +83,7 @@ impl Database {
         ))
         .take(limit as usize)
         .map(|result| {
-            let (key, value) = result.expect("Failed to iterate RocksDB");
+            let (_, value) = result.expect("Failed to iterate RocksDB");
             // Deserialize value toRpcCheckpointInfo 
             serde_json::from_slice::<RpcCheckpointInfo>(&value).unwrap()
         })
@@ -107,7 +102,7 @@ impl Database {
         }
     }
 
-    /// Searches for a checkpoint by exact match of either index or L2 block ID.
+    /// Searches for a checkpoint by exact match of either checkpoint index or L2 block ID.
     ///
     /// First attempts to parse the query as a checkpoint index.
     /// If that fails, tries to match it as an L2 block ID.
@@ -143,3 +138,16 @@ impl Database {
         None
     }
 }
+
+
+/// Database wrapper for RocksDB operations on checkpoints.
+/// Handles serialization/deserialization of checkpoint data and provides
+/// a high-level interface for checkpoint management.
+
+ /// Database wrapper for RocksDB operations on checkpoints.
+pub struct Database {
+    pub db: Arc<DB>,
+    cache_by_idx: Cache<u64, RpcCheckpointInfo>,
+    cache_by_l2_blockid: Cache<String, RpcCheckpointInfo>,
+}
+

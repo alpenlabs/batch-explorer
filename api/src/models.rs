@@ -3,15 +3,8 @@ use serde::{Deserialize, Serialize};
 /// Represents an L2 Block ID.
 pub type L2BlockId = String;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Checkpoint {
-    pub idx: u64,
-    pub l1_height: u64,
-    pub l2_height: u64,
-    pub l2_blockid: String,
-}
-
 /// Represents the checkpoint information returned by the RPC.
+/// Name for this struct comes from the Strata RPC endpoint.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RpcCheckpointInfo {
     /// The index of the checkpoint
