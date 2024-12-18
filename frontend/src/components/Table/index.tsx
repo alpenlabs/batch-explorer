@@ -1,55 +1,87 @@
-import { useState } from "react";
-
-import { Batch } from "../../data/batches";
-import useTable from "../../hooks/useTable";
+import shortenBlockId from "../../utils/lib";
 import styles from "./Table.module.css";
 import TableFooter from "./TableFooter";
-
 // Define the props for the Table component
-interface TableProps {
-    data: Batch[];         // An array of Batch objects
-    rowsPerPage: number;   // A number specifying rows per page
+interface RpcCheckpointInfo {
+    idx: number;               // Index of the checkpoint
+    l1_range: [number, number]; // L1 height range (start, end)
+    l2_range: [number, number]; // L2 height range (start, end)
+    l2_blockid: string;        // L2 block ID
 }
 
-const Table: React.FC<TableProps> = ({ data, rowsPerPage }) => {
-    const [page, setPage] = useState<number>(1);
-    const { slice, range } = useTable(data, page, rowsPerPage);
+interface TableProps {
+    data: RpcCheckpointInfo[]; // Array of checkpoint objects
+    rowsPerPage: number;       // Rows per page
+    currentPage: number;       // Current page number
+    totalPages: number;        // Total pages available
+    setPage: (page: number) => void; // Function to update the current page
+    setRowsPerPage: (rows: number) => number; // Function to update the rows per page
+}
 
+const Table: React.FC<TableProps> = ({ data, rowsPerPage, currentPage, totalPages, setPage, setRowsPerPage }) => {
     return (
         <>
+            <div className={styles.select_container}>
+                <span className={styles.select_info}>Checkpoints per page </span>
+                <select className={styles.select} onChange={(e) => {
+                    rowsPerPage = setRowsPerPage(parseInt(e.target.value, 10));
+                    setPage(1);
+                }}>
+                    <option>2</option>
+                    <option>5</option>
+                    <option>10</option>
+                </select>
+            </div>
             <table className={styles.table}>
                 <thead className={styles.tableRowHeader}>
                     <tr>
-                        <th className={styles.tableHeader}>L1 Start Hash</th>
-                        <th className={styles.tableHeader}>L1 End Hash</th>
-                        <th className={styles.tableHeader}>L2 Start Height</th>
-                        <th className={styles.tableHeader}>L2 End Height</th>
-                        <th className={styles.tableHeader}>Status</th>
-                        <th className={styles.tableHeader}>Commitment</th>
-                        <th className={styles.tableHeader}>Commitment Tx ID</th>
-                        <th className={styles.tableHeader}>Proof Tx ID</th>
+                        <th className={styles.tableHeader}>Index</th>
+                        <th className={styles.tableHeader}>L1 Range</th>
+                        <th className={styles.tableHeader}>L2 Range</th>
+                        <th className={styles.tableHeader}>L2 Block ID</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {slice.map((el) => (
-                        <tr className={styles.tableRowItems} key={el.l1StartHash}>
-                            <td className={styles.tableCell}>{el.l1StartHash}</td>
-                            <td className={styles.tableCell}>{el.l1EndHash}</td>
-                            <td className={styles.tableCell}>{el.l2StartHeight}</td>
-                            <td className={styles.tableCell}>{el.l2EndHeight}</td>
-                            <td className={styles.tableCell}>{el.status}</td>
-                            <td className={styles.tableCell}>{el.commitment}</td>
+                    {data.map((checkpoint) => (
+                        <tr className={styles.tableRowItems} key={checkpoint.idx}>
+                            <td className={styles.tableCell}>{checkpoint.idx}</td>
+                            {/* TODO: update urls from env or config */}
                             <td className={styles.tableCell}>
-                                <a href={`https://explorer.com/tx/${el.commitmentTransactionID}`} target="_blank" rel="noopener noreferrer">
-                                    {el.commitmentTransactionID}
+                                <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
+                                    {checkpoint.l1_range[0]}
+                                </a>
+                                -
+                                <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
+                                    {checkpoint.l1_range[1]}
                                 </a>
                             </td>
-                            <td className={styles.tableCell}>{el.proofTransactionID || "N/A"}</td>
+                            <td className={styles.tableCell}>
+                                <a href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
+                                    {checkpoint.l2_range[0]}
+                                </a>
+                                -
+                                <a href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
+                                    {checkpoint.l2_range[1]}
+                                </a>
+                            </td>
+                            <td className={styles.tableCell}>
+                                <a
+                                    href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_blockid}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {shortenBlockId(checkpoint.l2_blockid)}
+                                </a>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
-            </table>
-            <TableFooter range={range} slice={slice} setPage={setPage} page={page} />
+            </table >
+            <TableFooter
+                currentPage={currentPage}
+                totalPages={totalPages}
+                setPage={setPage}
+            />
         </>
     );
 };

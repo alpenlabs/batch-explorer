@@ -4,7 +4,7 @@
 use crate::models::RpcCheckpointInfo;
 use rocksdb::{Options, DB, IteratorMode};
 use std::sync::Arc;
-use tracing::info;
+use tracing::{info, error};
 use crate::cache::lib::Cache;
 
 impl Database {
@@ -77,6 +77,7 @@ impl Database {
         offset: u64,
         limit: u64,
     ) -> (Vec<RpcCheckpointInfo>, u64) {
+        info!("Fetching checkpoints from offset: {}, limit: {}", offset, limit);
         let checkpoints = self.db.iterator(IteratorMode::From(
             &offset.to_be_bytes(),
             rocksdb::Direction::Forward,
@@ -85,7 +86,14 @@ impl Database {
         .map(|result| {
             let (_, value) = result.expect("Failed to iterate RocksDB");
             // Deserialize value toRpcCheckpointInfo 
-            serde_json::from_slice::<RpcCheckpointInfo>(&value).unwrap()
+            serde_json::from_slice::<RpcCheckpointInfo>(&value).expect("Failed to deserialize checkpoint")
+            // let c = match serde_json::from_slice::<RpcCheckpointInfo>(&value) {
+            //     Ok(checkpoint) => Some(checkpoint),
+            //     Err(e) => {
+            //         error!("Failed to deserialize checkpoint at offset {}: {}", offset, e);
+            //         None
+            //     }
+            // }
         })
         .collect::<Vec<RpcCheckpointInfo>>();
 
@@ -97,7 +105,8 @@ impl Database {
 
     pub fn get_total_checkpoint_count(&self) -> u64 {
         match self.db.property_int_value("rocksdb.estimate-num-keys") {
-            Ok(value) => value.unwrap_or(0), // If successful, return the value
+            // divide by 2 represents no. of keys used to index the db
+            Ok(value) => value.unwrap_or(0)/2, // If successful, return the value
             Err(_) => 0, // Handle failure gracefully, maybe return 0 or fallback to counting keys
         }
     }

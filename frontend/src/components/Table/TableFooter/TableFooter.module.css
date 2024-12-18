@@ -1,34 +1,51 @@
-/* @/src/components/Table/TableFooter/TableFooter.module.css */
-.tableFooter {
-    background-color: #f1f1f1;
-    padding: 8px 0px;
-    width: 100%;
-    font-weight: 500;
-    text-align: left;
-    font-size: 16px;
-    color: #2c3e50;
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
+.footer {
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-family: Arial, sans-serif;
 }
 
-.button {
+.pageButton {
+    background-color: #333;
+    color: #fff;
     border: none;
-    padding: 7px 14px;
-    border-radius: 10px;
+    padding: 6px 10px;
+    border-radius: 4px;
     cursor: pointer;
-    margin-right: 4px;
-    margin-left: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
 }
 
-.activeButton {
-    color: white;
-    background: #185adb;
+.pageButton:hover {
+    background-color: #555;
 }
 
-.inactiveButton {
-    color: #2c3e50;
-    background: #f9f9f9;
+.pageButton.disabled {
+    background-color: #aaa;
+    color: #ddd;
+    cursor: not-allowed;
+}
+
+.pageInput {
+    width: 50px;
+    padding: 5px;
+    text-align: center;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+.pageInput:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+.pageInfo {
+    margin-left: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
 }
