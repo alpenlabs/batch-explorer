@@ -1,12 +1,176 @@
-/* @/src/App.module.css */
+#root {
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
 .container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #FFF7ED;
 }
 
 .wrapper {
-    width: 550px;
+    width: 90%;
+    max-width: 1200px;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.title {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--strata-sand-light);
+    margin-bottom: 20px;
+    font-family: Outfit, sans-serif;
+}
+
+.searchSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    padding-bottom: 50px;
+    background-color: var(--strata-terracotta-med);
+}
+
+
+.searchBox {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.searchInput {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    min-width: 150px;
+    background-color: var(--strata-sand-light);
+    color: grey;
+    /* Prevents the input from collapsing */
+}
+
+.searchInput:focus {
+    outline: none;
+}
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 20px 50px;
+    background-color: var(--strata-terracotta-med);
+    color: white;
+    box-sizing: border-box;
+}
+
+/* Logo */
+.logoWrapper {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.logoSvg img {
+    max-width: 130px;
+    height: auto;
+}
+
+/* Navbar Menu */
+.navbarMenuWrapper {
+    display: flex;
+    align-items: center;
+}
+
+.navMenu {
+    display: flex;
+    gap: 20px;
+}
+
+.navLinks {
+    display: flex;
+    gap: 20px;
+}
+
+.navLink {
+    text-decoration: none;
+    color: var(--strata-sand-light);
+}
+
+.navLink:hover {
+    color: var(--strata-sand-med);
+
+}
+
+/* Access DevNet Button */
+.devnetButtonWrapper {
+    margin-left: 20px;
+}
+
+.devnetButton {
+    padding: 10px 20px;
+    background-color: var(--strata-sand-med);
+    border: none;
+    border-radius: 5px;
+    color: var(--strata-terracotta-med);
+    font-weight: bold;
+    /* text-decoration: none; */
+    cursor: pointer;
+}
+
+.devnetButton:hover {
+    background-color: var(--strata-terracotta-med);
+    color: var(--strata-sand-med);
+    transition: color 0.5s ease;
+}
+
+/* Mobile Menu Button */
+.menuButton {
+    display: none;
+    /* Hidden on desktop, shown on mobile */
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+/* .burgerBar {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+} */
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .menuButton {
+        display: flex;
+    }
+
+    .navbarMenuWrapper {
+        display: none;
+        /* Hide desktop navigation on mobile */
+    }
 }

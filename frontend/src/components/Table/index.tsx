@@ -21,7 +21,7 @@ interface TableProps {
 const Table: React.FC<TableProps> = ({ data, rowsPerPage, currentPage, totalPages, setPage, setRowsPerPage }) => {
     return (
         <>
-            <div className={styles.select_container}>
+            {/* <div className={styles.select_container}>
                 <span className={styles.select_info}>Checkpoints per page </span>
                 <select className={styles.select} onChange={(e) => {
                     rowsPerPage = setRowsPerPage(parseInt(e.target.value, 10));
@@ -31,7 +31,7 @@ const Table: React.FC<TableProps> = ({ data, rowsPerPage, currentPage, totalPage
                     <option>5</option>
                     <option>10</option>
                 </select>
-            </div>
+            </div> */}
             <table className={styles.table}>
                 <thead className={styles.tableRowHeader}>
                     <tr>
@@ -87,3 +87,4 @@ const Table: React.FC<TableProps> = ({ data, rowsPerPage, currentPage, totalPage
 };
 
 export default Table;
+export type { RpcCheckpointInfo };
