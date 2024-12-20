@@ -7,6 +7,11 @@ const App = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +39,8 @@ const App = () => {
         </a>
 
         {/* Navbar Menu */}
-        <div className={styles.navbarMenuWrapper}>
+        <div className={`${styles.navbarMenuWrapper} ${isMenuOpen ? styles.showMenu : ""
+          }`}>
           <nav className={styles.navMenu} role="navigation">
             <div className={styles.navLinks}>
               <a href="#why" className={styles.navLink}>Why Strata</a>
@@ -48,12 +54,25 @@ const App = () => {
         </div>
 
         {/* Menu Button for Mobile */}
-        <div className={styles.menuButton} role="button" aria-label="menu" aria-haspopup="menu" aria-expanded="false">
-          <div className={styles.burger}>
-            <div className={styles.burgerBar}></div>
-            <div className={styles.burgerBar}></div>
-            <div className={styles.burgerBar}></div>
-          </div>
+        <div
+          className={styles.menuButton}
+          role="button"
+          aria-label={isMenuOpen ? "close menu" : "open menu"}
+          aria-haspopup="menu"
+          onClick={toggleMenu}
+        >
+          {isMenuOpen ? (
+            <div className={styles.cross}>
+              <div className={styles.crossBar}></div>
+              <div className={styles.crossBar}></div>
+            </div>
+          ) : (
+            <div className={styles.burger}>
+              <div className={styles.burgerBar}></div>
+              <div className={styles.burgerBar}></div>
+              <div className={styles.burgerBar}></div>
+            </div>
+          )}
         </div>
       </header>
       <div className={styles.searchSection}>
