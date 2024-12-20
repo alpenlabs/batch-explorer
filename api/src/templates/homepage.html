@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <!-- Wrapper Section -->
+  <div class="wrapper">
+    <table class="table">
+      <thead class="tableRowHeader">
+        <tr>
+          <th class="tableHeader">Index</th>
+          <th class="tableHeader">L1 Range</th>
+          <th class="tableHeader">L2 Range</th>
+          <th class="tableHeader">L2 Block ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for checkpoint in checkpoints %}
+        <tr class="tableRowItems">
+          <!-- Index -->
+          <td class="tableCell">{{ checkpoint.idx }}</td>
+    
+          <!-- L1 Range -->
+          <td class="tableCell">
+            <a 
+              href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[0] }}" 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              {{ checkpoint.l1_range[0] }}
+            </a>
+            -
+            <a 
+              href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[1] }}" 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              {{ checkpoint.l1_range[1] }}
+            </a>
+          </td>
+    
+          <!-- L2 Range -->
+          <td class="tableCell">
+            <a 
+              href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[0] }}" 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              {{ checkpoint.l2_range[0] }}
+            </a>
+            -
+            <a 
+              href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[1] }}" 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              {{ checkpoint.l2_range[1] }}
+            </a>
+          </td>
+    
+          <!-- L2 Block ID -->
+          <td class="tableCell">
+            <a 
+              href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_blockid }}" 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              {{ checkpoint.l2_blockid[:8] }}...{{ checkpoint.l2_blockid[-8:] }}
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Include Pagination -->
+    {% include "pagination.html" %}
+  </div>
+{% endblock %}

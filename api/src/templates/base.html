@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title | default("Batch Explorer") }}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/scripts.js" defer></script> 
+
+</head>
+<body>
+  <!-- Header Section -->
+  <header class="header">
+    <!-- Logo Wrapper -->
+    <a href="/" class="logoWrapper">
+      <div class="logoSvg">
+        <img src="/static/Strata_full_logo_sand.png" alt="STRATA">
+      </div>
+    </a>
+
+    <!-- Navbar Menu -->
+    {% include "navbar.html" %}
+    {% include "mobile-menu.html" %}
+  </header>
+  <main>
+    <!-- Search Section -->
+    {% include "search.html" %}
+      
+    {% block content %}
+    {% endblock %}
+  </main>
+</body>
+</html>

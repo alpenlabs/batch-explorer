@@ -1,73 +1,89 @@
-mod db;
-mod models;
-mod routes;
-mod fetcher;
-mod helper;
-mod cache;
-
-use axum::{routing::get, routing::post, Router};
-use tower_http::cors::{CorsLayer, Any};
-use fetcher::StrataFetcher;
-use routes::{fetch_and_store_checkpoint, get_checkpoint, generate_sample_data, get_checkpoints_paginated};
-use tracing::{info, Level};
-use tracing_subscriber::FmtSubscriber;
-use std::sync::Arc ;
-use db::Database;
-use reqwest::header::HeaderValue;
-use reqwest::Method;
-use reqwest::header;
-
-// TODO: get this from config
-const STRATA_FULLNODE: &str = "http://fnclient675f9eff3a682b8c0ea7423.devnet-annapurna.stratabtc.org/";
-const CACHE_SIZE: usize = 1000;
-
+use axum::{
+    extract::Path,
+    response::{Html, IntoResponse},
+    routing::get,
+    Router,
+};
+use tracing::info;
+use minijinja::{Environment, context};
+use std::sync::Arc;
+use tower_http::services::fs::ServeDir;
 
 #[tokio::main]
 async fn main() {
-    // Initialize logging
-    FmtSubscriber::builder()
-    .with_max_level(Level::INFO)
-    .init();
-    
-    // Initialize RocksDB and Fetcher
-    let dbs = Arc::new(Database::new("batches_db", CACHE_SIZE));
-    let fetcher = Arc::new(StrataFetcher::new(STRATA_FULLNODE.to_string()));
+    let mut env = Environment::new();
+    env.add_template("base.html", include_str!("templates/base.html")).unwrap();
+    env.add_template("homepage.html", include_str!("templates/homepage.html")).unwrap();
+    env.add_template("checkpoint.html", include_str!("templates/checkpoint.html")).unwrap();
+    env.add_template("pagination.html", include_str!("templates/pagination.html")).unwrap();
+    env.add_template("navbar.html", include_str!("templates/navbar.html")).unwrap();
+    env.add_template("search.html", include_str!("templates/search.html")).unwrap();
+    env.add_template("mobile-menu.html", include_str!("templates/mobile/menu-button.html")).unwrap();
 
-    // Define the CORS layer
-    let cors = CorsLayer::new()
-    .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap()) // Allow your frontend's origin
-    .allow_methods([Method::GET, Method::POST]) // Allow specific HTTP methods
-    .allow_headers([header::CONTENT_TYPE]); // Allow specific headers
+    let app = Router::new()
+        .route("/", get(homepage))
+        .route("/checkpoint/:id", get(checkpoint_details))
+        .nest_service("/static", ServeDir::new("src/static"))
+        .layer(axum::Extension(Arc::new(env)));
 
-    let db_router = Router::new()
+    info!("Listening on 0.0.0.0:3000");
 
-        .route("/checkpoint/:q", get(get_checkpoint))
-        .with_state(dbs.clone());
-
-    let fetch_router = Router::new()
-        .route("/fetch/:idx", post(fetch_and_store_checkpoint))
-        .with_state((dbs.clone(), fetcher.clone()));
-
-    let temp_generate_data = Router::new()
-        .route("/generate_data/:start_idx", get(generate_sample_data))
-        .with_state((dbs.clone(), fetcher.clone()));
-
-    let checkpoints_paginated = Router::new()
-        .route("/checkpoints_paginated", get(get_checkpoints_paginated))
-        .layer(cors)
-        .with_state(dbs.clone());
-
-    // Combine sub-routers into the main app
-    let app = db_router
-        .merge(fetch_router)
-        .merge(temp_generate_data)
-        .merge(checkpoints_paginated);
-
-    // Start server
-    info!("Server started at: http://localhost:3000");
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
 
+async fn homepage(axum::Extension(env): axum::Extension<Arc<Environment<'_>>>) -> impl IntoResponse {
+    // Mock data
+    let checkpoints = vec![
+        context! {
+            idx => 1,
+            l1_range => [100, 115],  // Ensure this is an array
+            l2_range => [1, 1],
+            l2_blockid => "295295a50a0b1234567890abcdef1234567890abcdef",
+        },
+        context! {
+            idx => 2,
+            l1_range => [116, 130],
+            l2_range => [2, 2],
+            l2_blockid => "8aa000a814a71234567890abcdef1234567890abcd",
+        },
+    ];
+
+    let template = env.get_template("homepage.html").unwrap();
+    let rendered = template
+        .render(context! {
+            checkpoints => checkpoints,
+            current_page => 1,
+            total_pages => 1,
+        })
+        .unwrap();
+
+    Html(rendered)
+}
+
+async fn checkpoint_details(
+    Path(id): Path<String>,
+    axum::Extension(env): axum::Extension<Arc<Environment<'_>>>,
+) -> impl IntoResponse {
+    let checkpoint = context! {
+        id => id,
+        batch_txid => "abc123...",
+        epoch_index => 12,
+        status => "confirmed",
+        signet_start_block => 1000,
+        signet_end_block => 1100,
+        strata_start_block => 1200,
+        strata_end_block => 1300,
+        transactions => [
+            context! { txid => "tx123", amount => 1.5 },
+            context! { txid => "tx456", amount => 2.0 }
+        ]
+    };
+
+    let template = env.get_template("checkpoint.html").unwrap();
+    let rendered = template.render(context! { checkpoint }).unwrap();
+
+    Html(rendered)
 }

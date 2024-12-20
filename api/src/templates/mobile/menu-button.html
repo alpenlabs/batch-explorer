@@ -1,0 +1,21 @@
+<!-- Menu Button for Mobile -->
+<div
+    class="menuButton"
+    role="button"
+    aria-label="{{ 'close menu' if isMenuOpen else 'open menu' }}"
+    aria-haspopup="menu"
+    onclick="toggleMenu()"
+>
+    {% if isMenuOpen %}
+    <div class="cross">
+        <div class="crossBar"></div>
+        <div class="crossBar"></div>
+    </div>
+    {% else %}
+    <div class="burger">
+        <div class="burgerBar"></div>
+        <div class="burgerBar"></div>
+        <div class="burgerBar"></div>
+    </div>
+    {% endif %}
+</div>

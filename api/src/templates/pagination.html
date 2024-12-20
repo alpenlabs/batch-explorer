@@ -1,0 +1,74 @@
+<div class="pagination">
+    <!-- Page Window Size -->
+    {% set page_window_size = 3 %}
+
+    <!-- Calculate Start Page -->
+    {% if current_page - (page_window_size // 2) < 1 %}
+        {% set start_page = 1 %}
+    {% else %}
+        {% set start_page = current_page - (page_window_size // 2) %}
+    {% endif %}
+
+    <!-- Calculate End Page -->
+    {% if start_page + page_window_size - 1 > total_pages %}
+        {% set end_page = total_pages %}
+    {% else %}
+        {% set end_page = start_page + page_window_size - 1 %}
+    {% endif %}
+
+    <!-- First Page Button -->
+    <button
+        class="pageButton {% if current_page == 1 %}disabled{% endif %}"
+        onclick="window.location.href='?page=1'"
+        {% if current_page == 1 %}disabled{% endif %}
+    >
+        «
+    </button>
+
+    <!-- Previous Page Button -->
+    <button
+        class="pageButton {% if current_page == 1 %}disabled{% endif %}"
+        onclick="window.location.href='?page={{ current_page - 1 }}'"
+        {% if current_page == 1 %}disabled{% endif %}
+    >
+        ‹
+    </button>
+
+    <!-- Page Numbers -->
+    {% for page in range(start_page, end_page + 1) %}
+        {% if page == current_page %}
+            <!-- Current Page Editable Input -->
+            <input
+                class="pageInput"
+                value="{{ current_page }}"
+                onblur="validatePageNumber(this.value, {{ total_pages }})"
+                onkeydown="if (event.key === 'Enter') validatePageNumber(this.value, {{ total_pages }})"
+            />
+        {% else %}
+            <button
+                class="pageButton"
+                onclick="window.location.href='?page={{ page }}'"
+            >
+                {{ page }}
+            </button>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Next Page Button -->
+    <button
+        class="pageButton {% if current_page == total_pages %}disabled{% endif %}"
+        onclick="window.location.href='?page={{ current_page + 1 }}'"
+        {% if current_page == total_pages %}disabled{% endif %}
+    >
+        ›
+    </button>
+
+    <!-- Last Page Button -->
+    <button
+        class="pageButton {% if current_page == total_pages %}disabled{% endif %}"
+        onclick="window.location.href='?page={{ total_pages }}'"
+        {% if current_page == total_pages %}disabled{% endif %}
+    >
+        »
+    </button>
+</div>

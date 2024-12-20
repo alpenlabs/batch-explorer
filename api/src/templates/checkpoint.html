@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Checkpoint Details</h1>
+<p><strong>Batch TXID:</strong> {{ checkpoint.batch_txid }}</p>
+<p><strong>Epoch Index:</strong> {{ checkpoint.epoch_index }}</p>
+<p><strong>Status:</strong> {{ checkpoint.status }}</p>
+<p><strong>Signet Start Block:</strong> {{ checkpoint.signet_start_block }}</p>
+<p><strong>Signet End Block:</strong> {{ checkpoint.signet_end_block }}</p>
+<p><strong>Strata Start Block:</strong> {{ checkpoint.strata_start_block }}</p>
+<p><strong>Strata End Block:</strong> {{ checkpoint.strata_end_block }}</p>
+<h2>Transactions</h2>
+<ul>
+  {% for tx in checkpoint.transactions %}
+  <li>
+    <strong>TXID:</strong> {{ tx.txid }} | <strong>Amount:</strong> {{ tx.amount }}
+  </li>
+  {% endfor %}
+</ul>
+<a href="/">Back to Home</a>
+{% endblock %}
