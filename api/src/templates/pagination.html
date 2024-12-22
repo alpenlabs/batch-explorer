@@ -1,10 +1,20 @@
 <div class="pagination">
     <!-- Page Window Size -->
-    {% set page_window_size = 3 %}
+    {% set page_window_size = 1 %}
+
+    <!-- 
+        Absolute First Page is the least possible page value. For checkpoint 
+        it's 0 and for table it's 1. 
+    -->
+    {% if current_path == "/checkpoint" %}
+        {% set absolute_first_page = 0 %}
+    {% else %}
+        {% set absolute_first_page = 1 %}
+    {% endif %}
 
     <!-- Calculate Start Page -->
     {% if current_page - (page_window_size // 2) < 1 %}
-        {% set start_page = 1 %}
+        {% set start_page = absolute_first_page %}
     {% else %}
         {% set start_page = current_page - (page_window_size // 2) %}
     {% endif %}
@@ -18,25 +28,25 @@
 
     <!-- First Page Button -->
     <button
-        class="pageButton arrow {% if current_page == 1 %}disabled{% endif %}"
-        onclick="window.location.href='?page=1'"
-        {% if current_page == 1 %}disabled{% endif %}
+        class="pageButton arrow {% if current_page == absolute_first_page %}disabled{% endif %}"
+        onclick="window.location.href='?p={{absolute_first_page}}'"
+        {% if current_page == absolute_first_page %}disabled{% endif %}
     >
         «
     </button>
 
     <!-- Previous Page Button -->
     <button
-        class="pageButton arrow {% if current_page == 1 %}disabled{% endif %}"
-        onclick="window.location.href='?page={{ current_page - 1 }}'"
-        {% if current_page == 1 %}disabled{% endif %}
+        class="pageButton arrow {% if current_page == absolute_first_page %}disabled{% endif %}"
+        onclick="window.location.href='?p={{ current_page - 1 }}'"
+        {% if current_page == absolute_first_page %}disabled{% endif %}
     >
         ‹
     </button>
 
     <!-- Page Numbers -->
-    {% for page in range(start_page, end_page + 1) %}
-        {% if page == current_page %}
+    {% for p in range(start_page, end_page + 1) %}
+        {% if p == current_page %}
             <!-- Current Page Editable Input -->
             <input
                 class="pageInput"
@@ -47,9 +57,9 @@
         {% else %}
             <button
                 class="pageButton"
-                onclick="window.location.href='?page={{ page }}'"
+                onclick="window.location.href='?p={{ p }}'"
             >
-                {{ page }}
+                {{ p }}
             </button>
         {% endif %}
     {% endfor %}
@@ -57,7 +67,7 @@
     <!-- Next Page Button -->
     <button
         class="pageButton arrow {% if current_page == total_pages %}disabled{% endif %}"
-        onclick="window.location.href='?page={{ current_page + 1 }}'"
+        onclick="window.location.href='?p={{ current_page + 1 }}'"
         {% if current_page == total_pages %}disabled{% endif %}
     >
         ›
@@ -66,9 +76,12 @@
     <!-- Last Page Button -->
     <button
         class="pageButton arrow {% if current_page == total_pages %}disabled{% endif %}"
-        onclick="window.location.href='?page={{ total_pages }}'"
+        onclick="window.location.href='?p={{ total_pages }}'"
         {% if current_page == total_pages %}disabled{% endif %}
     >
         »
     </button>
+    <div class="pageInfo">
+        {{current_page}} of {{total_pages}}
+    </div>
 </div>

@@ -5,16 +5,12 @@ mod fetcher;
 mod helper;
 mod cache;
 
-use tower_http::cors::{CorsLayer, Any};
 use fetcher::StrataFetcher;
 use routes::{fetch_and_store_checkpoint, get_checkpoint, generate_sample_data, get_checkpoints_paginated, PaginationParams};
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 use std::sync::Arc ;
 use db::Database;
-use reqwest::header::HeaderValue;
-use reqwest::Method;
-use reqwest::header;
 
 use axum::{
     extract::{Path, Query},
@@ -50,7 +46,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(homepage))
-        .route("/checkpoint/:id", get(checkpoint_details))
+        .route("/checkpoint", get(checkpoint_details))
         .nest_service("/static", ServeDir::new("src/static"))
         .layer(axum::Extension(Arc::new(env)))
         .with_state(dbs.clone());
@@ -68,52 +64,70 @@ async fn homepage(
     state: axum::extract::State<Arc<Database>>,
     Query(params): Query<PaginationParams>,
 ) -> impl IntoResponse {
-    // Set default pagination values if not provided
-    let page = params.page.unwrap_or(1);
-    let page_size = params.page_size.unwrap_or(3);
+    // Set default pagination values
+    let page = params.p.unwrap_or(1);
+    let page_size = params.ps.unwrap_or(10);
 
     // Fetch paginated checkpoints
-    let pp = PaginationParams {
-        page: Some(page),
-        page_size: Some(page_size),
-    };
-    
-    let paginated_checkpoints = get_checkpoints_paginated(state, pp).await;
+    let paginated_checkpoints = get_checkpoints_paginated(
+        state,
+        PaginationParams {
+            p: Some(page),
+            ps: Some(page_size),
+        },
+    )
+    .await;
 
-
-    let template = env.get_template("homepage.html").unwrap();
-    let rendered = template
-        .render(context! {
+    // Render the template
+    render_template(
+        &env,
+        "homepage.html",
+        context! {
             checkpoints => paginated_checkpoints.checkpoints,
             current_page => paginated_checkpoints.current_page,
             total_pages => paginated_checkpoints.total_pages,
-        })
-        .unwrap();
-
-    Html(rendered)
+        },
+    )
 }
 
 async fn checkpoint_details(
-    Path(id): Path<String>,
     axum::Extension(env): axum::Extension<Arc<Environment<'_>>>,
+    state: axum::extract::State<Arc<Database>>,
+    Query(params): Query<PaginationParams>,
 ) -> impl IntoResponse {
-    let checkpoint = context! {
-        id => id,
-        batch_txid => "abc123...",
-        epoch_index => 12,
-        status => "confirmed",
-        signet_start_block => 1000,
-        signet_end_block => 1100,
-        strata_start_block => 1200,
-        strata_end_block => 1300,
-        transactions => [
-            context! { txid => "tx123", amount => 1.5 },
-            context! { txid => "tx456", amount => 2.0 }
-        ]
-    };
+    let id = params.p.unwrap_or(1);
+    
+    if let Some(checkpoint) = state.get_checkpoint_by_idx(id) {
+        // Fetch total checkpoints for pagination
+        let total_checkpoints = state.get_total_checkpoint_count();
 
-    let template = env.get_template("checkpoint.html").unwrap();
-    let rendered = template.render(context! { checkpoint }).unwrap();
+        // Calculate the current page and total pages for navigation
+        let current_page = id;
+        let total_pages = total_checkpoints - 1 ;
 
+        let current_path = "/checkpoint";
+
+        return render_template(
+            &env,
+            "checkpoint.html",
+            context! {
+                checkpoint,
+                current_page,
+                total_pages,
+                current_path,
+            },
+        );
+    }
+    
+    render_template(&env, "404.html", context! { message => "Checkpoint not found" })
+}
+
+fn render_template(
+    env: &Environment<'_>,
+    template_name: &str,
+    context: minijinja::value::Value,
+) -> Html<String> {
+    let template = env.get_template(template_name).unwrap();
+    let rendered = template.render(context).unwrap();
     Html(rendered)
 }

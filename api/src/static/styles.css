@@ -439,6 +439,51 @@ button:focus-visible {
 .pageInfo {
     margin-left: 10px;
     font-size: 14px;
-    font-weight: bold;
+    /* font-weight: bold; */
     color: var(--strata-terracotta-med);
+}
+
+/* Checkpoint page */
+.checkpoint-container {
+
+    padding: 20px;
+    margin: 30px 30%;
+}
+
+.checkpoint-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.checkpoint-label {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.checkpoint-value {
+    font-size: 16px;
+    color: #555;
+    /* Slightly lighter gray for values */
+    text-align: right;
+    word-break: break-word;
+    /* Prevent long text from breaking the layout */
+}
+
+.customAlert {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    /* right: 50%; */
+    /* transform: translateX(30%); */
+    background-color: var(--strata-terracotta-light);
+    color: var(--strata-sand-light);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0.8;
+
 }

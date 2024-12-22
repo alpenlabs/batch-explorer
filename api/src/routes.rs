@@ -114,8 +114,10 @@ pub async fn generate_sample_data(
 
 #[derive(Deserialize)]
 pub struct PaginationParams {
-    pub page: Option<u64>,    // Default page 1
-    pub page_size: Option<u64>, // Default page size 20
+    /// Page number
+    pub p: Option<u64>,    // Default page 1
+    /// Page size
+    pub ps: Option<u64>, // Default page size 20
 }
 
 #[derive(serde::Serialize)]
@@ -131,8 +133,8 @@ pub async fn get_checkpoints_paginated(
     params: PaginationParams,
 ) -> PaginatedResponse  {
     // Set default values for pagination
-    let page = params.page.unwrap_or(1);
-    let page_size = params.page_size.unwrap_or(20);
+    let page = params.p.unwrap_or(1);
+    let page_size = params.ps.unwrap_or(20);
 
     // Calculate offset and limit for fetching from the database
     let offset = (page - 1) * page_size;

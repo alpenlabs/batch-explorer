@@ -1,20 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Checkpoint Details</h1>
-<p><strong>Batch TXID:</strong> {{ checkpoint.batch_txid }}</p>
-<p><strong>Epoch Index:</strong> {{ checkpoint.epoch_index }}</p>
-<p><strong>Status:</strong> {{ checkpoint.status }}</p>
-<p><strong>Signet Start Block:</strong> {{ checkpoint.signet_start_block }}</p>
-<p><strong>Signet End Block:</strong> {{ checkpoint.signet_end_block }}</p>
-<p><strong>Strata Start Block:</strong> {{ checkpoint.strata_start_block }}</p>
-<p><strong>Strata End Block:</strong> {{ checkpoint.strata_end_block }}</p>
-<h2>Transactions</h2>
-<ul>
-  {% for tx in checkpoint.transactions %}
-  <li>
-    <strong>TXID:</strong> {{ tx.txid }} | <strong>Amount:</strong> {{ tx.amount }}
-  </li>
-  {% endfor %}
-</ul>
-<a href="/">Back to Home</a>
+<div class="checkpoint-container">
+    <div class="checkpoint-row">
+        <span class="checkpoint-label">Batch TXID:</span>
+        <span class="checkpoint-value">{{ checkpoint.batch_txid }}</span>
+    </div>
+    <div class="checkpoint-row">
+        <span class="checkpoint-label">Epoch Index:</span>
+        <span class="checkpoint-value">{{ checkpoint.idx }}</span>
+    </div>
+    <div class="checkpoint-row">
+        <span class="checkpoint-label">Status:</span>
+        <span class="checkpoint-value">{{ checkpoint.status }}</span>
+    </div>
+    <div class="checkpoint-row">
+        <span class="checkpoint-label">Signet Start Block:</span>
+        <span class="checkpoint-value">{{ checkpoint.l1_range[0] }}</span>
+    </div>
+    <div class="checkpoint-row">
+        <span class="checkpoint-label">Signet End Block:</span>
+        <span class="checkpoint-value">{{ checkpoint.l1_range[1] }}</span>
+    </div>
+    <div class="checkpoint-row">
+        <span class="checkpoint-label">Strata Start Block:</span>
+        <span class="checkpoint-value">{{ checkpoint.l2_range[0] }}</span>
+    </div>
+    <div class="checkpoint-row">
+        <span class="checkpoint-label">Strata End Block:</span>
+        <span class="checkpoint-value">{{ checkpoint.l2_range[1] }}</span>
+    </div>
+</div>
+
+{% include "pagination.html" %}
 {% endblock %}

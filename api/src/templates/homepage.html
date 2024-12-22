@@ -17,7 +17,14 @@
         {% for checkpoint in checkpoints %}
         <tr class="tableRowItems">
           <!-- Index -->
-          <td class="tableCell">{{ checkpoint.idx }}</td>
+          <td class="tableCell">
+            <a 
+              href="/checkpoint?p={{ checkpoint.idx }}" 
+            >
+
+            {{ checkpoint.idx }}
+
+          </td>
     
           <!-- L1 Range -->
           <td class="tableCell">
