@@ -18,7 +18,7 @@
 
     <!-- First Page Button -->
     <button
-        class="pageButton {% if current_page == 1 %}disabled{% endif %}"
+        class="pageButton arrow {% if current_page == 1 %}disabled{% endif %}"
         onclick="window.location.href='?page=1'"
         {% if current_page == 1 %}disabled{% endif %}
     >
@@ -27,7 +27,7 @@
 
     <!-- Previous Page Button -->
     <button
-        class="pageButton {% if current_page == 1 %}disabled{% endif %}"
+        class="pageButton arrow {% if current_page == 1 %}disabled{% endif %}"
         onclick="window.location.href='?page={{ current_page - 1 }}'"
         {% if current_page == 1 %}disabled{% endif %}
     >
@@ -56,7 +56,7 @@
 
     <!-- Next Page Button -->
     <button
-        class="pageButton {% if current_page == total_pages %}disabled{% endif %}"
+        class="pageButton arrow {% if current_page == total_pages %}disabled{% endif %}"
         onclick="window.location.href='?page={{ current_page + 1 }}'"
         {% if current_page == total_pages %}disabled{% endif %}
     >
@@ -65,7 +65,7 @@
 
     <!-- Last Page Button -->
     <button
-        class="pageButton {% if current_page == total_pages %}disabled{% endif %}"
+        class="pageButton arrow {% if current_page == total_pages %}disabled{% endif %}"
         onclick="window.location.href='?page={{ total_pages }}'"
         {% if current_page == total_pages %}disabled{% endif %}
     >

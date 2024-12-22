@@ -1,16 +1,44 @@
+mod db;
+mod models;
+mod routes;
+mod fetcher;
+mod helper;
+mod cache;
+
+use tower_http::cors::{CorsLayer, Any};
+use fetcher::StrataFetcher;
+use routes::{fetch_and_store_checkpoint, get_checkpoint, generate_sample_data, get_checkpoints_paginated, PaginationParams};
+use tracing::{info, Level};
+use tracing_subscriber::FmtSubscriber;
+use std::sync::Arc ;
+use db::Database;
+use reqwest::header::HeaderValue;
+use reqwest::Method;
+use reqwest::header;
+
 use axum::{
-    extract::Path,
+    extract::{Path, Query},
     response::{Html, IntoResponse},
     routing::get,
     Router,
 };
-use tracing::info;
 use minijinja::{Environment, context};
-use std::sync::Arc;
 use tower_http::services::fs::ServeDir;
+
+// TODO: get this from config
+const STRATA_FULLNODE: &str = "http://fnclient675f9eff3a682b8c0ea7423.devnet-annapurna.stratabtc.org/";
+const CACHE_SIZE: usize = 1000;
 
 #[tokio::main]
 async fn main() {
+    // Initialize logging
+    FmtSubscriber::builder()
+    .with_max_level(Level::INFO)
+    .init();
+    
+    // Initialize RocksDB and Fetcher
+    let dbs = Arc::new(Database::new("batches_db", CACHE_SIZE));
+
     let mut env = Environment::new();
     env.add_template("base.html", include_str!("templates/base.html")).unwrap();
     env.add_template("homepage.html", include_str!("templates/homepage.html")).unwrap();
@@ -24,7 +52,8 @@ async fn main() {
         .route("/", get(homepage))
         .route("/checkpoint/:id", get(checkpoint_details))
         .nest_service("/static", ServeDir::new("src/static"))
-        .layer(axum::Extension(Arc::new(env)));
+        .layer(axum::Extension(Arc::new(env)))
+        .with_state(dbs.clone());
 
     info!("Listening on 0.0.0.0:3000");
 
@@ -34,29 +63,30 @@ async fn main() {
         .unwrap();
 }
 
-async fn homepage(axum::Extension(env): axum::Extension<Arc<Environment<'_>>>) -> impl IntoResponse {
-    // Mock data
-    let checkpoints = vec![
-        context! {
-            idx => 1,
-            l1_range => [100, 115],  // Ensure this is an array
-            l2_range => [1, 1],
-            l2_blockid => "295295a50a0b1234567890abcdef1234567890abcdef",
-        },
-        context! {
-            idx => 2,
-            l1_range => [116, 130],
-            l2_range => [2, 2],
-            l2_blockid => "8aa000a814a71234567890abcdef1234567890abcd",
-        },
-    ];
+async fn homepage(
+    axum::Extension(env): axum::Extension<Arc<Environment<'_>>>,
+    state: axum::extract::State<Arc<Database>>,
+    Query(params): Query<PaginationParams>,
+) -> impl IntoResponse {
+    // Set default pagination values if not provided
+    let page = params.page.unwrap_or(1);
+    let page_size = params.page_size.unwrap_or(3);
+
+    // Fetch paginated checkpoints
+    let pp = PaginationParams {
+        page: Some(page),
+        page_size: Some(page_size),
+    };
+    
+    let paginated_checkpoints = get_checkpoints_paginated(state, pp).await;
+
 
     let template = env.get_template("homepage.html").unwrap();
     let rendered = template
         .render(context! {
-            checkpoints => checkpoints,
-            current_page => 1,
-            total_pages => 1,
+            checkpoints => paginated_checkpoints.checkpoints,
+            current_page => paginated_checkpoints.current_page,
+            total_pages => paginated_checkpoints.total_pages,
         })
         .unwrap();
 

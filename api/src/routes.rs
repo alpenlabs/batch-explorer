@@ -114,22 +114,22 @@ pub async fn generate_sample_data(
 
 #[derive(Deserialize)]
 pub struct PaginationParams {
-    page: Option<u64>,    // Default page 1
-    page_size: Option<u64>, // Default page size 20
+    pub page: Option<u64>,    // Default page 1
+    pub page_size: Option<u64>, // Default page size 20
 }
 
 #[derive(serde::Serialize)]
 pub struct PaginatedResponse {
-    current_page: u64,
-    total_pages: u64,
-    total_checkpoints: u64,
-    checkpoints: Vec<RpcCheckpointInfo>,
+    pub current_page: u64,
+    pub total_pages: u64,
+    pub total_checkpoints: u64,
+    pub checkpoints: Vec<RpcCheckpointInfo>,
 }
 
 pub async fn get_checkpoints_paginated(
     State(db): State<Arc<Database>>,
-    Query(params): Query<PaginationParams>,
-) -> impl IntoResponse {
+    params: PaginationParams,
+) -> PaginatedResponse  {
     // Set default values for pagination
     let page = params.page.unwrap_or(1);
     let page_size = params.page_size.unwrap_or(20);
@@ -149,10 +149,10 @@ pub async fn get_checkpoints_paginated(
     };
 
     // Return the paginated response
-    Json(PaginatedResponse {
+    PaginatedResponse {
         current_page: page,
         total_pages,
         total_checkpoints,
         checkpoints,
-    })
+    }
 }

@@ -40,7 +40,6 @@ async fn main() {
     .allow_headers([header::CONTENT_TYPE]); // Allow specific headers
 
     let db_router = Router::new()
-
         .route("/checkpoint/:q", get(get_checkpoint))
         .with_state(dbs.clone());
 

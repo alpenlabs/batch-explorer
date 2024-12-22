@@ -3,9 +3,10 @@
     line-height: 1.5;
     font-weight: 400;
 
-    color-scheme: light dark;
+    /* color-scheme: light dark; */
     /* color: rgba(255, 255, 255, 0.87); */
     /* background-color: #242424; */
+    background-color: var(--strata-sand-light);
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -96,8 +97,7 @@ button:focus-visible {
 }
 
 .wrapper {
-    width: 90%;
-    max-width: 1200px;
+    margin: 0 5%;
     border-radius: 10px;
     padding: 20px;
 }
@@ -162,7 +162,7 @@ button:focus-visible {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 20px 50px;
+    padding: 20px 15px;
     background-color: var(--strata-terracotta-med);
     color: white;
     box-sizing: border-box;
@@ -362,12 +362,14 @@ button:focus-visible {
     margin: 10px 0;
 }
 
+
 .pagination span {
     margin: 0 5px;
     font-size: 16px;
     font-weight: bold;
 }
 
+/*
 .pagination button {
     padding: 5px 10px;
     border: none;
@@ -375,4 +377,68 @@ button:focus-visible {
     color: white;
     cursor: pointer;
     border-radius: 3px;
+} */
+
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    /* font-family: Arial, sans-serif; */
+}
+
+.pageButton {
+    /* background-color: #333; */
+    /* color: #fff; */
+    /* background-color: var(--strata-sand-med); */
+    border: 1px solid var(--strata-terracotta-med);
+    padding: 3px 6px;
+    border-radius: 0px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    color: var(--strata-terracotta-med);
+    background-color: var(--strata-sand-light);
+    margin: 0 1px;
+}
+
+.pageButton.arrow {
+    width: 1.3rem;
+}
+
+.pageButton:hover {
+    background-color: var(--strata-terracotta-light);
+}
+
+.pageButton.disabled {
+    background-color: #aaa;
+    border-color: #aaa;
+    color: #ddd;
+    cursor: not-allowed;
+}
+
+.pageInput {
+    width: 50px;
+    padding: 3px 6px;
+    text-align: center;
+    font-size: 14px;
+    /* border: 1px solid #ddd; */
+    /* border-radius: 4px; */
+    outline: none;
+    color-scheme: light;
+    background-color: var(--strata-sand-light);
+    color: var(--strata-terracotta-med);
+}
+
+.pageInput:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+.pageInfo {
+    margin-left: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--strata-terracotta-med);
 }

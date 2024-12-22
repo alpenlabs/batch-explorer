@@ -78,29 +78,32 @@ impl Database {
         limit: u64,
     ) -> (Vec<RpcCheckpointInfo>, u64) {
         info!("Fetching checkpoints from offset: {}, limit: {}", offset, limit);
+    
+        // Fetch the total count of items
+        let total_items = self.get_total_checkpoint_count();
+    
+        // Adjust limit for the last page if needed
+        let adjusted_limit = if offset + limit > total_items {
+            total_items.saturating_sub(offset) // Fetch only the remaining items
+        } else {
+            limit
+        };
+    
         let checkpoints = self.db.iterator(IteratorMode::From(
             &offset.to_be_bytes(),
             rocksdb::Direction::Forward,
         ))
-        .take(limit as usize)
+        .take(adjusted_limit as usize) // Use adjusted limit here
         .map(|result| {
             let (_, value) = result.expect("Failed to iterate RocksDB");
-            // Deserialize value toRpcCheckpointInfo 
-            serde_json::from_slice::<RpcCheckpointInfo>(&value).expect("Failed to deserialize checkpoint")
-            // let c = match serde_json::from_slice::<RpcCheckpointInfo>(&value) {
-            //     Ok(checkpoint) => Some(checkpoint),
-            //     Err(e) => {
-            //         error!("Failed to deserialize checkpoint at offset {}: {}", offset, e);
-            //         None
-            //     }
-            // }
+            // Deserialize value to RpcCheckpointInfo
+            serde_json::from_slice::<RpcCheckpointInfo>(&value)
+                .expect("Failed to deserialize checkpoint")
         })
         .collect::<Vec<RpcCheckpointInfo>>();
-
-        // Fetch the total count of checkpoints for pagination metadata
-        let total_checkpoints = self.get_total_checkpoint_count();
-
-        (checkpoints, total_checkpoints)
+    
+        // Return the fetched checkpoints and the total item count
+        (checkpoints, total_items)
     }
 
     pub fn get_total_checkpoint_count(&self) -> u64 {

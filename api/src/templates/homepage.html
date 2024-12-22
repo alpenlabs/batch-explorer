@@ -67,6 +67,16 @@
               {{ checkpoint.l2_blockid[:8] }}...{{ checkpoint.l2_blockid[-8:] }}
             </a>
           </td>
+          <!-- Status, TODO: populate with real value -->
+          <td class="tableCell">
+            <a 
+              href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_blockid }}" 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              {{ checkpoint.l2_blockid[:8] }}...{{ checkpoint.l2_blockid[-8:] }}
+            </a>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
