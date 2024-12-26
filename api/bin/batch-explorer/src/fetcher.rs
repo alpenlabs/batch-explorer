@@ -1,7 +1,7 @@
 //! This module contains the `StrataFetcher` struct, which is responsible for 
 //! fetching checkpoint data from the Strata API.
  
-use crate::models::RpcCheckpointInfo;
+use entity::checkpoint::RpcCheckpointInfo;
 use reqwest::Client;
 use serde_json::{json, Value};
 use anyhow::{Result, Context}; // Provides better error handling

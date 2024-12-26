@@ -1,0 +1,24 @@
+[package]
+edition = "2021"
+name = "batch-explorer"
+version = "0.1.0"
+
+[[bin]]
+name = "batch-explorer"
+path = "src/main.rs"
+
+[dependencies]
+entity.workspace = true
+service.workspace = true
+
+axum.workspace = true
+tokio.workspace = true
+tower-http.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+rand.workspace = true
+anyhow.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+minijinja.workspace = true
