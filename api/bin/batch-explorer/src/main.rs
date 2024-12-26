@@ -1,13 +1,14 @@
-mod fetcher;
 mod helper;
 
-use fetcher::StrataFetcher;
+use fullnode_client::fetcher::StrataFetcher;
 use serde::Deserialize;
 use service::db::DatabaseWrapper;
 use std::sync::Arc;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
-
+use tokio::sync::mpsc::{self, Receiver, Sender};
+use entity::{checkpoint::RpcCheckpointInfo, block::RpcBlockHeader};
+use sea_orm::Set;
 use axum::{
     extract::{Query, State},
     response::{Html, IntoResponse},
@@ -21,12 +22,17 @@ use tower_http::services::fs::ServeDir;
 const STRATA_FULLNODE: &str =
     "http://fnclient675f9eff3a682b8c0ea7423.devnet-annapurna.stratabtc.org/";
 const DATABASE_URL: &str = "postgres://username@localhost:5432/checkpoints";
-const FETCH_INTERVAL: u64 = 5;
+const FETCH_INTERVAL: u64 = 500;
 
 #[tokio::main]
 async fn main() {
-    // Initialize logging
-    FmtSubscriber::builder().with_max_level(Level::INFO).init();
+    // Initialize logging with debug level enabled
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::DEBUG) // Set the maximum log level to DEBUG
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("setting default subscriber failed");
 
     // Initialize database connection
     let database = Arc::new(DatabaseWrapper::new(DATABASE_URL).await);
@@ -34,22 +40,37 @@ async fn main() {
     // Initialize fetcher
     let fetcher = Arc::new(StrataFetcher::new(STRATA_FULLNODE.to_string()));
 
+    let (tx, rx):(Sender<CheckpointRange>, Receiver<CheckpointRange>) = mpsc::channel(100);
+
     // Spawn a background task for fetching checkpoint data
     let fetcher_clone = fetcher.clone();
     let database_clone = database.clone();
+    
     tokio::spawn(async move {
         info!("Starting data fetcher thread...");
-
+        
         // Periodic fetching every 5 seconds
         let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(FETCH_INTERVAL));
         loop {
+            let tx_clone = tx.clone();
             interval.tick().await;
-            match fetch_checkpoint_from_fullnode(&fetcher_clone, &database_clone).await {
+            match fetch_checkpoint_from_fullnode(&fetcher_clone, &database_clone, tx_clone).await {
                 Ok(_) => (),
                 Err(e) => tracing::error!("Error during periodic data fetch: {}", e),
             }
         }
     });
+
+    // Spawn a background task for fetching block data
+        // Spawn a background task for fetching checkpoint data
+        let fetcher_clone = fetcher.clone();
+        let database_clone = database.clone();
+    tokio::spawn(
+        async move {
+            info!("Starting block fetcher thread...");
+            run_block_fetcher(fetcher_clone, database_clone, rx).await;
+        }
+    );
 
     // Initialize Jinja2 templates
     let mut env = Environment::new();
@@ -160,11 +181,12 @@ struct CheckpointQuery {
 async fn fetch_checkpoint_from_fullnode(
     fetcher: &Arc<StrataFetcher>,
     database: &Arc<DatabaseWrapper>,
+    tx: Sender<CheckpointRange>
 ) -> anyhow::Result<()> {
     info!("Fetching data from fullnode...");
 
     // Get the last checkpoint index from the full node
-    let fullnode_last_checkpoint = fetcher.get_last_checkpoint_index().await?;
+    let fullnode_last_checkpoint = fetcher.get_latest_index("strata_getLatestCheckpointIndex").await?;
     info!(
         "Fullnode last checkpoint index: {}",
         fullnode_last_checkpoint
@@ -177,10 +199,17 @@ async fn fetch_checkpoint_from_fullnode(
 
     // Fetch all missing checkpoints
     for idx in (local_last_checkpoint + 1)..=fullnode_last_checkpoint as i64 {
-        match fetcher.fetch_checkpoint(idx).await {
+        match fetcher.fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", idx).await {
             Ok(checkpoint) => {
                 info!("Fetched checkpoint ID: {}", idx);
-                database.insert_checkpoint(checkpoint).await;
+                database.insert_checkpoint(checkpoint.clone()).await;
+                // Send the L2 block range to the block fetcher
+                let range = CheckpointRange {
+                    idx,
+                    start: checkpoint.l2_range.0 as i64,
+                    end: checkpoint.l2_range.0 as i64,
+                };
+                tx.send(range).await?;
             }
             Err(e) => {
                 tracing::warn!("Failed to fetch checkpoint {}: {}", idx, e);
@@ -188,4 +217,46 @@ async fn fetch_checkpoint_from_fullnode(
         }
     }
     Ok(())
+}
+
+
+// Data structure for checkpoint range
+#[derive(Debug, Deserialize, Clone)]
+pub struct CheckpointRange {
+    idx: i64,
+    start: i64,
+    end: i64,
+}
+
+/// Runs the block fetcher, which fetches blocks in the given checkpoint range
+async fn run_block_fetcher(
+    fetcher: Arc<StrataFetcher>,
+    database: Arc<DatabaseWrapper>,
+    mut rx: Receiver<CheckpointRange>,
+) {
+    while let Some(range) = rx.recv().await {
+        info!("Received checkpoint range: {:?}", range);
+        fetch_blocks_in_range(&fetcher, &database, range).await;
+    }
+}
+
+/// Fetches blocks in the given range and stores them in the database
+pub async fn fetch_blocks_in_range(
+    fetcher: &Arc<StrataFetcher>,
+    database: &Arc<DatabaseWrapper>,
+    range: CheckpointRange,
+) {
+    let checkpoint_idx = range.idx;
+    for block_height in range.start..=range.end {
+        // Fetch block data from the full node
+        match fetcher.fetch_data::<Vec<RpcBlockHeader>>("strata_getHeadersAtIdx", block_height).await {
+            Ok(rpc_block_header) => {
+                // Pass the RpcBlockHeader directly to `insert_block`
+                database.insert_block(rpc_block_header[0].clone(), checkpoint_idx).await;
+            }
+            Err(e) => {
+                tracing::warn!("Failed to fetch block {}: {}", block_height, e);
+            }
+        }
+    }
 }

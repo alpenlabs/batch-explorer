@@ -1,5 +1,5 @@
 use sea_orm::entity::prelude::*;
-use sea_orm::ActiveValue::{NotSet, Set};
+use sea_orm::ActiveValue::Set;
 use serde::{Deserialize, Serialize};
 /// Represents an L2 Block ID.
 pub type L2BlockId = String;

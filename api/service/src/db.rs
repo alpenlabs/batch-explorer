@@ -1,7 +1,7 @@
-use entity::checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo};
+use entity::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo}, block::{RpcBlockHeader, ActiveModel as BlockActiveModel, Entity as Block}};
 use sea_orm::{
-    prelude::Expr, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
-    QuerySelect,
+    prelude::*, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
+    QuerySelect, Set
 };
 use serde::{Deserialize, Serialize};
 use tracing::{error, info};
@@ -18,19 +18,21 @@ impl DatabaseWrapper {
             .expect("Failed to connect to PostgreSQL");
         Self { db }
     }
-
+    pub async fn checkpoint_exists(&self, idx: i64) -> bool {
+        Checkpoint::find()
+                .filter(entity::checkpoint::Column::Idx.eq(idx))
+                .one(&self.db)
+                .await
+                .map(|result| result.is_some())
+                .unwrap_or(false)
+    }
     /// Insert a new checkpoint into the database
     pub async fn insert_checkpoint(&self, checkpoint: RpcCheckpointInfo) {
         let idx: i64 = checkpoint.idx.try_into().unwrap();
         let previous_idx: i64 = idx - 1;
 
         if previous_idx > 0 {
-            let previous_checkpoint_exists = Checkpoint::find()
-                .filter(entity::checkpoint::Column::Idx.eq(previous_idx))
-                .one(&self.db)
-                .await
-                .map(|result| result.is_some())
-                .unwrap_or(false);
+            let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
 
             // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
             if !previous_checkpoint_exists {
@@ -166,7 +168,45 @@ impl DatabaseWrapper {
             }
         }
     }
-}
+        /// Inserts a new block into the database
+    /// Inserts a new block into the database, taking an `RpcBlockHeader` as input
+    pub async fn insert_block(&self, rpc_block_header: RpcBlockHeader, checkpoint_idx: i64) {
+        let height = rpc_block_header.block_idx as i64;
+        let block_id = rpc_block_header.block_id.clone();
+
+        // Ensure the block's checkpoint exists in the database
+        let checkpoint_exists = self.checkpoint_exists(checkpoint_idx).await;
+
+        if !checkpoint_exists {
+            tracing::error!(
+                "Cannot insert block with height {}: associated checkpoint with idx {} does not exist",
+                height, checkpoint_idx
+            );
+            return;
+        }
+
+        // Use `From` to convert `RpcBlockHeader` into an `ActiveModel`
+        let mut active_model: BlockActiveModel = rpc_block_header.into();
+        active_model.checkpoint_idx = Set(checkpoint_idx);
+
+        // Insert the block using the Entity::insert() method
+        match Block::insert(active_model).exec(&self.db).await {
+            Ok(_) => {
+                tracing::info!(
+                    "Block inserted successfully: height={}, block_hash={}",
+                    height,
+                    hex::encode(block_id)
+                );
+            }
+            Err(err) => {
+                tracing::error!(
+                    "Error inserting block with height {}: {:?}",
+                    height, err
+                );
+            }
+        }
+    }
+    }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PaginationInfo<T> {
