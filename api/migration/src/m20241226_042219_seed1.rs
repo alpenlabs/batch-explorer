@@ -1,5 +1,5 @@
-use sea_orm_migration::prelude::*;
 use rand::Rng;
+use sea_orm_migration::prelude::*;
 use uuid::Uuid;
 
 #[derive(DeriveMigrationName)]

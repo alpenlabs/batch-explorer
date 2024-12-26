@@ -22,9 +22,17 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Checkpoints::L1Start).big_integer().not_null())
+                    .col(
+                        ColumnDef::new(Checkpoints::L1Start)
+                            .big_integer()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Checkpoints::L1End).big_integer().not_null())
-                    .col(ColumnDef::new(Checkpoints::L2Start).big_integer().not_null())
+                    .col(
+                        ColumnDef::new(Checkpoints::L2Start)
+                            .big_integer()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Checkpoints::L2End).big_integer().not_null())
                     .col(
                         ColumnDef::new(Checkpoints::L2BlockId)
