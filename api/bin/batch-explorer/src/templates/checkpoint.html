@@ -1,35 +1,76 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="checkpoint-container">
-    <div class="checkpoint-row">
-        <span class="checkpoint-label">Batch TXID:</span>
-        <span class="checkpoint-value">{{ checkpoint.batch_txid }}</span>
-    </div>
-    <div class="checkpoint-row">
-        <span class="checkpoint-label">Epoch Index:</span>
-        <span class="checkpoint-value">{{ checkpoint.idx }}</span>
-    </div>
-    <div class="checkpoint-row">
-        <span class="checkpoint-label">Status:</span>
-        <span class="checkpoint-value">{{ checkpoint.status }}</span>
-    </div>
-    <div class="checkpoint-row">
-        <span class="checkpoint-label">Signet Start Block:</span>
-        <span class="checkpoint-value">{{ checkpoint.l1_range[0] }}</span>
-    </div>
-    <div class="checkpoint-row">
-        <span class="checkpoint-label">Signet End Block:</span>
-        <span class="checkpoint-value">{{ checkpoint.l1_range[1] }}</span>
-    </div>
-    <div class="checkpoint-row">
-        <span class="checkpoint-label">Strata Start Block:</span>
-        <span class="checkpoint-value">{{ checkpoint.l2_range[0] }}</span>
-    </div>
-    <div class="checkpoint-row">
-        <span class="checkpoint-label">Strata End Block:</span>
-        <span class="checkpoint-value">{{ checkpoint.l2_range[1] }}</span>
-    </div>
+    {% if pagination.items|length > 0 %}
+        {% set checkpoint = pagination.items[0] %}
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Batch TXID:</span>
+            <span class="checkpoint-value">{{ checkpoint.batch_txid }}</span>
+        </div>
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Epoch Index:</span>
+            <span class="checkpoint-value">{{ checkpoint.idx }}</span>
+        </div>
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Status:</span>
+            <span class="checkpoint-value">{{ checkpoint.status }}</span>
+        </div>
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Signet Start Block:</span>
+            <span class="checkpoint-value">
+                <a 
+                  href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[0] }}" 
+                  target="_blank" 
+                  rel="noreferrer"
+                >
+                    {{ checkpoint.l1_range[0] }}
+                </a>
+            </span>
+        </div>
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Signet End Block:</span>
+            <span class="checkpoint-value">
+                <a 
+                  href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[1] }}" 
+                  target="_blank" 
+                  rel="noreferrer"
+                >
+                    {{ checkpoint.l1_range[1] }}
+                </a>
+            </span>
+        </div>
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Strata Start Block:</span>
+            <span class="checkpoint-value">
+                <a 
+                  href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[0] }}" 
+                  target="_blank" 
+                  rel="noreferrer"
+                >
+                    {{ checkpoint.l2_range[0] }}
+                </a>
+            </span>
+        </div>
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Strata End Block:</span>
+            <span class="checkpoint-value">
+                <a 
+                  href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[1] }}" 
+                  target="_blank" 
+                  rel="noreferrer"
+                >
+                    {{ checkpoint.l2_range[1] }}
+                </a>
+            </span>
+        </div>
+    {% else %}
+        <div class="checkpoint-row">
+            <span class="checkpoint-label">Error:</span>
+            <span class="checkpoint-value">No checkpoint data available</span>
+        </div>
+    {% endif %}
 </div>
 
-{% include "pagination.html" %}
+<!-- Include the pagination bar -->
+{% include "pagination.html"  %}
 {% endblock %}

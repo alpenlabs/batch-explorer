@@ -1,3 +1,4 @@
+I do want to modify this logic such that, I only need one input field in middle and the arrow buttons, don't need all pages buttons.
 <div class="pagination">
     <!-- First Page Button -->
     <button
@@ -17,13 +18,25 @@
         ‹
     </button>
 
-    <!-- Current Page Editable Input -->
-    <input
-        class="pageInput"
-        value="{{ pagination.current_page }}"
-        onblur="validatePageNumber(this.value, {{ pagination.total_pages }})"
-        onkeydown="if (event.key === 'Enter') validatePageNumber(this.value, {{ pagination.total_pages }})"
-    />
+    <!-- Page Numbers -->
+    {% for p in range(pagination.absolute_first_page, pagination.total_pages + 1) %}
+        {% if p == pagination.current_page %}
+            <!-- Current Page Editable Input -->
+            <input
+                class="pageInput"
+                value="{{ pagination.current_page }}"
+                onblur="validatePageNumber(this.value, {{ pagination.total_pages }})"
+                onkeydown="if (event.key === 'Enter') validatePageNumber(this.value, {{ pagination.total_pages }})"
+            />
+        {% else %}
+            <button
+                class="pageButton"
+                onclick="window.location.href='?p={{ p }}'"
+            >
+                {{ p }}
+            </button>
+        {% endif %}
+    {% endfor %}
 
     <!-- Next Page Button -->
     <button
@@ -42,8 +55,7 @@
     >
         »
     </button>
-
     <div class="pageInfo">
-        Page {{ pagination.current_page }} of {{ pagination.total_pages }}
+        {{ pagination.current_page }} of {{ pagination.total_pages }}
     </div>
 </div>

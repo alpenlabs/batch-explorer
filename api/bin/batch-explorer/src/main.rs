@@ -45,7 +45,7 @@ async fn main() {
     // Build the router
     let app = Router::new()
         .route("/", get(homepage))
-        .route("/checkpoint/:id", get(checkpoint_details))
+        .route("/checkpoint", get(checkpoint_details))
         .nest_service("/static", ServeDir::new("bin/batch-explorer/src/static"))
         .with_state(database.clone())
         .layer(axum::Extension(Arc::new(env)));
@@ -65,22 +65,18 @@ async fn homepage(
     State(database): State<Arc<DatabaseWrapper>>,
     Query(params): Query<PaginationParams>,
 ) -> impl IntoResponse {
-    let page = params.p.unwrap_or(1);
+    let current_page = params.p.unwrap_or(1);
     let page_size = params.ps.unwrap_or(3);
 
-    // Fetch paginated checkpoints
-    let paginated_checkpoints = database
-        .get_paginated_checkpoints((page - 1) * page_size, page_size)
+    let pagination_info = database
+        .get_paginated_checkpoints(current_page, page_size, 1) // Set absolute_first_page to 1 for batch tables
         .await;
 
-    // Render the template
     render_template(
         &env,
         "homepage.html",
         context! {
-            checkpoints => paginated_checkpoints,
-            current_page => page,
-            total_pages => (database.get_total_checkpoint_count().await as f64 / page_size as f64).ceil() as u64,
+            pagination => pagination_info, // Pass the entire struct to the template
         },
     )
 }
@@ -89,26 +85,24 @@ async fn homepage(
 async fn checkpoint_details(
     axum::Extension(env): axum::Extension<Arc<Environment<'_>>>,
     State(database): State<Arc<DatabaseWrapper>>,
-    Path(id): Path<u64>,
+    Query(params): Query<CheckpointQuery>,
 ) -> impl IntoResponse {
-    if let Some(checkpoint) = database.get_checkpoint_by_idx(id).await {
-        // Render the template with checkpoint details
-        render_template(
-            &env,
-            "checkpoint.html",
-            context! {
-                checkpoint,
-                current_page => id,
-                total_pages => database.get_total_checkpoint_count().await,
-                current_path => format!("/checkpoint/{}", id),
-            },
-        )
-    } else {
-        // Render a 404 page if checkpoint not found
-        render_template(&env, "404.html", context! { message => "Checkpoint not found" })
-    }
-}
+    let current_page = params.p.unwrap_or(0); // Default to page 0
+    let page_size = 1;                      // Set page size
 
+    // Get paginated checkpoints
+    let pagination_info = database
+        .get_paginated_checkpoints(current_page, page_size, 0)
+        .await;
+
+    render_template(
+        &env,
+        "checkpoint.html",
+        context! {
+            pagination => pagination_info
+        },
+    )
+}
 // Utility function to render templates
 fn render_template(
     env: &Environment<'_>,
@@ -117,6 +111,7 @@ fn render_template(
 ) -> Html<String> {
     let template = env.get_template(template_name).unwrap();
     let rendered = template.render(context).unwrap();
+    info!("test if error from here");
     Html(rendered)
 }
 
@@ -126,3 +121,9 @@ struct PaginationParams {
     p: Option<u64>,
     ps: Option<u64>,
 }
+
+#[derive(Deserialize)]
+struct CheckpointQuery {
+    p: Option<u64>,
+}
+

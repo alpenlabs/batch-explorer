@@ -2,6 +2,7 @@ pub use sea_orm_migration::prelude::*;
 
 mod m20220101_000001_create_table;
 mod m20241224_144707_seed;
+mod m20241226_042219_seed1;
 
 pub struct Migrator;
 
@@ -11,6 +12,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20220101_000001_create_table::Migration),
             Box::new(m20241224_144707_seed::Migration),
+            Box::new(m20241226_042219_seed1::Migration),
         ]
     }
 }
