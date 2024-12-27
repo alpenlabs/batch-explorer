@@ -7,68 +7,62 @@
     <table class="table">
       <thead class="tableRowHeader">
         <tr>
-          <th class="tableHeader">Index</th>
-          <th class="tableHeader">L1 Range</th>
-          <th class="tableHeader">L2 Range</th>
-          <th class="tableHeader">L2 Block ID</th>
+          <th class="tableHeader">Batch TXID</th>
+          <th class="tableHeader">Epoch index</th>
+          <th class="tableHeader">Status</th>
+          <th class="tableHeader">Signet start block</th>
+          <th class="tableHeader">Signet end block</th>
+          <th class="tableHeader">Strata start block</th>
+          <th class="tableHeader">Strata end block</th>
         </tr>
       </thead>
       <tbody>
         {% for checkpoint in pagination.items %}
         <tr class="tableRowItems">
-          <!-- Index -->
+          <!-- Batch TXID -->
           <td class="tableCell">
-            <a href="/checkpoint?p={{ checkpoint.idx }}">
+            <a href="{{env.mempool_url }}tx/{{checkpoint.batch_txid}}" target="_blank" rel="noreferrer">
+              {{ checkpoint.batch_txid }}
+            </a>
+          </td>
+      
+          <!-- Epoch index -->
+          <td class="tableCell">
+            <a href="/checkpoint?p={{ checkpoint.idx }}" target="_blank" rel="noreferrer">
               {{ checkpoint.idx }}
             </a>
           </td>
-    
-          <!-- L1 Range -->
+      
+          <!-- Status -->
           <td class="tableCell">
-            <a 
-              href="{{ env.mempool_url }}/block/{{ checkpoint.l1_range[0] }}" 
-              target="_blank" 
-              rel="noreferrer"
-            >
-              {{ checkpoint.l1_range[0] }}
-            </a>
-            -
-            <a 
-              href="{{ env.mempool_url }}/block/{{ checkpoint.l1_range[1] }}" 
-              target="_blank" 
-              rel="noreferrer"
-            >
-              {{ checkpoint.l1_range[1] }}
+            {{ checkpoint.status }}
+          </td>
+      
+          <!-- Signet start block -->
+          <td class="tableCell">
+            <a href="{{ env.mempool_url }}/block/{{ checkpoint.l1_range[0] }}" target="_blank" rel="noreferrer">
+              {{  checkpoint.l1_range[0] }}
             </a>
           </td>
-    
-          <!-- L2 Range -->
+      
+          <!-- Signet end block -->
           <td class="tableCell">
-            <a 
-              href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[0] }}" 
-              target="_blank" 
-              rel="noreferrer"
-            >
+            <a href="{{ env.mempool_url }}/block/{{  checkpoint.l1_range[1] }}" target="_blank" rel="noreferrer">
+              {{  checkpoint.l1_range[1] }}
+            </a>
+          </td>
+      
+          <!-- Strata start block -->
+          <td class="tableCell">
+            <a href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[0] }}" target="_blank" rel="noreferrer">
               {{ checkpoint.l2_range[0] }}
             </a>
-            -
-            <a 
-              href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[1] }}" 
-              target="_blank" 
-              rel="noreferrer"
-            >
-              {{ checkpoint.l2_range[1] }}
-            </a>
           </td>
-    
-          <!-- L2 Block ID -->
+      
+          <!-- Strata end block -->
           <td class="tableCell">
-            <a 
-              href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_blockid }}" 
-              target="_blank" 
-              rel="noreferrer"
-            >
-              {{ checkpoint.l2_blockid[:8] }}...{{ checkpoint.l2_blockid[-8:] }}
+            <a href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[1] }}" target="_blank" rel="noreferrer">
+              {{ checkpoint.l2_range[1] }}
             </a>
           </td>
         </tr>

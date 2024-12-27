@@ -4,14 +4,22 @@ use fullnode_client::fetcher::StrataFetcher;
 use tokio::sync::mpsc::Receiver;
 use std::sync::Arc;
 use tracing::info;
-
+use entity::checkpoint::RpcCheckpointInfo;
 #[derive(Debug, Clone)]
 pub struct CheckpointRange {
     pub idx: i64,
     pub start: i64,
     pub end: i64,
 }
-
+impl CheckpointRange {
+    pub fn new(checkpoint: RpcCheckpointInfo ) -> Self {
+        Self { 
+            idx: checkpoint.idx as i64,
+            start: checkpoint.l2_range.0 as i64,
+            end: checkpoint.l2_range.1 as i64,
+        }
+    }
+}
 pub async fn run_block_fetcher(
     fetcher: Arc<StrataFetcher>,
     database: Arc<DatabaseWrapper>,

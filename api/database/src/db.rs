@@ -208,6 +208,7 @@ impl DatabaseWrapper {
     }
     }
 
+// TODO: keep it in separate pagination module
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PaginationInfo<T> {
     pub current_page: u64,

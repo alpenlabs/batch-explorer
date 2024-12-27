@@ -45,6 +45,8 @@ impl From<RpcBlockHeader> for ActiveModel {
 //         }
 //     }
 // }
+
+/// Represents a block header as returned by the RPC
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct RpcBlockHeader {
     /// The index of the block representing height.
@@ -59,7 +61,7 @@ pub struct RpcBlockHeader {
     /// previous block
     pub prev_block: String,
 
-    // L1 segment hash
+    /// L1 segment hash
     pub l1_segment_hash: String,
 
     /// Hash of the execution segment
@@ -69,6 +71,7 @@ pub struct RpcBlockHeader {
     pub state_root: String,
 }
 /// Simplified representation of a block header with only fields of interest
+/// for the checkpoint explorer
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct BlockInfo {
     /// The index of the block (height)

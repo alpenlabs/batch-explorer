@@ -16,6 +16,10 @@ pub struct RpcCheckpointInfo {
     pub l2_range: (u64, u64),
     /// The L2 block ID that this checkpoint covers
     pub l2_blockid: L2BlockId,
+
+    // These are optional as current version of fullnode does not return them
+    pub batch_txid: Option<String>,
+    pub status: Option<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
@@ -28,6 +32,8 @@ pub struct Model {
     pub l2_start: i64,
     pub l2_end: i64,
     pub l2_block_id: L2BlockId,
+    pub batch_txid: String,
+    pub status: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -43,6 +49,8 @@ impl From<RpcCheckpointInfo> for ActiveModel {
             l2_start: Set(info.l2_range.0 as i64),
             l2_end: Set(info.l2_range.1 as i64),
             l2_block_id: Set(info.l2_blockid),
+            batch_txid: Set(info.batch_txid.unwrap_or_else(|| "-".to_string())), // Default value
+            status: Set(info.status.unwrap_or_else(|| "-".to_string())),         // Default value
         }
     }
 }
@@ -54,6 +62,8 @@ impl From<Model> for RpcCheckpointInfo {
             l1_range: (model.l1_start as u64, model.l1_end as u64),
             l2_range: (model.l2_start as u64, model.l2_end as u64),
             l2_blockid: model.l2_block_id,
+            batch_txid: Some(model.batch_txid.clone()),
+            status: Some(model.status.clone()),
         }
     }
 }

@@ -37,11 +37,7 @@ async fn fetch_checkpoints(
     for idx in (local_last_checkpoint + 1)..=fullnode_last_checkpoint as i64 {
         if let Ok(checkpoint) = fetcher.fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", idx).await {
             database.insert_checkpoint(checkpoint.clone()).await;
-            let range = CheckpointRange {
-                idx,
-                start: checkpoint.l2_range.0 as i64,
-                end: checkpoint.l2_range.1 as i64,
-            };
+            let range = CheckpointRange::new(checkpoint); 
             tx.send(range).await?;
         }
     }
