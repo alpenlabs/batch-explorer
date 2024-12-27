@@ -26,7 +26,7 @@
           <!-- L1 Range -->
           <td class="tableCell">
             <a 
-              href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[0] }}" 
+              href="{{ env.mempool_url }}/block/{{ checkpoint.l1_range[0] }}" 
               target="_blank" 
               rel="noreferrer"
             >
@@ -34,7 +34,7 @@
             </a>
             -
             <a 
-              href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[1] }}" 
+              href="{{ env.mempool_url }}/block/{{ checkpoint.l1_range[1] }}" 
               target="_blank" 
               rel="noreferrer"
             >
@@ -45,7 +45,7 @@
           <!-- L2 Range -->
           <td class="tableCell">
             <a 
-              href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[0] }}" 
+              href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[0] }}" 
               target="_blank" 
               rel="noreferrer"
             >
@@ -53,7 +53,7 @@
             </a>
             -
             <a 
-              href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[1] }}" 
+              href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[1] }}" 
               target="_blank" 
               rel="noreferrer"
             >
@@ -64,7 +64,7 @@
           <!-- L2 Block ID -->
           <td class="tableCell">
             <a 
-              href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_blockid }}" 
+              href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_blockid }}" 
               target="_blank" 
               rel="noreferrer"
             >

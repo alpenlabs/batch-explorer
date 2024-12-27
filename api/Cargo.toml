@@ -1,9 +1,10 @@
 [workspace]
+resolver = "2"
 members = [
     "bin/batch-explorer",
     "entity",
     "migration",
-    "service",
+    "database",
     "fullnode-client",
 ]
 
@@ -15,7 +16,7 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 entity = { path = "entity" }
 migration = { path = "migration" }
-service = { path = "service" }
+database = { path = "database" }
 fullnode-client = { path = "fullnode-client" }
 anyhow = "1.0"
 axum = "0.6"
@@ -30,3 +31,5 @@ lru = "0.10"
 minijinja = "2.5.0"
 hex = "0.4"
 sea-orm-migration = "0.9"
+config = "0.13"
+dotenvy = "0.15.7"

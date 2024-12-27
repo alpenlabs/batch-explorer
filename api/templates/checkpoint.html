@@ -19,7 +19,7 @@
             <span class="checkpoint-label">Signet Start Block:</span>
             <span class="checkpoint-value">
                 <a 
-                  href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[0] }}" 
+                  href="{{env.mempool_url}}{{ checkpoint.l1_range[0] }}" 
                   target="_blank" 
                   rel="noreferrer"
                 >
@@ -31,7 +31,7 @@
             <span class="checkpoint-label">Signet End Block:</span>
             <span class="checkpoint-value">
                 <a 
-                  href="https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l1_range[1] }}" 
+                  href="{{env.mempool_url}}{{ checkpoint.l1_range[1] }}" 
                   target="_blank" 
                   rel="noreferrer"
                 >
@@ -43,7 +43,7 @@
             <span class="checkpoint-label">Strata Start Block:</span>
             <span class="checkpoint-value">
                 <a 
-                  href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[0] }}" 
+                  href="{{env.blockscout_url}}{{ checkpoint.l2_range[0] }}" 
                   target="_blank" 
                   rel="noreferrer"
                 >
@@ -55,7 +55,7 @@
             <span class="checkpoint-label">Strata End Block:</span>
             <span class="checkpoint-value">
                 <a 
-                  href="https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/{{ checkpoint.l2_range[1] }}" 
+                  href="{{env.blockscout_url}}{{ checkpoint.l2_range[1] }}" 
                   target="_blank" 
                   rel="noreferrer"
                 >
