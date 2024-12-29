@@ -72,24 +72,56 @@ impl DatabaseWrapper {
     }
 
     /// Fetch a checkpoint by its L2 block ID
-    pub async fn get_checkpoint_by_l2_blockid(
+    pub async fn get_checkpoint_idx_by_block_hash(
         &self,
-        l2_blockid: &str,
-    ) -> Option<RpcCheckpointInfo> {
-        match Checkpoint::find()
-            .filter(entity::checkpoint::Column::L2BlockId.eq(l2_blockid))
+        block_hash: &str,
+    ) -> Result<Option<i32>, DbErr> {
+    
+        match Block::find()
+            .filter(entity::block::Column::BlockHash.eq(block_hash))
             .one(&self.db)
             .await
         {
-            Ok(Some(checkpoint)) => Some(checkpoint.into()),
-            Ok(None) => None,
+            Ok(Some(block))=>{
+                tracing::info!("Block found: {:?}", block);
+                Ok(Some(block.checkpoint_idx))
+            }
+            Ok(None) => {
+                tracing::info!("No block found for hash: {}", block_hash);
+                Ok(None)
+            }
             Err(err) => {
-                error!("Error fetching checkpoint by L2 block ID: {:?}", err);
-                None
+                tracing::error!("Query failed: {:?}", err);
+                Err(err)
             }
         }
     }
-
+    /// Fetch a checkpoint by its L2 block height
+    pub async fn get_checkpoint_idx_by_block_height(
+        &self,
+        block_height: i32,
+    ) -> Result<Option<i32>, DbErr> {
+        tracing::debug!("Searching for block with height: {}", block_height);
+    
+        match Block::find()
+            .filter(entity::block::Column::Height.eq(block_height))
+            .one(&self.db)
+            .await
+        {
+            Ok(Some(block)) => {
+                tracing::info!("Block found: {:?}", block);
+                Ok(Some(block.checkpoint_idx))
+            }
+            Ok(None) => {
+                tracing::info!("No block found for height: {}", block_height);
+                Ok(None)
+            }
+            Err(err) => {
+                tracing::error!("Query failed: {:?}", err);
+                Err(err)
+            }
+        }
+    }
     // TODO: move this out of db and have a separate pagination wrapper module
     pub async fn get_paginated_checkpoints(
         &self,
@@ -128,13 +160,13 @@ impl DatabaseWrapper {
         }
     }
 
-    /// Perform an exact match search on checkpoints
-    pub async fn search_exact_match(&self, query: &str) -> Option<RpcCheckpointInfo> {
-        if let Ok(idx) = query.parse::<u64>() {
-            return self.get_checkpoint_by_idx(idx).await;
-        }
-        self.get_checkpoint_by_l2_blockid(query).await
-    }
+    // /// Perform an exact match search on checkpoints
+    // pub async fn search_exact_match(&self, query: &str) -> Option<RpcCheckpointInfo> {
+    //     if let Ok(idx) = query.parse::<u64>() {
+    //         return self.get_checkpoint_by_idx(idx).await;
+    //     }
+    //     self.get_checkpoint_by_l2_blockid(query).await
+    // }
 
     /// Get the total count of checkpoints in the database
     pub async fn get_total_checkpoint_count(&self) -> u64 {
@@ -187,7 +219,10 @@ impl DatabaseWrapper {
 
         // Use `From` to convert `RpcBlockHeader` into an `ActiveModel`
         let mut active_model: BlockActiveModel = rpc_block_header.into();
-        active_model.checkpoint_idx = Set(checkpoint_idx);
+
+        // TODO: remove this
+        let temp = checkpoint_idx as i32;
+        active_model.checkpoint_idx = Set(temp);
 
         // Insert the block using the Entity::insert() method
         match Block::insert(active_model).exec(&self.db).await {

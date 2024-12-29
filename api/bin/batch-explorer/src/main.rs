@@ -77,6 +77,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(services::template_service::homepage))
         .route("/checkpoint", get(services::template_service::checkpoint_details))
+        .route("/search", get(services::template_service::search_handler))
         .nest_service("/static", ServeDir::new("static"))
         .with_state(database.clone())
         .layer(axum::Extension(Arc::new(env)));

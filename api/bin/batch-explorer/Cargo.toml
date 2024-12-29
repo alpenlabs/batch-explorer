@@ -27,3 +27,4 @@ minijinja.workspace = true
 sea-orm.workspace = true
 config.workspace = true
 dotenvy.workspace = true
+url = "2.3.1"

@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key)]
     pub block_hash: String, // Represents the block_id as a hash
-    pub height: i64,         // Represents the block height
-    pub checkpoint_idx: i64, // Foreign key to the checkpoint index
+    pub height: i32,         // Represents the block height
+    pub checkpoint_idx: i32, // Foreign key to the checkpoint index
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -21,8 +21,8 @@ impl ActiveModelBehavior for ActiveModel {}
 impl From<RpcBlockHeader> for ActiveModel {
     fn from(header: RpcBlockHeader) -> Self {
         Self {
-            block_hash: Set(hex::encode(header.block_id)), // Convert block_id (u8 array) to hex string
-            height: Set(header.block_idx as i64),
+            block_hash: Set(header.block_id), // Convert block_id (u8 array) to hex string
+            height: Set(header.block_idx as i32),
             checkpoint_idx: NotSet, // Leave unset, to be filled when associating with a checkpoint
         }
     }
