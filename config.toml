@@ -1,4 +1,0 @@
-[default]
-strata_fullnode = "http://fnclient675f9eff3a682b8c0ea7423.devnet-annapurna.stratabtc.org/"
-database_url = "postgres://username@localhost:5432/checkpoints"
-fetch_interval = 500

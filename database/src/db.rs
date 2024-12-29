@@ -15,7 +15,7 @@ impl DatabaseWrapper {
     pub async fn new(database_url: &str) -> Self {
         let db = Database::connect(database_url)
             .await
-            .expect("Failed to connect to PostgreSQL");
+            .expect(&format!("Failed to connect to PostgreSQL {}", database_url));
         Self { db }
     }
     pub async fn checkpoint_exists(&self, idx: i64) -> bool {

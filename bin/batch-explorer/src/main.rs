@@ -1,7 +1,7 @@
 mod services;
+mod utils;
 
 use axum::{routing::get, Router};
-use config::Config as ConfigLoader;
 use database::db::DatabaseWrapper;
 use fullnode_client::fetcher::StrataFetcher;
 use tower_http::services::ServeDir;
@@ -10,38 +10,13 @@ use std::sync::Arc;
 use tokio::sync::mpsc;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
-use std::env;
-
-#[derive(Debug, serde::Deserialize)]
-pub struct Config {
-    pub strata_fullnode: String,
-    pub database_url: String,
-    pub fetch_interval: u64,
-}
-
+use utils::config::Config;
+use dotenvy::dotenv;
+use clap::Parser;
 #[tokio::main]
 async fn main() {
-    // Load environment variables
-    dotenvy::dotenv().ok();
-
-    // Detect current environment
-    let current_env = env::var("APP_ENV").unwrap_or_else(|_| "default".to_string());
-    println!("Current environment: {}", current_env);
-
-    // Load configuration
-    let raw_config = ConfigLoader::builder()
-        .add_source(config::File::with_name("config").required(false))
-        .add_source(config::Environment::with_prefix("APP"))
-        .build()
-        .expect("Failed to load configuration");
-
-    println!("Raw configuration: {:?}", raw_config);
-
-    // Extract the configuration for the current environment
-    let config: Config = raw_config.get("default")
-        .expect("Failed to extract the 'default' section from the configuration");
-
-    println!("Loaded configuration: {:?}", config);
+    dotenv().ok();
+    let config = Config::parse();
 
     // Initialize logging
     let subscriber = FmtSubscriber::builder()
