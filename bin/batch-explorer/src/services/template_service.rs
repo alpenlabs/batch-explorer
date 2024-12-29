@@ -40,7 +40,7 @@ pub async fn homepage(
     Query(params): Query<QueryParams>,
 ) -> impl IntoResponse {
     let current_page = params.p.unwrap_or(1);
-    let page_size = params.ps.unwrap_or(3);
+    let page_size = params.ps.unwrap_or(10);
     let error_msg = params.error_msg.clone();
     tracing::info!("error_msg: {:?}", error_msg);
 
