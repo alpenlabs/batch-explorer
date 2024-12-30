@@ -50,7 +50,6 @@ button {
     padding: 0.6em 1.2em;
     font-size: 1em;
     font-weight: 500;
-    /* font-family: inherit; */
     background-color: var(--strata-sand-med);
     cursor: pointer;
     transition: border-color 0.25s;
@@ -118,7 +117,6 @@ button:focus-visible {
     font-weight: bold;
     color: var(--strata-sand-med);
     margin-bottom: 20px;
-    font-family: Outfit, sans-serif;
 }
 
 .searchSection {
@@ -403,7 +401,6 @@ button:focus-visible {
     align-items: center;
     gap: 8px;
     margin-top: 10px;
-    /* font-family: Arial, sans-serif; */
 }
 
 .pageButton {
