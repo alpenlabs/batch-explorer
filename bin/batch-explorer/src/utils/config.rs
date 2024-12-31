@@ -12,7 +12,7 @@ pub struct Config {
     #[arg(
         long,
         env = "APP_STRATA_FULLNODE",
-        default_value = "http://localhost:18332",
+        default_value = "http://localhost:58000/",
         help = "Strata fullnode URL"
     )]
     pub strata_fullnode: String,

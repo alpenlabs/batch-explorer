@@ -23,8 +23,7 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/target/debug/batch-explorer .
 COPY --from=builder /usr/src/app/target/debug/migration .
 COPY static static
-COPY ./config.toml .
-COPY ./.env .
+COPY .env* .
 # Expose the application port (default is 3000 for batch-explorer)
 EXPOSE 3000
 

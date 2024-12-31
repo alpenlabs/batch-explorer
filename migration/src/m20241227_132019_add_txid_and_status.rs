@@ -18,7 +18,6 @@ impl MigrationTrait for Migration {
                     .add_column(
                         ColumnDef::new(Checkpoints::BatchTxid)
                             .string()
-                            .unique_key()
                             .not_null()
                             .default("-"),
                     )
