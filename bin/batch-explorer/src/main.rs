@@ -31,6 +31,13 @@ async fn main() {
     // Channels for communication between checkpoint fetcher and block fetcher
     let (tx, rx) = mpsc::channel(100);
 
+    // Start block fetcher task
+    let fetcher_clone = fetcher.clone();
+    let database_clone = database.clone();
+    tokio::spawn(async move {
+        run_block_fetcher(fetcher_clone, database_clone, rx).await;
+    });
+    
     // Start checkpoint fetcher task
     let fetcher_clone = fetcher.clone();
     let database_clone = database.clone();
@@ -38,12 +45,6 @@ async fn main() {
         start_checkpoint_fetcher(fetcher_clone, database_clone, tx, config.fetch_interval).await;
     });
 
-    // Start block fetcher task
-    let fetcher_clone = fetcher.clone();
-    let database_clone = database.clone();
-    tokio::spawn(async move {
-        run_block_fetcher(fetcher_clone, database_clone, rx).await;
-    });
 
     // Initialize Jinja2 templates
     let env = initialize_templates();

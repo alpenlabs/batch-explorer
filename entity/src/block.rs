@@ -28,24 +28,6 @@ impl From<RpcBlockHeader> for ActiveModel {
     }
 }
 
-// /// Implements conversion from `Model` (database row) back to `RpcBlockHeader`
-// impl From<Model> for RpcBlockHeader {
-//     fn from(model: Model) -> Self {
-//         RpcBlockHeader {
-//             block_idx: model.height as u64,
-//             timestamp: 0, // Placeholder: Needs to be populated from additional data
-//             block_id: hex::decode(&model.block_hash)
-//                 .unwrap_or_else(|_| [0; 32].to_vec())
-//                 .try_into()
-//                 .unwrap_or([0; 32]), // Convert hex string to a u8 array
-//             prev_block: [0; 32], // Placeholder
-//             l1_segment_hash: [0; 32], // Placeholder
-//             exec_segment_hash: [0; 32], // Placeholder
-//             state_root: [0; 32], // Placeholder
-//         }
-//     }
-// }
-
 /// Represents a block header as returned by the RPC
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct RpcBlockHeader {
