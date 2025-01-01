@@ -23,12 +23,12 @@
 
 a {
     font-weight: 500;
-    color: #646cff;
+    color: var(--strata-terracotta-med);
     text-decoration: inherit;
 }
 
 a:hover {
-    color: #535bf2;
+    color: var(--strata-terracotta-sharp);
 }
 
 body {
@@ -37,6 +37,10 @@ body {
     place-items: center;
     min-width: 320px;
     min-height: 100vh;
+}
+
+main {
+    width: 100%;
 }
 
 h1 {
@@ -230,7 +234,7 @@ button:focus-visible {
 .devnetButton {
     padding: 10px 20px;
     background-color: var(--strata-sand-med);
-    border: none;
+    border: 2px solid var(--strata-sand-med);
     border-radius: 5px;
     color: var(--strata-terracotta-med);
     font-weight: bold;
@@ -342,9 +346,10 @@ button:focus-visible {
 
 .tableRowHeader {
     /* background-color: #DF896D; */
-    color: rgb(44, 43, 43);
+    /* color: rgb(44, 43, 43); */
     /* font-weight: bold; */
     /* border-radius: 10px; */
+    color: var(--strata-terracotta-sharp);
     border-bottom: 1px solid grey;
 }
 
