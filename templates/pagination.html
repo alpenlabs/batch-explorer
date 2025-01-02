@@ -2,7 +2,7 @@
     <!-- First Page Button -->
     <button
         class="pageButton arrow {% if pagination.current_page == pagination.absolute_first_page %}disabled{% endif %}"
-        onclick="window.location.href='?p={{ pagination.absolute_first_page }}'"
+        data-page="{{ pagination.absolute_first_page }}"
         {% if pagination.current_page == pagination.absolute_first_page %}disabled{% endif %}
     >
         «
@@ -11,7 +11,7 @@
     <!-- Previous Page Button -->
     <button
         class="pageButton arrow {% if pagination.current_page == pagination.absolute_first_page %}disabled{% endif %}"
-        onclick="window.location.href='?p={{ pagination.current_page - 1 }}'"
+        data-page="{{ pagination.current_page - 1 }}"
         {% if pagination.current_page == pagination.absolute_first_page %}disabled{% endif %}
     >
         ‹
@@ -19,16 +19,16 @@
 
     <!-- Current Page Editable Input -->
     <input
-        class="pageInput"
-        value="{{ pagination.current_page }}"
-        onblur="validatePageNumber(this.value, {{ pagination.total_pages }})"
-        onkeydown="if (event.key === 'Enter') validatePageNumber(this.value, {{ pagination.total_pages }})"
-    />
+    class="pageInput"
+    value="{{ pagination.current_page }}"
+    data-total-pages="{{ pagination.total_pages }}"
+    placeholder="Enter"
+/>
 
     <!-- Next Page Button -->
     <button
         class="pageButton arrow {% if pagination.current_page == pagination.total_pages %}disabled{% endif %}"
-        onclick="window.location.href='?p={{ pagination.current_page + 1 }}'"
+        data-page="{{ pagination.current_page + 1 }}"
         {% if pagination.current_page == pagination.total_pages %}disabled{% endif %}
     >
         ›
@@ -37,7 +37,7 @@
     <!-- Last Page Button -->
     <button
         class="pageButton arrow {% if pagination.current_page == pagination.total_pages %}disabled{% endif %}"
-        onclick="window.location.href='?p={{ pagination.total_pages }}'"
+        data-page="{{ pagination.total_pages }}"
         {% if pagination.current_page == pagination.total_pages %}disabled{% endif %}
     >
         »

@@ -433,7 +433,7 @@ button:focus-visible {
 }
 
 .pageButton.disabled {
-    background-color: #aaa;
+    background-color: var(--strata-terracotta-med);
     border-color: #aaa;
     color: #ddd;
     cursor: not-allowed;
@@ -468,7 +468,7 @@ button:focus-visible {
 .checkpoint-container {
 
     padding: 20px;
-    margin: 30px 30%;
+    margin: 30px 20%;
 }
 
 .checkpoint-row {

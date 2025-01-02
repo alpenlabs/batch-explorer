@@ -3,7 +3,7 @@
 {% block content %}
 
   <!-- Wrapper Section -->
-  <div class="wrapper">
+  <div class="wrapper" id="dynamicContent">
     <table class="table">
       <thead class="tableRowHeader">
         <tr>
@@ -28,7 +28,12 @@
       
           <!-- Epoch index -->
           <td class="tableCell">
-            <a href="/checkpoint?p={{ checkpoint.idx }}" target="_blank" rel="noreferrer">
+            <a 
+            href="/checkpoint?p={{ checkpoint.idx }}" 
+            data-link 
+            data-target="#dynamicContent"
+            target="_self"
+            >
               {{ checkpoint.idx }}
             </a>
           </td>

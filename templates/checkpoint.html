@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="checkpoint-container">
+<div id="dynamicContent">
+    <div class="checkpoint-container">
     {% if pagination.items|length > 0 %}
         {% set checkpoint = pagination.items[0] %}
         <div class="checkpoint-row">
@@ -69,8 +70,8 @@
             <span class="checkpoint-value">No checkpoint data available</span>
         </div>
     {% endif %}
+    <!-- Include the pagination bar -->
+    {% include "pagination.html"  %}
+    </div>
 </div>
-
-<!-- Include the pagination bar -->
-{% include "pagination.html"  %}
 {% endblock %}
