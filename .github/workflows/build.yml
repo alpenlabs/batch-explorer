@@ -1,47 +1,47 @@
-name: Push the Docker image to AWS ECR Repo
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch: # Allows manual triggering of the workflow
+# name: Push the Docker image to AWS ECR Repo
+# on:
+#   push:
+#     branches:
+#       - main
+#   workflow_dispatch: # Allows manual triggering of the workflow
 
-jobs:
-  Build:
-    name: Build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Required for OIDC authentication
-      contents: read  # Allows reading repo contents
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+# jobs:
+#   Build:
+#     name: Build
+#     runs-on: ubuntu-latest
+#     permissions:
+#       id-token: write # Required for OIDC authentication
+#       contents: read  # Allows reading repo contents
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
 
-      - name: Setup AWS ECR Details
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE}}
-          role-session-name: client
-          aws-region: us-east-1
+#       - name: Setup AWS ECR Details
+#         uses: aws-actions/configure-aws-credentials@v3
+#         with:
+#           role-to-assume: ${{ secrets.AWS_ROLE}}
+#           role-session-name: github-actions-session
+#           aws-region: us-east-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          mask-password: "true"
+#       - name: Login to Amazon ECR
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v1
+#         with:
+#           mask-password: "true"
 
-      - name: Get commit hash
-        id: get-commit-hash
-        run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
-      - name: Get timestamp
-        id: get-timestamp
-        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
+#       - name: Get commit hash
+#         id: get-commit-hash
+#         run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
+#       - name: Get timestamp
+#         id: get-timestamp
+#         run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
 
-      - name: Build, tag, and push the image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-          IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+#       - name: Build, tag, and push the image to Amazon ECR
+#         id: build-image
+#         env:
+#           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#           ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+#           IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
+#         run: |
+#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

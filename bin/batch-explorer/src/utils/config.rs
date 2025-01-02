@@ -11,7 +11,7 @@ pub struct Config {
     /// The URL of the Strata Fullnode
     #[arg(
         long,
-        env = "APP_STRATA_FULLNODE",
+        env = "STRATA_FULLNODE",
         default_value = "http://localhost:58000/",
         help = "Strata fullnode URL"
     )]
@@ -30,8 +30,16 @@ pub struct Config {
     #[arg(
         long,
         env = "APP_FETCH_INTERVAL",
-        default_value_t = 500,
+        default_value_t = 5,
         help = "Fetch interval in seconds"
     )]
     pub fetch_interval: u64,
+
+    #[arg(
+        long,
+        env = "STRATA_URL",
+        default_value = "https://stratabtc.org",
+        help = "Strata URL"
+    )]
+    pub strata_url: String,
 }

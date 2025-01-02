@@ -14,14 +14,15 @@ macro_rules! template_path {
 pub fn initialize_templates() -> Environment<'static> {
     let mut env = Environment::new();
 
-        // Load environment variables
-        let mut global_context = HashMap::new();
-        global_context.insert("mempool_url", env::var("MEMPOOL_URL").unwrap_or_default());
-        global_context.insert("blockscout_url", env::var("BLOCKSCOUT_URL").unwrap_or_default());
-        global_context.insert("strata_docs", env::var("STRATA_DOCS").unwrap_or_default());
-        global_context.insert("strata_blog", env::var("STRATA_BLOG").unwrap_or_default());
-    
-        env.add_global("env", Value::from(global_context)); // Add global context for all templates
+    // Load environment variables
+    let mut global_context = HashMap::new();
+    global_context.insert("mempool_url", env::var("MEMPOOL_URL").unwrap_or_default());
+    global_context.insert("blockscout_url", env::var("BLOCKSCOUT_URL").unwrap_or_default());
+    global_context.insert("strata_docs", env::var("STRATA_DOCS").unwrap_or_default());
+    global_context.insert("strata_blog", env::var("STRATA_BLOG").unwrap_or_default());
+    global_context.insert("strata_url", env::var("STRATA_URL").unwrap_or_default());
+
+    env.add_global("env", Value::from(global_context)); // Add global context for all templates
     
     env.add_template("base.html", include_str!(template_path!("base.html"))).unwrap();
     env.add_template("homepage.html", include_str!(template_path!("homepage.html"))).unwrap();

@@ -30,8 +30,8 @@ services:
     container_name: batch_explorer_app
     environment:
       APP_DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
-      APP_STRATA_FULLNODE : "http://fnclient675f9eff3a682b8c0ea7423.devnet-annapurna.stratabtc.org/"
-      APP_FETCH_INTERVAL : 500
+      STRATA_FULLNODE : "http://fnclient675f9eff3a682b8c0ea7423.devnet-annapurna.stratabtc.org/"
+      APP_FETCH_INTERVAL : 5
     ports:
       - "3000:3000"
     depends_on:

@@ -146,6 +146,7 @@ button:focus-visible {
 .searchInput {
     flex-grow: 1;
     padding: 10px 15px;
+    margin: 0px 10px;
     border: none;
     border-radius: 7px;
     font-size: 1rem;
@@ -349,7 +350,7 @@ button:focus-visible {
     /* color: rgb(44, 43, 43); */
     /* font-weight: bold; */
     /* border-radius: 10px; */
-    color: var(--strata-terracotta-sharp);
+    color: var(--strata-terracotta-med);
     border-bottom: 1px solid grey;
 }
 
@@ -443,7 +444,7 @@ button:focus-visible {
     padding: 3px 6px;
     text-align: center;
     font-size: 14px;
-    /* border: 1px solid #ddd; */
+    border: 1px solid var(--strata-terracotta-med);
     /* border-radius: 4px; */
     outline: none;
     color-scheme: light;
@@ -479,7 +480,6 @@ button:focus-visible {
 
 .checkpoint-label {
     font-size: 16px;
-    font-weight: bold;
 }
 
 .checkpoint-value {
