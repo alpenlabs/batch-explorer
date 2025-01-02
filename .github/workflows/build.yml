@@ -3,24 +3,31 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: # Allows manual triggering of the workflow
+
 jobs:
   Build:
     name: Build
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC authentication
+      contents: read  # Allows reading repo contents
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Setup AWS ECR Details
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE}}
+          role-session-name: client
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: "true"
 
       - name: Get commit hash
         id: get-commit-hash
