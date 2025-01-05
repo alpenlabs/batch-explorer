@@ -1,3 +1,4 @@
+use crate::pgu64::PgU64;
 use sea_orm::entity::prelude::*;
 use sea_orm::ActiveValue::Set;
 use serde::{Deserialize, Serialize};
@@ -43,14 +44,14 @@ impl ActiveModelBehavior for ActiveModel {}
 impl From<RpcCheckpointInfo> for ActiveModel {
     fn from(info: RpcCheckpointInfo) -> Self {
         Self {
-            idx: Set(info.idx as i64),
-            l1_start: Set(info.l1_range.0 as i64),
-            l1_end: Set(info.l1_range.1 as i64),
-            l2_start: Set(info.l2_range.0 as i64),
-            l2_end: Set(info.l2_range.1 as i64),
+            idx: Set(PgU64(info.idx).to_i64()),
+            l1_start: Set(PgU64(info.l1_range.0).to_i64()),
+            l1_end: Set(PgU64(info.l1_range.1).to_i64()),
+            l2_start: Set(PgU64(info.l2_range.0).to_i64()),
+            l2_end: Set(PgU64(info.l2_range.1).to_i64()),
             l2_block_id: Set(info.l2_blockid),
-            batch_txid: Set(info.batch_txid.unwrap_or_else(|| "-".to_string())), // Default value
-            status: Set(info.status.unwrap_or_else(|| "-".to_string())),         // Default value
+            batch_txid: Set(info.batch_txid.unwrap_or_else(|| "-".to_string())),
+            status: Set(info.status.unwrap_or_else(|| "-".to_string())),
         }
     }
 }
@@ -58,12 +59,18 @@ impl From<RpcCheckpointInfo> for ActiveModel {
 impl From<Model> for RpcCheckpointInfo {
     fn from(model: Model) -> Self {
         Self {
-            idx: model.idx as u64,
-            l1_range: (model.l1_start as u64, model.l1_end as u64),
-            l2_range: (model.l2_start as u64, model.l2_end as u64),
+            idx: PgU64::from_i64(model.idx).0,
+            l1_range: (
+                PgU64::from_i64(model.l1_start).0,
+                PgU64::from_i64(model.l1_end).0,
+            ),
+            l2_range: (
+                PgU64::from_i64(model.l2_start).0,
+                PgU64::from_i64(model.l2_end).0,
+            ),
             l2_blockid: model.l2_block_id,
-            batch_txid: Some(model.batch_txid.clone()),
-            status: Some(model.status.clone()),
+            batch_txid: Some(model.batch_txid),
+            status: Some(model.status),
         }
     }
 }

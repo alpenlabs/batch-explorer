@@ -5,6 +5,7 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 use tracing::{error, info};
+use entity::pgu64::PgU64;
 /// Wrapper around the database connection
 pub struct DatabaseWrapper {
     pub db: DatabaseConnection,
@@ -28,10 +29,9 @@ impl DatabaseWrapper {
     }
     /// Insert a new checkpoint into the database
     pub async fn insert_checkpoint(&self, checkpoint: RpcCheckpointInfo) {
-        let idx: i64 = checkpoint.idx.try_into().unwrap();
-        let previous_idx: i64 = idx - 1;
+        let idx: i64 = PgU64(checkpoint.idx).to_i64();
 
-        if previous_idx > 0 {
+        if let Some(previous_idx) = idx.checked_sub(1){
             let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
 
             // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
@@ -53,14 +53,13 @@ impl DatabaseWrapper {
     }
 
     /// Fetch a checkpoint by its index
-    pub async fn get_checkpoint_by_idx(&self, idx: u64) -> Option<RpcCheckpointInfo> {
+    pub async fn get_checkpoint_by_idx(&self, idx: i64) -> Option<RpcCheckpointInfo> {
         match Checkpoint::find()
-            .filter(entity::checkpoint::Column::Idx.eq(idx as i64))
+            .filter(entity::checkpoint::Column::Idx.eq(idx))
             .one(&self.db)
             .await
         {
             Ok(Some(checkpoint)) => {
-                info!("Checkpoint found by idx: {:?}", idx);
                 Some(checkpoint.into())
             }
             Ok(None) => None,
@@ -75,7 +74,7 @@ impl DatabaseWrapper {
     pub async fn get_checkpoint_idx_by_block_hash(
         &self,
         block_hash: &str,
-    ) -> Result<Option<i32>, DbErr> {
+    ) -> Result<Option<i64>, DbErr> {
     
         match Block::find()
             .filter(entity::block::Column::BlockHash.eq(block_hash))
@@ -99,8 +98,8 @@ impl DatabaseWrapper {
     /// Fetch a checkpoint by its L2 block height
     pub async fn get_checkpoint_idx_by_block_height(
         &self,
-        block_height: i32,
-    ) -> Result<Option<i32>, DbErr> {
+        block_height: i64,
+    ) -> Result<Option<i64>, DbErr> {
         tracing::debug!("Searching for block with height: {}", block_height);
     
         match Block::find()
@@ -123,6 +122,7 @@ impl DatabaseWrapper {
         }
     }
     // TODO: move this out of db and have a separate pagination wrapper module
+    // TODO: PGU64 VERIFICATION
     pub async fn get_paginated_checkpoints(
         &self,
         current_page: u64,
@@ -160,14 +160,6 @@ impl DatabaseWrapper {
         }
     }
 
-    // /// Perform an exact match search on checkpoints
-    // pub async fn search_exact_match(&self, query: &str) -> Option<RpcCheckpointInfo> {
-    //     if let Ok(idx) = query.parse::<u64>() {
-    //         return self.get_checkpoint_by_idx(idx).await;
-    //     }
-    //     self.get_checkpoint_by_l2_blockid(query).await
-    // }
-
     /// Get the total count of checkpoints in the database
     pub async fn get_total_checkpoint_count(&self) -> u64 {
         use sea_orm::entity::prelude::*;
@@ -203,24 +195,25 @@ impl DatabaseWrapper {
         /// Inserts a new block into the database
     /// Inserts a new block into the database, taking an `RpcBlockHeader` as input
     pub async fn insert_block(&self, rpc_block_header: RpcBlockHeader, checkpoint_idx: i64)   {
-        let height = rpc_block_header.block_idx as i64;
-        let block_id = rpc_block_header.block_id.clone();
+        // Use `From` to convert `RpcBlockHeader` into an `ActiveModel`
+        let mut active_model: BlockActiveModel = rpc_block_header.into();
+ 
+        let height = active_model.height.clone().unwrap();
+        let block_id = active_model.block_hash.clone().unwrap();
 
         // ensure that blocks exist incrementally and continuously
         // TODO: it should have been enforced by autoincrement constraint
         // TODO: move this logic to a wrapper
         let last_block = self.get_latest_block_index().await;
         if let Some(last_block_height) = last_block {
-            if last_block_height as i64 != height - 1  {
+            if last_block_height  != height.checked_sub(1).unwrap()  {
                 panic!("last_block_height does not match the expected height!"); 
             }
         }
 
-        // Use `From` to convert `RpcBlockHeader` into an `ActiveModel`
-        let mut active_model: BlockActiveModel = rpc_block_header.into();
 
         // TODO: remove this type conversion
-        active_model.checkpoint_idx = Set(checkpoint_idx as i32);
+        active_model.checkpoint_idx = Set(checkpoint_idx);
 
         // Insert the block using the Entity::insert() method
         match Block::insert(active_model).exec(&self.db).await {
@@ -240,13 +233,13 @@ impl DatabaseWrapper {
         }
     }
     /// Get the latest checkpoint index stored in the database
-    pub async fn get_latest_block_index(&self) -> Option<i32> {
+    pub async fn get_latest_block_index(&self) -> Option<i64> {
         // use sea_orm::entity::prelude::*;
 
         match Block::find()
             .select_only()
             .column_as(entity::block::Column::Height.max(), "max_height")
-            .into_tuple::<Option<i32>>() // Fetch the max value as a tuple
+            .into_tuple::<Option<i64>>() // Fetch the max value as a tuple
             .one(&self.db)
             .await
         {
@@ -258,7 +251,7 @@ impl DatabaseWrapper {
             }
         }
     }
-    pub async fn block_exists(&self, height: i32) -> bool {
+    pub async fn _block_exists(&self, height: i64) -> bool {
         Block::find()
             .filter(entity::block::Column::Height.eq(height))
             .one(&self.db)

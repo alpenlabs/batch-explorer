@@ -4,7 +4,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m20220101_000001_create_table"
+        "m20220101_000001_create_checkpoint_table"
     }
 }
 
@@ -39,6 +39,18 @@ impl MigrationTrait for Migration {
                             .string()
                             .not_null()
                             .unique_key(),
+                    )
+                    .col(
+                        ColumnDef::new(Checkpoints::BatchTxid)
+                        .string()
+                        .not_null()
+                        .default("-"),
+                    )
+                    .col(
+                        ColumnDef::new(Checkpoints::Status)
+                        .string()
+                        .not_null()
+                        .default("-"),
                     )
                     .to_owned(),
             )
@@ -93,4 +105,6 @@ enum Checkpoints {
     L2Start,
     L2End,
     L2BlockId,
+    BatchTxid,
+    Status,
 }

@@ -23,8 +23,8 @@ impl StrataFetcher {
     /// * `method` - JSON-RPC method name (e.g., `strata_getLatestCheckpointIndex`)
     ///
     /// # Returns
-    /// * `Result<i64>` - Latest index if successful
-    pub async fn get_latest_index(&self, method: &str) -> Result<i64> {
+    /// * `Result<u64>` - Latest index if successful
+    pub async fn get_latest_index(&self, method: &str) -> Result<u64> {
         let payload = json!({
             "jsonrpc": "2.0",
             "method": method,
@@ -47,7 +47,7 @@ impl StrataFetcher {
 
         response
             .get("result")
-            .and_then(|value| value.as_i64())
+            .and_then(|value| value.as_u64())
             .ok_or_else(|| anyhow::anyhow!("Failed to fetch latest index for method: {}", method))
     }
 
@@ -59,7 +59,7 @@ impl StrataFetcher {
     ///
     /// # Returns
     /// * `Result<T>` - Fetched data deserialized into the generic type `T`
-    pub async fn fetch_data<T>(&self, method: &str, idx: i64) -> Result<T>
+    pub async fn fetch_data<T>(&self, method: &str, idx: u64) -> Result<T>
     where
         T: serde::de::DeserializeOwned,
     {

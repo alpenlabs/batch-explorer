@@ -19,13 +19,13 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(Blocks::Height)
-                            .integer()
+                            .big_integer()
                             .not_null()
                             .unique_key(), // Unique key for height
                     )
                     .col(
                         ColumnDef::new(Blocks::CheckpointIdx)
-                            .integer()
+                            .big_integer()
                             .not_null(), // Foreign key column
                     )
                     .foreign_key(

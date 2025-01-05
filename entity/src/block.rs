@@ -1,3 +1,4 @@
+use crate::pgu64::PgU64;
 use sea_orm::entity::prelude::*;
 use sea_orm::ActiveValue::{NotSet, Set};
 use serde::{Deserialize, Serialize};
@@ -7,9 +8,9 @@ use serde::{Deserialize, Serialize};
 #[sea_orm(table_name = "blocks")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub block_hash: String, // Represents the block_id as a hash
-    pub height: i32,         // Represents the block height
-    pub checkpoint_idx: i32, // Foreign key to the checkpoint index
+    pub block_hash: String,
+    pub height: i64,
+    pub checkpoint_idx: i64,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -20,10 +21,11 @@ impl ActiveModelBehavior for ActiveModel {}
 /// Implements conversion from `RpcBlockHeader` to `ActiveModel` for the `blocks` table
 impl From<RpcBlockHeader> for ActiveModel {
     fn from(header: RpcBlockHeader) -> Self {
+        let b_id = PgU64::from_u64(header.block_idx).to_i64();
         Self {
-            block_hash: Set(header.block_id), // Convert block_id (u8 array) to hex string
-            height: Set(header.block_idx as i32),
-            checkpoint_idx: NotSet, // Leave unset, to be filled when associating with a checkpoint
+            block_hash: Set(header.block_id),
+            height: Set(b_id),
+            checkpoint_idx: NotSet,
         }
     }
 }

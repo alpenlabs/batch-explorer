@@ -6,6 +6,8 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
 use url::Url;
+use entity::pgu64::PgU64;
+
 macro_rules! template_path {
     ($file:expr) => {
         concat!("../../../../templates/", $file)
@@ -100,9 +102,11 @@ pub async fn search_handler(
     let mut query = params.query.trim();
 
     // Check if it's a valid block number
-    if let Ok(block_number) = query.parse::<i32>() {
+    if let Ok(block_number) = query.parse::<u64>() {
         tracing::info!("Searching for block number: {}", block_number);
+        let block_number = PgU64(block_number).to_i64();
         if let Ok(Some(checkpoint_idx)) = database.get_checkpoint_idx_by_block_height(block_number).await {
+            let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
             // Redirect to the batch page if found
             return Redirect::to(format!("/checkpoint?p={}", checkpoint_idx).as_str());
         }
@@ -117,6 +121,7 @@ pub async fn search_handler(
     }
     if let Ok(Some(checkpoint_idx)) = database.get_checkpoint_idx_by_block_hash(query).await {
         // Redirect to the batch page if found
+            let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
             return Redirect::to(format!("/checkpoint?p={}", checkpoint_idx).as_str());
     }
 
