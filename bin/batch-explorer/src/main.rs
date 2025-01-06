@@ -2,7 +2,7 @@ mod services;
 mod utils;
 
 use axum::{routing::get, Router};
-use database::db::DatabaseWrapper;
+use database::connection::DatabaseWrapper;
 use fullnode_client::fetcher::StrataFetcher;
 use tower_http::services::ServeDir;
 use services::{block_service::run_block_fetcher, checkpoint_service::start_checkpoint_fetcher, template_service::initialize_templates};

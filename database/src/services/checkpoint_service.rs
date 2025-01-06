@@ -3,26 +3,22 @@ use sea_orm::{
     prelude::*, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
     QuerySelect, Set
 };
-use serde::{Deserialize, Serialize};
 use tracing::{error, info};
 use model::pgu64::PgU64;
-/// Wrapper around the database connection
-pub struct DatabaseWrapper {
-    pub db: DatabaseConnection,
+use crate::services::block_service::BlockService;
+use crate::services::pagination::PaginationInfo;
+pub struct CheckpointService<'a> {
+    pub db: &'a DatabaseConnection,
 }
 
-impl DatabaseWrapper {
-    /// Create a new database wrapper with the given database URL
-    pub async fn new(database_url: &str) -> Self {
-        let db = Database::connect(database_url)
-            .await
-            .expect(&format!("Failed to connect to PostgreSQL {}", database_url));
+impl<'a> CheckpointService<'a> {
+    pub fn new(db: &'a DatabaseConnection) -> Self {
         Self { db }
     }
     pub async fn checkpoint_exists(&self, idx: i64) -> bool {
         Checkpoint::find()
                 .filter(model::checkpoint::Column::Idx.eq(idx))
-                .one(&self.db)
+                .one(self.db)
                 .await
                 .map(|result| result.is_some())
                 .unwrap_or(false)
@@ -46,7 +42,7 @@ impl DatabaseWrapper {
 
         // Insert the checkpoint
         let active_model: ActiveModel = checkpoint.into();
-        match Checkpoint::insert(active_model).exec(&self.db).await {
+        match Checkpoint::insert(active_model).exec(self.db).await {
             Ok(_) => info!("Checkpoint with idx {} inserted successfully", idx),
             Err(err) => error!("Error inserting checkpoint with idx {}: {:?}", idx, err),
         }
@@ -56,7 +52,7 @@ impl DatabaseWrapper {
     pub async fn get_checkpoint_by_idx(&self, idx: i64) -> Option<RpcCheckpointInfo> {
         match Checkpoint::find()
             .filter(model::checkpoint::Column::Idx.eq(idx))
-            .one(&self.db)
+            .one(self.db)
             .await
         {
             Ok(Some(checkpoint)) => {
@@ -78,7 +74,7 @@ impl DatabaseWrapper {
     
         match Block::find()
             .filter(model::block::Column::BlockHash.eq(block_hash))
-            .one(&self.db)
+            .one(self.db)
             .await
         {
             Ok(Some(block))=>{
@@ -104,7 +100,7 @@ impl DatabaseWrapper {
     
         match Block::find()
             .filter(model::block::Column::Height.eq(block_height))
-            .one(&self.db)
+            .one(self.db)
             .await
         {
             Ok(Some(block)) => {
@@ -141,7 +137,7 @@ impl DatabaseWrapper {
             .order_by(model::checkpoint::Column::Idx, sea_orm::Order::Asc) // Sort numerically
             .offset(offset)
             .limit(limit)
-            .all(&self.db)
+            .all(self.db)
             .await
         {
             Ok(checkpoints) => checkpoints.into_iter().map(Into::into).collect(),
@@ -163,7 +159,7 @@ impl DatabaseWrapper {
     pub async fn get_total_checkpoint_count(&self) -> u64 {
         use sea_orm::entity::prelude::*;
 
-        match Checkpoint::find().count(&self.db).await {
+        match Checkpoint::find().count(self.db).await {
             Ok(count) => count,
             Err(err) => {
                 error!("Failed to count checkpoints: {:?}", err);
@@ -180,7 +176,7 @@ impl DatabaseWrapper {
             .select_only()
             .column_as(model::checkpoint::Column::Idx.max(), "max_idx")
             .into_tuple::<Option<i64>>() // Fetch the max value as a tuple
-            .one(&self.db)
+            .one(self.db)
             .await
         {
             Ok(Some(max_idx)) => max_idx,
@@ -203,7 +199,8 @@ impl DatabaseWrapper {
         // ensure that blocks exist incrementally and continuously
         // TODO: it should have been enforced by autoincrement constraint
         // TODO: move this logic to a wrapper
-        let last_block = self.get_latest_block_index().await;
+        let block_service = BlockService::new(self.db);
+        let last_block = block_service.get_latest_block_index().await;
         if let Some(last_block_height) = last_block {
             if last_block_height  != height.checked_sub(1).unwrap()  {
                 panic!("last_block_height does not match the expected height!"); 
@@ -211,11 +208,10 @@ impl DatabaseWrapper {
         }
 
 
-        // TODO: remove this type conversion
         active_model.checkpoint_idx = Set(checkpoint_idx);
 
         // Insert the block using the Entity::insert() method
-        match Block::insert(active_model).exec(&self.db).await {
+        match Block::insert(active_model).exec(self.db).await {
             Ok(_) => {
                 tracing::info!(
                     "Block inserted successfully: height={}, block_hash={}",
@@ -230,41 +226,5 @@ impl DatabaseWrapper {
                 );
             }
         }
-    }
-    /// Get the latest checkpoint index stored in the database
-    pub async fn get_latest_block_index(&self) -> Option<i64> {
-        // use sea_orm::entity::prelude::*;
-
-        match Block::find()
-            .select_only()
-            .column_as(model::block::Column::Height.max(), "max_height")
-            .into_tuple::<Option<i64>>() // Fetch the max value as a tuple
-            .one(&self.db)
-            .await
-        {
-            Ok(Some(max_height)) => max_height,
-            Ok(_) => None, // If no checkpoints exist, return None
-            Err(err) => {
-                error!("Failed to fetch the latest  block index: {:?}", err);
-                None
-            }
-        }
-    }
-    pub async fn _block_exists(&self, height: i64) -> bool {
-        Block::find()
-            .filter(model::block::Column::Height.eq(height))
-            .one(&self.db)
-            .await
-            .map(|result| result.is_some())
-            .unwrap_or(false)
-    }
-}
-
-// TODO: keep it in separate pagination module
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PaginationInfo<T> {
-    pub current_page: u64,
-    pub total_pages: u64,
-    pub absolute_first_page: u64, // Will be 0 or 1, depending on the context
-    pub items: Vec<T>,            // The items for the current page
+    } 
 }

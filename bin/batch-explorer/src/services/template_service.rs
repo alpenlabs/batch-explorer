@@ -1,5 +1,5 @@
 use axum::{extract::{State, Query}, response::{Html,IntoResponse, Redirect}};
-use database::db::DatabaseWrapper;
+use database::connection::DatabaseWrapper;
 use minijinja::{context, Environment, Value};
 use std::sync::Arc;
 use serde::Deserialize;
@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::env;
 use url::Url;
 use model::pgu64::PgU64;
-
+use database::services::{checkpoint_service::CheckpointService, block_service::BlockService};
 macro_rules! template_path {
     ($file:expr) => {
         concat!("../../../../templates/", $file)
@@ -47,7 +47,8 @@ pub async fn homepage(
     let error_msg = params.error_msg.clone();
     tracing::info!("error_msg: {:?}", error_msg);
 
-    let pagination_info = database
+    let checkpoint_db = CheckpointService::new(&database.db);
+    let pagination_info = checkpoint_db
         .get_paginated_checkpoints(current_page, page_size, 1) // Set absolute_first_page to 1 for batch tables
         .await;
 
@@ -70,8 +71,9 @@ pub async fn checkpoint_details(
     let current_page = params.p.unwrap_or(0); // Default to page 0
     let page_size = 1; // Set page size
 
+    let checkpoint_db = CheckpointService::new(&database.db);
     // Get paginated checkpoints
-    let mut pagination_info = database
+    let mut pagination_info = checkpoint_db
         .get_paginated_checkpoints(current_page, page_size, 0)
         .await;
     pagination_info.total_pages -= 1; // Adjust total pages for 0-based indexing
@@ -100,12 +102,13 @@ pub async fn search_handler(
     headers: HeaderMap, // Extract headers from the request
 ) -> impl IntoResponse {
     let mut query = params.query.trim();
-
+    let checkpoint_db = CheckpointService::new(&database.db);
+    
     // Check if it's a valid block number
     if let Ok(block_number) = query.parse::<u64>() {
         tracing::info!("Searching for block number: {}", block_number);
         let block_number = PgU64(block_number).to_i64();
-        if let Ok(Some(checkpoint_idx)) = database.get_checkpoint_idx_by_block_height(block_number).await {
+        if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_height(block_number).await {
             let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
             // Redirect to the batch page if found
             return Redirect::to(format!("/checkpoint?p={}", checkpoint_idx).as_str());
@@ -119,7 +122,7 @@ pub async fn search_handler(
     if query.starts_with("0x") {
         query = query.trim_start_matches("0x");
     }
-    if let Ok(Some(checkpoint_idx)) = database.get_checkpoint_idx_by_block_hash(query).await {
+    if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_hash(query).await {
         // Redirect to the batch page if found
             let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
             return Redirect::to(format!("/checkpoint?p={}", checkpoint_idx).as_str());

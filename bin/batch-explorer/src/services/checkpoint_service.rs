@@ -1,13 +1,13 @@
 use fullnode_client::fetcher::StrataFetcher;
 use tokio::sync::mpsc::Sender;
-use database::db::DatabaseWrapper;
+use database::connection::DatabaseWrapper;
 use model::checkpoint::RpcCheckpointInfo;
 use std::sync::Arc;
 use std::cmp::min;
 use tracing::info;
 use model::pgu64::PgU64;
 use crate::services::block_service::CheckpointFetch;
-
+use database::services::{checkpoint_service::CheckpointService, block_service::BlockService};
 pub async fn start_checkpoint_fetcher(
     fetcher: Arc<StrataFetcher>,
     database: Arc<DatabaseWrapper>,
@@ -31,16 +31,17 @@ async fn fetch_checkpoints(
     database: Arc<DatabaseWrapper>,
     tx: Sender<CheckpointFetch>,
 ) -> anyhow::Result<()> {
+    let checkpoint_db = CheckpointService::new(&database.db);
     info!("Fetching checkpoints from fullnode...");
     let fullnode_last_checkpoint = fetcher.get_latest_index("strata_getLatestCheckpointIndex").await?;
     let fn_chkpt_i64 = PgU64(fullnode_last_checkpoint).to_i64();
     let starting_checkpoint = get_starting_checkpoint_idx(database.clone()).await?;
     info!(fn_chkpt_i64, starting_checkpoint, "fetching checkpoints");
     for idx in (starting_checkpoint)..=fn_chkpt_i64 {
-        if !database.checkpoint_exists(idx).await{
+        if !checkpoint_db.checkpoint_exists(idx).await{
             let i = PgU64::from_i64(idx).0;
             if let Ok(checkpoint) = fetcher.fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", i).await {
-                database.insert_checkpoint(checkpoint.clone()).await;
+                checkpoint_db.insert_checkpoint(checkpoint.clone()).await;
             }
         }
         let range = CheckpointFetch::new(idx); 
@@ -51,9 +52,12 @@ async fn fetch_checkpoints(
 
 
 async fn get_starting_checkpoint_idx(db: Arc<DatabaseWrapper>) -> anyhow::Result<i64> {
-    let last_block = db.get_latest_block_index().await;
+    let checkpoint_db = CheckpointService::new(&db.db);
+    let block_db = BlockService::new(&db.db);
+
+    let last_block = block_db.get_latest_block_index().await;
     
-    let local_last_checkpoint = db.get_latest_checkpoint_index().await.unwrap_or(-1);
+    let local_last_checkpoint = checkpoint_db.get_latest_checkpoint_index().await.unwrap_or(-1);
     // if we do not have a checkpoint in db start from 0
     if local_last_checkpoint == -1 {
         return Ok(i64::MIN)
@@ -61,7 +65,7 @@ async fn get_starting_checkpoint_idx(db: Arc<DatabaseWrapper>) -> anyhow::Result
     // we are calling it probable_* to consider some weirdest condition when 
     // we have the block but no any earlier checkpoint (before where block corresponds)
     let probable_starting_checkpoint: i64 = if let Some(block_height) = last_block {
-        db.get_checkpoint_idx_by_block_height(block_height ).await?.unwrap_or_default()
+        checkpoint_db.get_checkpoint_idx_by_block_height(block_height ).await?.unwrap_or_default()
     } else {
         i64::MIN
     };
