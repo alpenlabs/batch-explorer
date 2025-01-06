@@ -1,11 +1,11 @@
 use fullnode_client::fetcher::StrataFetcher;
 use tokio::sync::mpsc::Sender;
 use database::db::DatabaseWrapper;
-use entity::checkpoint::RpcCheckpointInfo;
+use model::checkpoint::RpcCheckpointInfo;
 use std::sync::Arc;
 use std::cmp::min;
 use tracing::info;
-use entity::pgu64::PgU64;
+use model::pgu64::PgU64;
 use crate::services::block_service::CheckpointFetch;
 
 pub async fn start_checkpoint_fetcher(

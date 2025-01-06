@@ -6,7 +6,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
 use url::Url;
-use entity::pgu64::PgU64;
+use model::pgu64::PgU64;
 
 macro_rules! template_path {
     ($file:expr) => {

@@ -1,11 +1,11 @@
-use entity::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo}, block::{RpcBlockHeader, ActiveModel as BlockActiveModel, Entity as Block}};
+use model::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo}, block::{RpcBlockHeader, ActiveModel as BlockActiveModel, Entity as Block}};
 use sea_orm::{
     prelude::*, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
     QuerySelect, Set
 };
 use serde::{Deserialize, Serialize};
 use tracing::{error, info};
-use entity::pgu64::PgU64;
+use model::pgu64::PgU64;
 /// Wrapper around the database connection
 pub struct DatabaseWrapper {
     pub db: DatabaseConnection,
@@ -21,7 +21,7 @@ impl DatabaseWrapper {
     }
     pub async fn checkpoint_exists(&self, idx: i64) -> bool {
         Checkpoint::find()
-                .filter(entity::checkpoint::Column::Idx.eq(idx))
+                .filter(model::checkpoint::Column::Idx.eq(idx))
                 .one(&self.db)
                 .await
                 .map(|result| result.is_some())
@@ -55,7 +55,7 @@ impl DatabaseWrapper {
     /// Fetch a checkpoint by its index
     pub async fn get_checkpoint_by_idx(&self, idx: i64) -> Option<RpcCheckpointInfo> {
         match Checkpoint::find()
-            .filter(entity::checkpoint::Column::Idx.eq(idx))
+            .filter(model::checkpoint::Column::Idx.eq(idx))
             .one(&self.db)
             .await
         {
@@ -77,7 +77,7 @@ impl DatabaseWrapper {
     ) -> Result<Option<i64>, DbErr> {
     
         match Block::find()
-            .filter(entity::block::Column::BlockHash.eq(block_hash))
+            .filter(model::block::Column::BlockHash.eq(block_hash))
             .one(&self.db)
             .await
         {
@@ -103,7 +103,7 @@ impl DatabaseWrapper {
         tracing::debug!("Searching for block with height: {}", block_height);
     
         match Block::find()
-            .filter(entity::block::Column::Height.eq(block_height))
+            .filter(model::block::Column::Height.eq(block_height))
             .one(&self.db)
             .await
         {
@@ -122,7 +122,6 @@ impl DatabaseWrapper {
         }
     }
     // TODO: move this out of db and have a separate pagination wrapper module
-    // TODO: PGU64 VERIFICATION
     pub async fn get_paginated_checkpoints(
         &self,
         current_page: u64,
@@ -138,8 +137,8 @@ impl DatabaseWrapper {
         let limit = page_size.try_into().ok();
 
         let items = match Checkpoint::find()
-            .filter(Expr::col(entity::checkpoint::Column::Idx).is_not_null()) // Ensure idx is not NULL
-            .order_by(entity::checkpoint::Column::Idx, sea_orm::Order::Asc) // Sort numerically
+            .filter(Expr::col(model::checkpoint::Column::Idx).is_not_null()) // Ensure idx is not NULL
+            .order_by(model::checkpoint::Column::Idx, sea_orm::Order::Asc) // Sort numerically
             .offset(offset)
             .limit(limit)
             .all(&self.db)
@@ -179,7 +178,7 @@ impl DatabaseWrapper {
 
         match Checkpoint::find()
             .select_only()
-            .column_as(entity::checkpoint::Column::Idx.max(), "max_idx")
+            .column_as(model::checkpoint::Column::Idx.max(), "max_idx")
             .into_tuple::<Option<i64>>() // Fetch the max value as a tuple
             .one(&self.db)
             .await
@@ -238,7 +237,7 @@ impl DatabaseWrapper {
 
         match Block::find()
             .select_only()
-            .column_as(entity::block::Column::Height.max(), "max_height")
+            .column_as(model::block::Column::Height.max(), "max_height")
             .into_tuple::<Option<i64>>() // Fetch the max value as a tuple
             .one(&self.db)
             .await
@@ -253,7 +252,7 @@ impl DatabaseWrapper {
     }
     pub async fn _block_exists(&self, height: i64) -> bool {
         Block::find()
-            .filter(entity::block::Column::Height.eq(height))
+            .filter(model::block::Column::Height.eq(height))
             .one(&self.db)
             .await
             .map(|result| result.is_some())

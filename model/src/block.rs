@@ -30,7 +30,7 @@ impl From<RpcBlockHeader> for ActiveModel {
     }
 }
 
-/// Represents a block header as returned by the RPC
+/// Represents a block header as returned by Strata fullnode
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct RpcBlockHeader {
     /// The index of the block representing height.
@@ -53,14 +53,4 @@ pub struct RpcBlockHeader {
 
     /// The root hash of the state tree
     pub state_root: String,
-}
-/// Simplified representation of a block header with only fields of interest
-/// for the checkpoint explorer
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct BlockInfo {
-    /// The index of the block (height)
-    pub block_idx: u64,
-
-    /// The hash of the block's contents
-    pub block_id: [u8; 32],
 }

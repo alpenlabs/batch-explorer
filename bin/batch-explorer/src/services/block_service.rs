@@ -1,10 +1,10 @@
 use database::db::DatabaseWrapper;
-use entity::block::RpcBlockHeader;
+use model::block::RpcBlockHeader;
 use fullnode_client::fetcher::StrataFetcher;
 use tokio::sync::mpsc::Receiver;
 use std::sync::Arc;
 use tracing::info;
-use entity::pgu64::PgU64;
+use model::pgu64::PgU64;
 
 /// Event sent to block fetcher to request fetching of blocks for the checkpoint
 #[derive(Debug, Clone)]

@@ -446,9 +446,9 @@ dependencies = [
  "config",
  "database",
  "dotenvy",
- "entity",
  "fullnode-client",
  "minijinja",
+ "model",
  "rand",
  "reqwest",
  "sea-orm",
@@ -836,9 +836,9 @@ dependencies = [
 name = "database"
 version = "0.1.0"
 dependencies = [
- "entity",
  "hex",
  "migration",
+ "model",
  "sea-orm",
  "serde",
  "tokio",
@@ -917,15 +917,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "entity"
-version = "0.1.0"
-dependencies = [
- "hex",
- "sea-orm",
- "serde",
 ]
 
 [[package]]
@@ -1044,8 +1035,8 @@ name = "fullnode-client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "entity",
  "migration",
+ "model",
  "reqwest",
  "sea-orm",
  "serde",
@@ -1834,6 +1825,15 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "model"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "sea-orm",
+ "serde",
 ]
 
 [[package]]

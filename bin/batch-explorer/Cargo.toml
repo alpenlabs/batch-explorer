@@ -8,7 +8,7 @@ name = "batch-explorer"
 path = "src/main.rs"
 
 [dependencies]
-entity.workspace = true
+model.workspace = true
 database.workspace = true
 fullnode-client.workspace = true
 
