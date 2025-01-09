@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::env;
 use url::Url;
 use model::pgu64::PgU64;
-use database::services::{checkpoint_service::CheckpointService, block_service::BlockService};
+use database::services::checkpoint_service::CheckpointService;
 macro_rules! template_path {
     ($file:expr) => {
         concat!("../../../../templates/", $file)

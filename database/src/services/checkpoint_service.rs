@@ -1,11 +1,10 @@
-use model::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo}, block::{RpcBlockHeader, ActiveModel as BlockActiveModel, Entity as Block}};
+use model::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo}, block:: Entity as Block};
 use sea_orm::{
-    prelude::*, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
-    QuerySelect, Set
+    prelude::*, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
+    QuerySelect
 };
 use tracing::{error, info};
 use model::pgu64::PgU64;
-use crate::services::block_service::BlockService;
 use crate::services::pagination::PaginationInfo;
 pub struct CheckpointService<'a> {
     pub db: &'a DatabaseConnection,
@@ -187,44 +186,4 @@ impl<'a> CheckpointService<'a> {
             }
         }
     }
-        /// Inserts a new block into the database
-    /// Inserts a new block into the database, taking an `RpcBlockHeader` as input
-    pub async fn insert_block(&self, rpc_block_header: RpcBlockHeader, checkpoint_idx: i64)   {
-        // Use `From` to convert `RpcBlockHeader` into an `ActiveModel`
-        let mut active_model: BlockActiveModel = rpc_block_header.into();
- 
-        let height = active_model.height.clone().unwrap();
-        let block_id = active_model.block_hash.clone().unwrap();
-
-        // ensure that blocks exist incrementally and continuously
-        // TODO: it should have been enforced by autoincrement constraint
-        // TODO: move this logic to a wrapper
-        let block_service = BlockService::new(self.db);
-        let last_block = block_service.get_latest_block_index().await;
-        if let Some(last_block_height) = last_block {
-            if last_block_height  != height.checked_sub(1).unwrap()  {
-                panic!("last_block_height does not match the expected height!"); 
-            }
-        }
-
-
-        active_model.checkpoint_idx = Set(checkpoint_idx);
-
-        // Insert the block using the Entity::insert() method
-        match Block::insert(active_model).exec(self.db).await {
-            Ok(_) => {
-                tracing::info!(
-                    "Block inserted successfully: height={}, block_hash={}",
-                    height,
-                    hex::encode(block_id)
-                );
-            }
-            Err(err) => {
-                tracing::error!(
-                    "Error inserting block with height {}: {:?}",
-                    height, err
-                );
-            }
-        }
-    } 
 }

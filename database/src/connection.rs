@@ -7,7 +7,7 @@ impl DatabaseWrapper {
     pub async fn new(database_url: &str) -> Self {
         let db = Database::connect(database_url)
             .await
-            .expect(&format!("Failed to connect to PostgreSQL {}", database_url));
+            .expect("Failed to connect to PostgreSQL {database_url}");
         Self { db }
     }
 }

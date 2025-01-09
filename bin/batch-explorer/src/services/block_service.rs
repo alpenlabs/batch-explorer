@@ -49,13 +49,14 @@ async fn fetch_blocks_in_checkpoint(
         let last_block = block_db.get_latest_block_index().await;
         if let Some(last_block_height) = last_block{
             let last_block_height_u64 =   PgU64::from_i64(last_block_height).0;
-            if last_block_height_u64 > start {
+            // start from the next block
+            if last_block_height_u64 >= start {
                 start = last_block_height_u64 + 1 ;
             } 
         }
         info!("Fetching blocks from {} to {} for checkpoint {}", start, end, checkpoint_idx);
         for block_height in start..=end {
-                if let Ok(block_headers) = fetcher.fetch_data::<Vec<RpcBlockHeader>>("strata_getHeadersAtIdx", block_height as u64).await {
+                if let Ok(block_headers) = fetcher.fetch_data::<Vec<RpcBlockHeader>>("strata_getHeadersAtIdx", block_height).await {
                     for block_header in block_headers {
                         block_db.insert_block(block_header.clone(), checkpoint_idx).await;
                     }

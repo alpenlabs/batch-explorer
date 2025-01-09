@@ -10,6 +10,7 @@ impl<'a> BlockService<'a> {
     pub fn new(db: &'a DatabaseConnection) -> Self {
         Self { db }
     }
+
     pub async fn insert_block(&self, rpc_block_header: RpcBlockHeader, checkpoint_idx: i64)   {
         // Use `From` to convert `RpcBlockHeader` into an `ActiveModel`
         let mut active_model: BlockActiveModel = rpc_block_header.into();
@@ -18,17 +19,12 @@ impl<'a> BlockService<'a> {
         let block_id = active_model.block_hash.clone().unwrap();
 
         // ensure that blocks exist incrementally and continuously
-        // TODO: it should have been enforced by autoincrement constraint
-        // TODO: move this logic to a wrapper
-        let last_block = self.get_latest_block_index().await;
-        if let Some(last_block_height) = last_block {
-            if last_block_height  != height.checked_sub(1).unwrap()  {
-                panic!("last_block_height does not match the expected height!"); 
-            }
+        let can_insert_block = self.can_insert_block(height).await;
+        if !can_insert_block {
+            panic!("last_block_height does not match the expected height!"); 
         }
 
 
-        // TODO: remove this type conversion
         active_model.checkpoint_idx = Set(checkpoint_idx);
 
         // Insert the block using the Entity::insert() method
@@ -60,20 +56,38 @@ impl<'a> BlockService<'a> {
             .await
         {
             Ok(Some(max_height)) => max_height,
-            Ok(_) => None, // If no checkpoints exist, return None
+            Ok(_) => None, // If no block exist, return None
             Err(err) => {
                 error!("Failed to fetch the latest  block index: {:?}", err);
                 None
             }
         }
     }
-    pub async fn _block_exists(&self, height: i64) -> bool {
+    async fn block_exists(&self, height: i64) -> bool {
         Block::find()
             .filter(model::block::Column::Height.eq(height))
             .one(self.db)
             .await
             .map(|result| result.is_some())
             .unwrap_or(false)
+    }
+    async fn prev_block_exists(&self, height: i64) -> bool {
+        if height == i64::MIN {
+            // return true for the genesis block
+            return true;
+        }
+        self.block_exists(height-1).await
+    }
+
+    /// Check if a block can be inserted at the given height
+    /// The conditions it should meet are:
+    ///     1. The block table should be empty 
+    ///     2. or, the block table should have the previous block
+    pub async fn can_insert_block(&self, height: i64) -> bool {
+        if self.get_latest_block_index().await.is_none() {
+            return true;
+        }
+        self.prev_block_exists(height).await
     }
 }
 
