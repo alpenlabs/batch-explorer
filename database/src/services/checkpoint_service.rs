@@ -133,7 +133,7 @@ impl<'a> CheckpointService<'a> {
 
         let items = match Checkpoint::find()
             .filter(Expr::col(model::checkpoint::Column::Idx).is_not_null()) // Ensure idx is not NULL
-            .order_by(model::checkpoint::Column::Idx, sea_orm::Order::Asc) // Sort numerically
+            .order_by(model::checkpoint::Column::Idx, sea_orm::Order::Desc) // Sort numerically
             .offset(offset)
             .limit(limit)
             .all(self.db)

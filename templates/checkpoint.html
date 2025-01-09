@@ -9,7 +9,7 @@
             <span class="checkpoint-value">{{ checkpoint.batch_txid }}</span>
         </div>
         <div class="checkpoint-row">
-            <span class="checkpoint-label">Epoch Index:</span>
+            <span class="checkpoint-label">Epoch index:</span>
             <span class="checkpoint-value">{{ checkpoint.idx }}</span>
         </div>
         <div class="checkpoint-row">
@@ -17,7 +17,7 @@
             <span class="checkpoint-value">{{ checkpoint.status }}</span>
         </div>
         <div class="checkpoint-row">
-            <span class="checkpoint-label">Signet Start Block:</span>
+            <span class="checkpoint-label">Signet start block:</span>
             <span class="checkpoint-value">
                 <a 
                   href="{{env.mempool_url}}block/{{ checkpoint.l1_range[0] }}" 
@@ -29,7 +29,7 @@
             </span>
         </div>
         <div class="checkpoint-row">
-            <span class="checkpoint-label">Signet End Block:</span>
+            <span class="checkpoint-label">Signet end block:</span>
             <span class="checkpoint-value">
                 <a 
                   href="{{env.mempool_url}}block/{{ checkpoint.l1_range[1] }}" 
@@ -41,7 +41,7 @@
             </span>
         </div>
         <div class="checkpoint-row">
-            <span class="checkpoint-label">Strata Start Block:</span>
+            <span class="checkpoint-label">Strata start block:</span>
             <span class="checkpoint-value">
                 <a 
                   href="{{env.blockscout_url}}block/{{ checkpoint.l2_range[0] }}" 
@@ -53,7 +53,7 @@
             </span>
         </div>
         <div class="checkpoint-row">
-            <span class="checkpoint-label">Strata End Block:</span>
+            <span class="checkpoint-label">Strata end block:</span>
             <span class="checkpoint-value">
                 <a 
                   href="{{env.blockscout_url}}block/{{ checkpoint.l2_range[1] }}" 
