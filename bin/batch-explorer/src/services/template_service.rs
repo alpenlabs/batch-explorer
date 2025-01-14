@@ -49,7 +49,7 @@ pub async fn homepage(
 
     let checkpoint_db = CheckpointService::new(&database.db);
     let pagination_info = checkpoint_db
-        .get_paginated_checkpoints(current_page, page_size, 1) // Set absolute_first_page to 1 for batch tables
+        .get_paginated_checkpoints(current_page, page_size, 1, None) // Set absolute_first_page to 1 for batch tables
         .await;
 
     render_template(
@@ -74,7 +74,7 @@ pub async fn checkpoint_details(
     let checkpoint_db = CheckpointService::new(&database.db);
     // Get paginated checkpoints
     let mut pagination_info = checkpoint_db
-        .get_paginated_checkpoints(current_page, page_size, 0)
+        .get_paginated_checkpoints(current_page, page_size, 0, Some("asc"))
         .await;
     pagination_info.total_pages -= 1; // Adjust total pages for 0-based indexing
 
