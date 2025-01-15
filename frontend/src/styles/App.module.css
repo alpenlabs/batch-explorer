@@ -32,12 +32,12 @@
     text-decoration: none;
 }
 
+
 .title {
     font-size: 36px;
     font-weight: bold;
-    color: var(--strata-sand-light);
+    color: var(--strata-sand-med);
     margin-bottom: 20px;
-    font-family: Outfit, sans-serif;
 }
 
 .searchSection {
@@ -53,6 +53,7 @@
 
 
 .searchBox {
+    position: relative;
     display: flex;
     gap: 10px;
     width: 100%;
@@ -62,6 +63,7 @@
 .searchInput {
     flex-grow: 1;
     padding: 10px 15px;
+    margin: 0px 10px;
     border: none;
     border-radius: 7px;
     font-size: 1rem;
@@ -75,15 +77,32 @@
     outline: none;
 }
 
+.error-message {
+    color: var(--strata-sand-med);
+    /* font-weight: bold; */
+    text-align: center;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 5px;
+    white-space: nowrap;
+    display: none;
+}
+
+.error-message.visible {
+    display: block;
+}
+
 /* Header Styles */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 20px 50px;
+    padding: 20px 15px;
     background-color: var(--strata-terracotta-med);
-    color: white;
+    color: var(--strata-sand-med);
     box-sizing: border-box;
 }
 
@@ -117,11 +136,11 @@
 
 .navLink {
     text-decoration: none;
-    color: var(--strata-sand-light);
+    color: var(--strata-sand-med);
 }
 
 .navLink:hover {
-    color: var(--strata-sand-med);
+    color: var(--strata-sand-light);
 
 }
 
@@ -133,7 +152,7 @@
 .devnetButton {
     padding: 10px 20px;
     background-color: var(--strata-sand-med);
-    border: none;
+    border: 2px solid var(--strata-sand-med);
     border-radius: 5px;
     color: var(--strata-terracotta-med);
     font-weight: bold;

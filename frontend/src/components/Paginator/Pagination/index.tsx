@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import styles from "./TableFooter.module.css";
+import styles from "./Pagination.module.css";
 
-interface TableFooterProps {
+interface PaginationProps {
     currentPage: number;    // Current page number
     totalPages: number;     // Total pages available
     setPage: (page: number) => void; // Function to update the page
 }
 
-const TableFooter: React.FC<TableFooterProps> = ({ currentPage, totalPages, setPage }) => {
-    const pageWindowSize = 3; // Number of pages to show in the window
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, setPage }) => {
+    const pageWindowSize = 1; // Number of pages to show in the window
     const startPage = Math.max(1, currentPage - Math.floor(pageWindowSize / 2));
     const endPage = Math.min(totalPages, startPage + pageWindowSize - 1);
 
+    console.log("endPage", endPage);
     const [editablePage, setEditablePage] = useState<number | string>(currentPage);
 
     // Keep the input value in sync with the currentPage
@@ -97,4 +98,4 @@ const TableFooter: React.FC<TableFooterProps> = ({ currentPage, totalPages, setP
     );
 };
 
-export default TableFooter;
+export default Pagination;

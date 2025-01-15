@@ -65,7 +65,7 @@ button:hover {
 
 button:focus,
 button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+    outline: 4px auto var(--strata-terracotta-med);
 }
 
 @media (prefers-color-scheme: light) {
@@ -137,6 +137,7 @@ tbody {
     margin-bottom: 20px;
 }
 
+/* Search Section */
 .searchSection {
     display: flex;
     flex-direction: column;
@@ -352,7 +353,7 @@ tbody {
     }
 }
 
-
+/* Table  */
 .table {
     border-collapse: collapse;
     width: 100%;
@@ -391,6 +392,7 @@ tbody {
     color: #2c3e50;
 }
 
+/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
@@ -467,12 +469,12 @@ tbody {
 }
 
 .pageInput:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+    border-color: var(--strata-terracotta-med);
+    box-shadow: 0 0 3px var(--strata-terracotta-med);
 }
 
 .pageInfo {
-    width: 80px;
+    width: 150px;
     margin-left: 10px;
     font-size: 14px;
     /* font-weight: bold; */

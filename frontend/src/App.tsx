@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import styles from "./App.module.css";
-import Table from "./components/Table";
-
+import PaginatedData from "./components/Paginator";
+import styles from "./styles/App.module.css";
 const App = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,13 +15,13 @@ const App = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
-        `http://localhost:3000/checkpoints_paginated?page=${currentPage}&page_size=${rowsPerPage}`
+        `http://localhost:3000/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
       );
       const result = await response.json();
-      const totalCheckpoints = result.total_checkpoints;
+      const totalCheckpoints = result.result.total_pages;
 
-      setData(result.checkpoints);
-      setTotalPages(Math.ceil(totalCheckpoints / rowsPerPage));
+      setData(result.result.items);
+      setTotalPages(totalCheckpoints);
     };
 
     fetchData();
@@ -43,7 +42,6 @@ const App = () => {
           }`}>
           <nav className={styles.navMenu} role="navigation">
             <div className={styles.navLinks}>
-              <a href="#why" className={styles.navLink}>Why Strata</a>
               <a href="https://docs.stratabtc.org/" target="_blank" className={styles.navLink}>Documentation</a>
               <a href="#blog" className={styles.navLink}>Blog</a>
             </div>
@@ -76,7 +74,7 @@ const App = () => {
         </div>
       </header>
       <div className={styles.searchSection}>
-        <h1 className={styles.title}>Batch Explorer</h1>
+        <a href="/"><h1 className={styles.title}>Batch explorer</h1></a>
         <div className={styles.searchBox}>
           <input
             type="text"
@@ -86,16 +84,12 @@ const App = () => {
         </div>
       </div>
       <div className={styles.wrapper}>
-        <Table
+        <PaginatedData
           data={data}
-          rowsPerPage={rowsPerPage}
+          // rowsPerPage={rowsPerPage}
           currentPage={currentPage}
           totalPages={totalPages}
           setPage={setCurrentPage}
-          setRowsPerPage={(rows) => {
-            setRowsPerPage(rows);
-            return rows;
-          }}
         />
       </div>
     </main>
