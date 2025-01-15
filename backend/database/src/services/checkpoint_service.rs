@@ -5,7 +5,7 @@ use sea_orm::{
 };
 use tracing::{error, info};
 use model::pgu64::PgU64;
-use crate::services::pagination::PaginationInfo;
+use crate::services::pagination::PaginatedData;
 use super::utils::resolve_order;
 pub struct CheckpointService<'a> {
     pub db: &'a DatabaseConnection,
@@ -124,7 +124,7 @@ impl<'a> CheckpointService<'a> {
         page_size: u64,
         absolute_first_page: u64,
         order: Option<&str>
-    ) -> PaginationInfo<RpcCheckpointInfo> {
+    ) -> PaginatedData<RpcCheckpointInfo> {
         let total_checkpoints = self.get_total_checkpoint_count().await;
         let total_pages = (total_checkpoints as f64 / page_size as f64).ceil() as u64;
         let offset = (current_page - absolute_first_page) * page_size; // Adjust based on the first page
@@ -148,7 +148,7 @@ impl<'a> CheckpointService<'a> {
             }
         };
 
-        PaginationInfo {
+        PaginatedData {
             current_page,
             total_pages,
             absolute_first_page,

@@ -49,12 +49,19 @@ async fn main() {
     // Initialize Jinja2 templates
     let env = initialize_templates();
 
+    // api routes
+    let api_routes = Router::new()
+        .route("/checkpoints", get(services::api_service::checkpoints))
+        .route("/checkpoint", get(services::api_service::checkpoint))
+        .route("/search", get(services::api_service::search));
+
     // Setup Axum router
-    let app = Router::new()
+    let app: Router = Router::new()
         .route("/", get(services::template_service::homepage))
         .route("/checkpoint", get(services::template_service::checkpoint_details))
         .route("/search", get(services::template_service::search_handler))
         .nest_service("/static", ServeDir::new("static"))
+        .nest("/api", api_routes)
         .with_state(database.clone())
         .layer(axum::Extension(Arc::new(env)));
 

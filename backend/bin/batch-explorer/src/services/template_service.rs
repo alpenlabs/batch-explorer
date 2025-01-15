@@ -48,7 +48,7 @@ pub async fn homepage(
     tracing::info!("error_msg: {:?}", error_msg);
 
     let checkpoint_db = CheckpointService::new(&database.db);
-    let pagination_info = checkpoint_db
+    let paginated_data = checkpoint_db
         .get_paginated_checkpoints(current_page, page_size, 1, None) // Set absolute_first_page to 1 for batch tables
         .await;
 
@@ -56,7 +56,7 @@ pub async fn homepage(
         &env,
         "homepage.html",
         context! {
-            pagination => pagination_info, // Pass the entire struct to the template
+            pagination => paginated_data, // Pass the entire struct to the template
             error_msg => error_msg,
         },
     )
@@ -73,16 +73,16 @@ pub async fn checkpoint_details(
 
     let checkpoint_db = CheckpointService::new(&database.db);
     // Get paginated checkpoints
-    let mut pagination_info = checkpoint_db
+    let mut paginated_data = checkpoint_db
         .get_paginated_checkpoints(current_page, page_size, 0, Some("asc"))
         .await;
-    pagination_info.total_pages -= 1; // Adjust total pages for 0-based indexing
+    paginated_data.total_pages -= 1; // Adjust total pages for 0-based indexing
 
     render_template(
         &env,
         "checkpoint.html",
         context! {
-            pagination => pagination_info,
+            pagination => paginated_data,
             error_msg => params.error_msg,
         },
     )
@@ -93,7 +93,7 @@ use axum::headers::HeaderMap;
 
 #[derive(Deserialize)]
 pub struct SearchQuery {
-    query: String,
+    pub query: String,
 }
 
 pub async fn search_handler(
@@ -163,7 +163,7 @@ fn render_template(
 // Struct for pagination parameters
 #[derive(Debug, Deserialize)]
 pub struct QueryParams {
-    p: Option<u64>,
-    ps: Option<u64>,
-    error_msg: Option<String>,
+    pub p: Option<u64>,
+    pub ps: Option<u64>,
+    pub error_msg: Option<String>,
 }
