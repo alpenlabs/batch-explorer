@@ -1,4 +1,4 @@
-import { RpcCheckpointInfo } from "../../../types/types";
+import { RpcCheckpointInfo } from "../../../types";
 import styles from "./Table.module.css";
 // Define the props for the Table component
 
@@ -68,15 +68,6 @@ const TableBody: React.FC<TableBodyProps> = ({
                                     {checkpoint.l2_range[1]}
                                 </a>
                             </td>
-                            {/* <td className={styles.tableCell}>
-                                <a
-                                    href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_blockid}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {shortenBlockId(checkpoint.l2_blockid)}
-                                </a>
-                            </td> */}
                         </tr>
                     ))}
                 </tbody >

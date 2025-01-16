@@ -75,13 +75,15 @@ const App = () => {
       </header>
       <div className={styles.searchSection}>
         <a href="/"><h1 className={styles.title}>Batch explorer</h1></a>
-        <div className={styles.searchBox}>
+        <form action="/search" method="get" className={styles.searchBox}>
           <input
             type="text"
+            name="query"
             placeholder="🔍 Search by Strata orchestration layer block number or block hash"
             className={styles.searchInput}
+            required
           />
-        </div>
+        </form>
       </div>
       <div className={styles.wrapper}>
         <PaginatedData
@@ -92,7 +94,7 @@ const App = () => {
           setPage={setCurrentPage}
         />
       </div>
-    </main>
+    </main >
   );
 };
 

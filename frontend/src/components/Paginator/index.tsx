@@ -1,10 +1,10 @@
-import { RpcCheckpointInfo } from "../../types/types";
+import { isRpcCheckpointInfo } from "../../utils/lib";
 import TableBody from "../Table/TableBody";
 import Pagination from "./Pagination";
 // Define the props for the Table component
 
-interface PaginatedDataProps {
-    data: RpcCheckpointInfo[],
+interface PaginatedDataProps<T> {
+    data: T[],
     // rowsPerPage: number;
     currentPage: number;
     totalPages: number;
@@ -12,19 +12,20 @@ interface PaginatedDataProps {
     // setRowsPerPage: (rows: number) => number; // Function to update the rows per page
 }
 
-const PaginatedData: React.FC<PaginatedDataProps> = ({
+const PaginatedData = <T,>({
     data,
-    // rowsPerPage,
     currentPage,
     totalPages,
     setPage,
-    // setRowsPerPage
-}) => {
+}: PaginatedDataProps<T>) => {
     return (
         <>
-            <TableBody
-                data={data}
-            />
+            {/* if type is TableBody */}
+            {isRpcCheckpointInfo(data) ? (
+                <TableBody data={data} />
+            ) : (
+                <div>Unknown data type</div>
+            )}
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
