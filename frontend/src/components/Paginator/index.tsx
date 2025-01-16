@@ -1,4 +1,7 @@
+import { Route, Routes } from "react-router-dom";
+import styles from "../../styles/App.module.css";
 import { isRpcCheckpointInfo } from "../../utils/lib";
+import CheckpointDetails from "../CheckpointDetails";
 import TableBody from "../Table/TableBody";
 import Pagination from "./Pagination";
 // Define the props for the Table component
@@ -19,19 +22,38 @@ const PaginatedData = <T,>({
     setPage,
 }: PaginatedDataProps<T>) => {
     return (
-        <>
-            {/* if type is TableBody */}
-            {isRpcCheckpointInfo(data) ? (
-                <TableBody data={data} />
-            ) : (
-                <div>Unknown data type</div>
-            )}
+
+        <div className={styles.wrapper}>
+            <Routes>
+                <Route
+                    path="/"
+                    element={
+                        <>
+                            {/* if type is TableBody */}
+                            {isRpcCheckpointInfo(data) ? (
+                                <TableBody data={data} />
+                            ) : (
+                                <div>Unknown data type</div>
+                            )}
+                        </>
+                    }
+                />
+                <Route
+                    path="/checkpoint"
+                    element={
+                        <>
+                            <CheckpointDetails />
+                        </>
+                    }
+                />
+            </Routes>
+
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 setPage={setPage}
             />
-        </>
+        </div >
     );
 };
 

@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import Header from "./components/Header";
 import PaginatedData from "./components/Paginator";
+import SearchSection from "./components/SearchSection";
 import styles from "./styles/App.module.css";
 const App = () => {
   const [data, setData] = useState([]);
@@ -28,64 +31,10 @@ const App = () => {
   }, [currentPage, rowsPerPage]);
 
   return (
-    <main className={styles.container}>
-      <header className={styles.header}>
-        {/* Logo Wrapper */}
-        <a href="/" className={styles.logoWrapper}>
-          <div className={styles.logoSvg}>
-            <img src="/Strata_full_logo_sand.png" alt="STRATA" />
-          </div>
-        </a>
-
-        {/* Navbar Menu */}
-        <div className={`${styles.navbarMenuWrapper} ${isMenuOpen ? styles.showMenu : ""
-          }`}>
-          <nav className={styles.navMenu} role="navigation">
-            <div className={styles.navLinks}>
-              <a href="https://docs.stratabtc.org/" target="_blank" className={styles.navLink}>Documentation</a>
-              <a href="#blog" className={styles.navLink}>Blog</a>
-            </div>
-          </nav>
-          <div className={styles.devnetButtonWrapper}>
-            <a href="#open-form" className={styles.devnetButton}>Access DevNet</a>
-          </div>
-        </div>
-
-        {/* Menu Button for Mobile */}
-        <div
-          className={styles.menuButton}
-          role="button"
-          aria-label={isMenuOpen ? "close menu" : "open menu"}
-          aria-haspopup="menu"
-          onClick={toggleMenu}
-        >
-          {isMenuOpen ? (
-            <div className={styles.cross}>
-              <div className={styles.crossBar}></div>
-              <div className={styles.crossBar}></div>
-            </div>
-          ) : (
-            <div className={styles.burger}>
-              <div className={styles.burgerBar}></div>
-              <div className={styles.burgerBar}></div>
-              <div className={styles.burgerBar}></div>
-            </div>
-          )}
-        </div>
-      </header>
-      <div className={styles.searchSection}>
-        <a href="/"><h1 className={styles.title}>Batch explorer</h1></a>
-        <form action="/search" method="get" className={styles.searchBox}>
-          <input
-            type="text"
-            name="query"
-            placeholder="🔍 Search by Strata orchestration layer block number or block hash"
-            className={styles.searchInput}
-            required
-          />
-        </form>
-      </div>
-      <div className={styles.wrapper}>
+    <Router>
+      <main className={styles.container}>
+        <Header />
+        <SearchSection />
         <PaginatedData
           data={data}
           // rowsPerPage={rowsPerPage}
@@ -93,8 +42,8 @@ const App = () => {
           totalPages={totalPages}
           setPage={setCurrentPage}
         />
-      </div>
-    </main >
+      </main >
+    </Router>
   );
 };
 
