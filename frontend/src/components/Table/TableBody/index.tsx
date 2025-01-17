@@ -1,28 +1,38 @@
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { RpcCheckpointInfo } from "../../../types";
+import Pagination from "../../Paginator/Pagination";
 import styles from "./Table.module.css";
 // Define the props for the Table component
 
-interface TableBodyProps {
-    data: RpcCheckpointInfo[],
-}
 
-const TableBody: React.FC<TableBodyProps> = ({
-    data,
-    // setRowsPerPage
-}) => {
+const TableBody: React.FC = ({ }) => {
+    const [data, setData] = useState<RpcCheckpointInfo[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(0);
+    const [firstPage, setFirstPage] = useState(1);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await fetch(
+                `http://localhost:3000/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
+            );
+            const result = await response.json();
+            const totalCheckpoints = result.result.total_pages;
+            const firstPage = result.result.absolute_first_page;
+
+            setData(result.result.items);
+            setTotalPages(totalCheckpoints);
+            setFirstPage(firstPage);
+        };
+
+        fetchData();
+    }, [currentPage, rowsPerPage]);
+
     return (
         <>
-            {/* <div className={styles.select_container}>
-                <span className={styles.select_info}>Checkpoints per page </span>
-                <select className={styles.select} onChange={(e) => {
-                    rowsPerPage = setRowsPerPage(parseInt(e.target.value, 10));
-                    setPage(1);
-                }}>
-                    <option>2</option>
-                    <option>5</option>
-                    <option>10</option>
-                </select>
-            </div> */}
             <table className={styles.table}>
                 <thead className={styles.tableRowHeader}>
                     <tr>
@@ -72,7 +82,12 @@ const TableBody: React.FC<TableBodyProps> = ({
                     ))}
                 </tbody >
             </table >
-
+            <Pagination
+                currentPage={currentPage}
+                firstPage={firstPage}
+                totalPages={totalPages}
+                setPage={setCurrentPage}
+            />
         </>)
 };
 
