@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 // import { useAlert } from "../../../hooks/useAlert";
-import styles from "./Pagination.module.css";
-
+import styles from "../../../styles/Pagination.module.css";
+import AlertComponent from "../../Alert";
 interface PaginationProps {
     currentPage: number;
     firstPage: number;
@@ -11,7 +11,6 @@ interface PaginationProps {
 }
 
 const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPages, setPage }) => {
-    // const { showAlert, alertUI } = useAlert();
     const pageWindowSize = 1;
     const startPage = Math.max(firstPage, currentPage - Math.floor(pageWindowSize / 2));
     const endPage = Math.min(totalPages, startPage + pageWindowSize - 1);
@@ -19,6 +18,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPa
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [editablePage, setEditablePage] = useState<number | string>(currentPage);
+    const [showAlert, setShowAlert] = useState(false);
 
     // Sync the input value with currentPage
     useEffect(() => {
@@ -27,22 +27,24 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPa
 
     // Function to update both state and URL
     const updatePage = (page: number) => {
-        if (page < firstPage || page > totalPages) return;
-        setPage(page);
-        setSearchParams({ p: page.toString() }); // Update the URL query
-        navigate(`?p=${page}`, { replace: true }); // Prevent adding to browser history stack
+        if (page >= firstPage && page <= totalPages) {
+            setPage(page);
+            setSearchParams({ p: page.toString() }); // Update the URL query
+            navigate(`?p=${page}`, { replace: true }); // Prevent adding to browser history stack
+        } else {
+            setShowAlert(true);
+            setTimeout(() => {
+                // wait for 3 seconds and then set the alert to false
+                setShowAlert(false);
+            }, 2000);
+            return;
+        }
     };
 
     // Validate and navigate to new page on input change
     const handlePageChange = () => {
         const page = Number(editablePage);
-        if (page >= firstPage && page <= totalPages) {
-            updatePage(page);
-        } else {
-            // showAlert(`Please enter a page number between ${firstPage} and ${totalPages}`);
-            return;
-            // setEditablePage(currentPage); // Reset on invalid input
-        }
+        updatePage(page);
     };
 
     return (
@@ -111,6 +113,9 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPa
                 <div className={styles.pageInfo}>
                     Page {currentPage} of {totalPages}
                 </div>
+            </div>
+            <div className={styles.alertWrapper}>
+                {showAlert && <AlertComponent />}
             </div>
         </>
     );
