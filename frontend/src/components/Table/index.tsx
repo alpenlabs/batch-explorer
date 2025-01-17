@@ -5,17 +5,10 @@ import TableBody from "./TableBody";
 interface TableProps {
     data: RpcCheckpointInfo[],
 }
-const Table: React.FC<TableProps> = ({
-    data,
-    // rowsPerPage,
-
-    // setRowsPerPage
-}) => {
+const Table: React.FC<TableProps> = ({ }) => {
     return (
         <>
-            <TableBody
-                data={data}
-            />
+            <TableBody />
         </>
     );
 };

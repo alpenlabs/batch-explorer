@@ -2,7 +2,7 @@ use axum::{extract::{State, Query}, response::{Html,IntoResponse, Redirect}};
 use database::connection::DatabaseWrapper;
 use minijinja::{context, Environment, Value};
 use std::sync::Arc;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use std::env;
 use url::Url;
@@ -91,7 +91,7 @@ pub async fn checkpoint_details(
 use axum::headers::HeaderMap;
 
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct SearchQuery {
     pub query: String,
 }

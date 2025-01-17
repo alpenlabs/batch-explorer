@@ -49,8 +49,7 @@ pub async fn search(
         let block_number = PgU64(block_number).to_i64();
         if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_height(block_number).await {
             let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
-            // let checkpoint = checkpoint_db.get_checkpoint_by_idx(checkpoint_idx).await.expect("Checkpoint should exist");
-            return Json(json!({ "result": checkpoint_idx }));
+            return Json(json!({"result": checkpoint_idx}));
         }
     }
     // Check if it's a valid block hash
@@ -61,7 +60,7 @@ pub async fn search(
     }
     if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_hash(query).await {
         let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
-        return Json(json!({ "result": checkpoint_idx }));
+        return Json(json!({"result": checkpoint_idx})); 
     }
     Json(json!({ "error": "Invalid search entry" }))
 }

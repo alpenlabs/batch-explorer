@@ -3,56 +3,33 @@ import { useSearchParams } from "react-router-dom";
 import { RpcCheckpointInfo } from "../../../types";
 import Pagination from "../../Paginator/Pagination";
 import styles from "./Table.module.css";
+// Define the props for the Table component
 
-const TableBody: React.FC = () => {
+
+const TableBody: React.FC = ({ }) => {
     const [data, setData] = useState<RpcCheckpointInfo[]>([]);
-    const [rowsPerPage] = useState(10); // Fixed value
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
     const [firstPage, setFirstPage] = useState(1);
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // Get `p` from URL and ensure it's a valid number
-    const pageFromUrl = Number(searchParams.get("p")) || 1;
-    const [currentPage, setCurrentPage] = useState(pageFromUrl);
-
-
-    useEffect(() => {
-        if (currentPage !== pageFromUrl) {
-            setCurrentPage(pageFromUrl);
-        }
-    }, [pageFromUrl]);
-
-    /** 
-     * - Ensures data reloads when the user changes pages.
-     */
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const response = await fetch(
-                    `http://localhost:3000/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
-                );
-                const result = await response.json();
-                setData(result.result.items);
-                setTotalPages(result.result.total_pages);
-                setFirstPage(result.result.absolute_first_page);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
+            const response = await fetch(
+                `http://localhost:3000/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
+            );
+            const result = await response.json();
+            const totalCheckpoints = result.result.total_pages;
+            const firstPage = result.result.absolute_first_page;
+
+            setData(result.result.items);
+            setTotalPages(totalCheckpoints);
+            setFirstPage(firstPage);
         };
 
         fetchData();
-    }, [currentPage, rowsPerPage]); // Trigger fetch when `currentPage` changes
-
-    /** 
-     * Immediately update `searchParams` and state 
-     * - Prevents the need for a second click.
-     */
-    const setPage = (page: number) => {
-        if (page < firstPage || page > totalPages || page === currentPage) return;
-
-        setSearchParams({ p: page.toString() }); // Update URL first
-        setCurrentPage(page); // Then update state immediately
-    };
+    }, [currentPage, rowsPerPage]);
 
     return (
         <>
@@ -77,14 +54,17 @@ const TableBody: React.FC = () => {
                             <td className={styles.tableCell}>
                                 <a href={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</a>
                             </td>
-                            <td className={styles.tableCell}>{checkpoint.status}</td>
                             <td className={styles.tableCell}>
+                                {checkpoint.status}
+                            </td>
+                            {/* TODO: update urls from env or config */}
+                            < td className={styles.tableCell} >
                                 <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l1_range[0]}
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[1]}`} target="_blank" rel="noreferrer">
+                                <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l1_range[1]}
                                 </a>
                             </td>
@@ -94,22 +74,21 @@ const TableBody: React.FC = () => {
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
+                                <a href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l2_range[1]}
                                 </a>
                             </td>
                         </tr>
                     ))}
-                </tbody>
-            </table>
+                </tbody >
+            </table >
             <Pagination
                 currentPage={currentPage}
                 firstPage={firstPage}
                 totalPages={totalPages}
-                setPage={setPage}
+                setPage={setCurrentPage}
             />
-        </>
-    );
+        </>)
 };
 
 export default TableBody;

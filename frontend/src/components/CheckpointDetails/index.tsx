@@ -1,41 +1,51 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import styles from "../../styles/CheckpointDetails.module.css";
 import { RpcCheckpointInfo } from "../../types";
-import Pagination from "../Paginator/Pagination";
-const CheckpointDetails = () => {
-    const location = useLocation();
-    const params = new URLSearchParams(location.search);
-    const page = params.get("p"); // Get the "p" query parameter
+import Pagination from "../Paginator/Pagination/index";
 
-    // if page is not a number, set it to 0
+const CheckpointDetails = () => {
+    const [searchParams] = useSearchParams();
+    const page = searchParams.get("p"); // Get the "p" query parameter
+
+    // Ensure `currentPage` updates when `p` changes
+    const [currentPage, setCurrentPage] = useState<number>(Number(page) || 0);
     const [checkpoint, setData] = useState<RpcCheckpointInfo | null>(null);
-    const [currentPage, setCurrentPage] = useState<number>(isNaN(Number(page)) ? 0 : Number(page));
-    const [rowsPerPage, setRowsPerPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [firstPage, setFirstPage] = useState(0);
+    const rowsPerPage = 1; // Fixed value
 
     useEffect(() => {
+        // Convert the query param `p` to a number
+        const pageNumber = Number(page);
+        if (!isNaN(pageNumber) && pageNumber !== currentPage) {
+            setCurrentPage(pageNumber);
+        }
+    }, [page]);
+
+    useEffect(() => {
+        console.log("currentPage", currentPage);
         const fetchData = async () => {
-            const response = await fetch(
-                `http://localhost:3000/api/checkpoint?p=${currentPage}&ps=${rowsPerPage}`
-            );
-            const result = await response.json();
-            const totalCheckpoints = result.result.total_pages;
-            const firstPage = result.result.absolute_first_page;
-
-
-            setData(result.result.items[0]);
-            setTotalPages(totalCheckpoints);
-            setFirstPage(firstPage);
+            try {
+                const response = await fetch(
+                    `http://localhost:3000/api/checkpoint?p=${currentPage}`
+                );
+                const result = await response.json();
+                setData(result.result.items[0]);
+                console.log("result", result);
+                setTotalPages(result.result.total_pages);
+                setFirstPage(result.result.absolute_first_page);
+            } catch (error) {
+                console.error("Error fetching checkpoint data:", error);
+            }
         };
-
-        fetchData();
+        if (currentPage >= 0) fetchData();
     }, [currentPage, rowsPerPage]);
 
     if (!checkpoint) {
         return <div>No checkpoint data available</div>;
     }
+
     return (
         <>
             <div className={styles.checkpointContainer}>
@@ -100,6 +110,7 @@ const CheckpointDetails = () => {
                     </span>
                 </div>
             </div>
+
             <Pagination
                 currentPage={currentPage}
                 firstPage={firstPage}

@@ -28,6 +28,14 @@ const PaginatedData = ({
                         </>
                     }
                 />
+                <Route
+                    path="/search"
+                    element={
+                        <>
+                            <CheckpointDetails />
+                        </>
+                    }
+                />
             </Routes>
         </div >
     );
