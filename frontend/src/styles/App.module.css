@@ -1,0 +1,33 @@
+#root {
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #FFF7ED;
+}
+
+.wrapper {
+    width: 90%;
+    max-width: 1200px;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav a {
+    color: #ffffff;
+    text-decoration: none;
+}

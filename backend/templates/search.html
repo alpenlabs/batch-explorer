@@ -1,0 +1,21 @@
+<div class="searchSection">
+    <a href="/"><h1 class="title">Batch explorer</h1></a>
+    <form action="/search" method="get" class="searchBox">
+        <input
+          type="text"
+          name="query"
+          placeholder="🔍 Search by Strata orchestration layer block number or block hash"
+          class="searchInput"
+          required
+        />
+        {% if error_msg %}
+            <div class="error-message visible">
+                {{ error_msg }}
+            </div>
+        {% else %}
+            <div class="error-message">
+                <!-- Placeholder for error -->
+            </div>
+        {% endif %}
+    </form>
+</div>
