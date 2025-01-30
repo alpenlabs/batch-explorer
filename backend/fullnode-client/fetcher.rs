@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use reqwest::Client;
 use serde_json::{json, Value};
-
+use tracing::error;
 /// `StrataFetcher` struct for fetching checkpoint and block data
 pub struct StrataFetcher {
     client: Client,
@@ -31,24 +31,36 @@ impl StrataFetcher {
             "params": [],
             "id": 1
         });
-
-        let response: Value = self
+    
+        let response = self
             .client
             .post(&self.endpoint)
             .json(&payload)
             .send()
             .await
-            .context("Failed to send request")?
-            .error_for_status()
-            .context("Request returned an error status")?
-            .json()
-            .await
+            .context("Failed to send request")?;
+    
+        let status = response.status();
+        let text = response.text().await.context("Failed to read response body")?;
+    
+        if !status.is_success() {
+            error!(
+                "Request to {} failed with status {}: {}",
+                self.endpoint, status, text
+            );
+            return Err(anyhow::anyhow!(
+                "Request returned an error status: {} - {}",
+                status,
+                text
+            ));
+        }
+    
+        let json_response: Value = serde_json::from_str(&text)
             .context("Failed to parse JSON response")?;
-
-        response
-            .get("result")
-            .and_then(|value| value.as_u64())
-            .ok_or_else(|| anyhow::anyhow!("Failed to fetch latest index for method: {}", method))
+    
+        json_response["result"]
+            .as_u64()
+            .ok_or_else(|| anyhow::anyhow!("Invalid response format: {}", json_response))
     }
 
     /// Fetches detailed information for a given index (checkpoint or block).
