@@ -49,8 +49,8 @@ async fn main() {
     let fetcher_clone = fetcher.clone();
     let database_clone = database.clone();
     tokio::spawn(async move {
-        // TODO: Make the interval configurable
-        start_checkpoint_status_updater_task(fetcher_clone, database_clone, 20).await;
+        // TODO: Make the interval configurable, for now set to 5 minutes
+        start_checkpoint_status_updater_task(fetcher_clone, database_clone, 300).await;
     }); 
 
     // Initialize Jinja2 templates

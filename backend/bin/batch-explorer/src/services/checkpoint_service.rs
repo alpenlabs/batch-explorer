@@ -124,7 +124,7 @@ async fn update_checkpoints_status(
 
     loop {
         let i = PgU64::from_i64(idx).0;
-        let checkpoint = fetcher
+        let checkpoint_from_rpc = fetcher
             .fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", i)
             .await
             .map_err(|_| {
@@ -137,20 +137,24 @@ async fn update_checkpoints_status(
             anyhow::anyhow!("No checkpoint in database")
         })?;
 
-        let status = match checkpoint.status {
-            Some(status) => status,
+        let status = match checkpoint_from_rpc.confirmation_status {
+            Some(status) => status.to_string(),
             None => {
                 warn!("Checkpoint status is None for idx {}", idx);
-                return Ok(()); // Simply return and continue execution instead of erroring
+                return Ok(()); // Simply return and continue execution instead of erroring  
             }
         };
+        info!("Updating checkpoint status: idx={}, status={}", idx, status.clone());
         // if there is no change in status, return by doing nothing
-        if checkpoint_in_db.status == Some(status.clone()) {
+        if checkpoint_in_db
+        .confirmation_status
+        .map_or("-".to_string(), |s| s.to_string()) == status.to_string() 
+        {
             return Ok(());
         }
         
         checkpoint_db
-        .update_checkpoint_status(idx, status)
+        .update_checkpoint_status(idx, status.to_string())
         .await
         .map_err(|e| {
             error!("Error updating checkpoint status: {:?}", e);
