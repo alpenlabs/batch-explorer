@@ -45,13 +45,12 @@ const CheckpointDetails = () => {
     if (!checkpoint) {
         return <div>No checkpoint data available</div>;
     }
-
     return (
         <>
             <div className={styles.checkpointContainer}>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Batch TXID:</span>
-                    <span className={styles.checkpointValue}>{checkpoint.batch_txid}</span>
+                    <span className={styles.checkpointValue}>{checkpoint.commitment?.txid}</span>
                 </div>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Epoch index:</span>
@@ -59,7 +58,7 @@ const CheckpointDetails = () => {
                 </div>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Status:</span>
-                    <span className={styles.checkpointValue}>{checkpoint.status}</span>
+                    <span className={styles.checkpointValue}>{checkpoint.confirmation_status}</span>
                 </div>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Signet start block:</span>

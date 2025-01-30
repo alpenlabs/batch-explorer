@@ -5,7 +5,7 @@ use axum::{routing::get, Router};
 use database::connection::DatabaseWrapper;
 use fullnode_client::fetcher::StrataFetcher;
 use tower_http::services::ServeDir;
-use services::{block_service::run_block_fetcher, checkpoint_service::start_checkpoint_fetcher, template_service::initialize_templates};
+use services::{block_service::run_block_fetcher, checkpoint_service::{start_checkpoint_status_updater_task, start_checkpoint_fetcher}, template_service::initialize_templates};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tracing::{info, Level};
@@ -45,6 +45,13 @@ async fn main() {
         start_checkpoint_fetcher(fetcher_clone, database_clone, tx, config.fetch_interval).await;
     });
 
+    // Start checkpoint status updater task
+    let fetcher_clone = fetcher.clone();
+    let database_clone = database.clone();
+    tokio::spawn(async move {
+        // TODO: Make the interval configurable, for now set to 5 minutes
+        start_checkpoint_status_updater_task(fetcher_clone, database_clone, 300).await;
+    }); 
 
     // Initialize Jinja2 templates
     let env = initialize_templates();

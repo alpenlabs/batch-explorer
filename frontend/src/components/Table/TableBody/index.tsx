@@ -72,12 +72,12 @@ const TableBody: React.FC = () => {
                     {data.map((checkpoint) => (
                         <tr className={styles.tableRowItems} key={checkpoint.idx}>
                             <td className={styles.tableCell}>
-                                {checkpoint.batch_txid}
+                                {checkpoint.commitment?.txid}
                             </td>
                             <td className={styles.tableCell}>
                                 <a href={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</a>
                             </td>
-                            <td className={styles.tableCell}>{checkpoint.status}</td>
+                            <td className={styles.tableCell}>{checkpoint.confirmation_status}</td>
                             <td className={styles.tableCell}>
                                 <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l1_range[0]}

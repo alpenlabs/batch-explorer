@@ -1,7 +1,7 @@
 use model::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo}, block:: Entity as Block};
 use sea_orm::{
-    prelude::*, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
-    QuerySelect
+    prelude::*, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Order,
+    QuerySelect, Set
 };
 use tracing::{error, info};
 use model::pgu64::PgU64;
@@ -185,6 +185,69 @@ impl<'a> CheckpointService<'a> {
             Err(err) => {
                 error!("Failed to fetch the latest checkpoint index: {:?}", err);
                 None
+            }
+        }
+    }
+
+    /// Get the earliest checkpoint index whose status is either `Pending` or `Confirmed` or `-`
+    pub async fn get_earliest_unfinalized_checkpoint_idx(&self) -> Option<i64> {
+        match Checkpoint::find()
+            .filter(
+                model::checkpoint::Column::Status.eq("Pending")
+                    .or(model::checkpoint::Column::Status.eq("Confirmed"))
+                    .or(model::checkpoint::Column::Status.eq("-")),
+            )
+            .order_by(model::checkpoint::Column::Idx, Order::Asc)
+            .one(self.db)
+            .await
+        {
+            Ok(Some(checkpoint)) => Some(checkpoint.idx),
+            Ok(None) => None,
+            Err(err) => {
+                error!("Error fetching earliest unfinalized checkpoint: {:?}", err);
+                None
+            }
+        }
+    }
+
+    /// Update the status of a checkpoint
+    pub async fn update_checkpoint_status(&self, checkpoint_idx: i64, status: String) -> Result<(), DbErr> {
+        match Checkpoint::find()
+            .filter(model::checkpoint::Column::Idx.eq(checkpoint_idx))
+            .one(self.db)
+            .await
+        {
+            Ok(Some(checkpoint)) => {
+                let mut active_model: ActiveModel = checkpoint.into();
+                active_model.status = Set(status.to_string());
+
+                match active_model.update(self.db).await {
+                    Ok(_) => {
+                        info!(
+                            "Checkpoint with idx {} updated successfully to status: {}",
+                            checkpoint_idx, status
+                        );
+                        Ok(())
+                    },
+                    Err(err) => {
+                        error!(
+                            "Failed to update checkpoint with idx {}: {:?}",
+                            checkpoint_idx, err
+                        );
+                        Err(err)
+                    },
+                }
+            }
+            Ok(None) => {
+                error!("Checkpoint with idx {} not found", checkpoint_idx);
+                Err(DbErr::RecordNotFound(format!("Checkpoint with idx {} not found", checkpoint_idx)))
+            }
+            Err(err) => {
+                error!(
+                    "Error querying checkpoint with idx {}: {:?}",
+                    checkpoint_idx, err
+                );
+                Err(err)
             }
         }
     }
