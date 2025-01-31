@@ -76,3 +76,5 @@ storybook-static/
 # .dockerignore
 # *.dockerfile
 # docker-compose.yml
+
+.env

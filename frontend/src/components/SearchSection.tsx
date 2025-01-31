@@ -12,9 +12,10 @@ const SearchSection = () => {
         if (!query.trim()) return;
 
         try {
+            // modify the code to get base url from .env file
+            const baseUrl = import.meta.env.API_BASE_URL || 'http://localhost:3000';
             const response = await fetch(
-                `http://localhost:3000/api/search?query=${query.trim()}&ps=1`
-            );
+                `${baseUrl}/api/search?query=${query.trim()}&ps=1`);
             const result = await response.json();
 
             if (result.error) {

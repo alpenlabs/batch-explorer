@@ -27,8 +27,9 @@ const CheckpointDetails = () => {
         console.log("currentPage", currentPage);
         const fetchData = async () => {
             try {
+                const baseUrl = import.meta.env.API_BASE_URL || 'http://localhost:3000';
                 const response = await fetch(
-                    `http://localhost:3000/api/checkpoint?p=${currentPage}`
+                    `${baseUrl}/api/checkpoint?p=${currentPage}`
                 );
                 const result = await response.json();
                 setData(result.result.items[0]);
