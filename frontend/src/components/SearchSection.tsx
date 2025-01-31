@@ -26,7 +26,7 @@ const SearchSection = () => {
             }
 
             const checkpoint_id = result.result;
-            if (checkpoint_id) {
+            if (checkpoint_id >= 0) {
                 navigate(`/checkpoint?p=${checkpoint_id}`);
             }
         } catch (error) {
