@@ -4,11 +4,12 @@ import styles from '../styles/SearchSection.module.css';
 
 const SearchSection = () => {
     const [query, setQuery] = useState("");
+    const [error, setError] = useState(false); // State to track error visibility
     const navigate = useNavigate();
 
     const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault(); // Prevent full page reload
-        if (!query.trim()) return; // Prevent empty searches
+        e.preventDefault();
+        if (!query.trim()) return;
 
         try {
             const response = await fetch(
@@ -17,13 +18,15 @@ const SearchSection = () => {
             const result = await response.json();
 
             if (result.error) {
-                console.error("Error fetching data:", result.error);
+                console.log("Error fetching data:", result.error);
+                setError(true); // Show error message
+                setTimeout(() => setError(false), 3000); // Hide after 3s
                 return;
             }
 
             const checkpoint_id = result.result;
             if (checkpoint_id) {
-                navigate(`/checkpoint?p=${checkpoint_id}`); // Navigate only after receiving data
+                navigate(`/checkpoint?p=${checkpoint_id}`);
             }
         } catch (error) {
             console.error("UNKNOWN Error fetching data:", error);
@@ -32,17 +35,23 @@ const SearchSection = () => {
 
     return (
         <div className={styles.searchSection}>
-            <a href="/"><h1 className={styles.title}>Batch Explorer</h1></a>
-            <form onSubmit={handleSearch} className={styles.searchBox}>
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="🔍 Search by Strata orchestration layer block number or block hash"
-                    className={styles.searchInput}
-                    required
-                />
-            </form>
+            <>
+                <a href="/"><h1 className={styles.title}>Batch Explorer</h1></a>
+                <form onSubmit={handleSearch} className={styles.searchBox}>
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="🔍 Search by Strata orchestration layer block number or block hash"
+                        className={styles.searchInput}
+                        required
+                    />
+                    {/* Dynamically apply the visible class */}
+                    <div className={`${styles.errorMessage} ${error ? styles.visible : ""}`}>
+                        Invalid search entry
+                    </div>
+                </form>
+            </>
         </div>
     );
 };

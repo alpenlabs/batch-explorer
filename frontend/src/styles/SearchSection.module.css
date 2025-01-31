@@ -5,6 +5,8 @@
     margin-bottom: 20px;
 }
 
+
+/* Search Section */
 .searchSection {
     display: flex;
     flex-direction: column;
@@ -42,19 +44,23 @@
     outline: none;
 }
 
-.error-message {
+.errorMessage {
     color: var(--strata-sand-med);
-    /* font-weight: bold; */
     text-align: center;
     position: absolute;
-    top: 100%;
+    top: calc(100% + 5px);
+    /* Ensure it does not overlap */
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 5px;
+    width: auto;
+    /* Prevent collapsing */
+    min-width: 200px;
+    /* Ensure it has a proper size */
     white-space: nowrap;
     display: none;
 }
 
-.error-message.visible {
-    display: block;
+.visible {
+    display: block !important;
+    visibility: visible;
 }
