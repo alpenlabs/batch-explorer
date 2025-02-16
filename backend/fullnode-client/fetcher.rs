@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use reqwest::Client;
 use serde_json::{json, Value};
-use tracing::error;
+use tracing::{info, error};
 /// `StrataFetcher` struct for fetching checkpoint and block data
 pub struct StrataFetcher {
     client: Client,
@@ -24,7 +24,7 @@ impl StrataFetcher {
     ///
     /// # Returns
     /// * `Result<u64>` - Latest index if successful
-    pub async fn get_latest_index(&self, method: &str) -> Result<u64> {
+    pub async fn get_latest_index(&self, method: &str) -> Result<Option<u64>> {
         let payload = json!({
             "jsonrpc": "2.0",
             "method": method,
@@ -38,7 +38,7 @@ impl StrataFetcher {
             .json(&payload)
             .send()
             .await
-            .context("Failed to send request")?;
+            .with_context(|| format!("Failed to send request for method: {}", method))?;
     
         let status = response.status();
         let text = response.text().await.context("Failed to read response body")?;
@@ -58,9 +58,16 @@ impl StrataFetcher {
         let json_response: Value = serde_json::from_str(&text)
             .context("Failed to parse JSON response")?;
     
-        json_response["result"]
-            .as_u64()
-            .ok_or_else(|| anyhow::anyhow!("Invalid response format: {}", json_response))
+        match json_response.get("result") {
+            Some(Value::Null) => {
+                info!("No latest index found, returning None.");
+                Ok(None)
+            }
+            Some(Value::Number(n)) => n.as_u64().map(Some).ok_or_else(|| {
+                anyhow::anyhow!("Invalid numeric format in response: {}", json_response)
+            }),
+            _ => Err(anyhow::anyhow!("Unexpected response format: {}", json_response)),
+        }
     }
 
     /// Fetches detailed information for a given index (checkpoint or block).

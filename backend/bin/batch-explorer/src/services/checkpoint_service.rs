@@ -40,7 +40,12 @@ async fn fetch_checkpoints(
     let checkpoint_db = CheckpointService::new(&database.db);
     info!("Fetching checkpoints from fullnode...");
     let fullnode_last_checkpoint = fetcher.get_latest_index("strata_getLatestCheckpointIndex").await?;
-    let fn_chkpt_i64 = PgU64(fullnode_last_checkpoint).to_i64();
+    // handle None case
+    if fullnode_last_checkpoint.is_none() {
+        warn!("Failed to fetch latest checkpoint index from fullnode or no checkpoint yet.");
+        return Ok(());
+    }
+    let fn_chkpt_i64 = PgU64(fullnode_last_checkpoint.unwrap()).to_i64();
     let starting_checkpoint = get_starting_checkpoint_idx(database.clone()).await?;
     info!(fn_chkpt_i64, starting_checkpoint, "fetching checkpoints");
     for idx in (starting_checkpoint)..=fn_chkpt_i64 {
@@ -117,10 +122,15 @@ async fn update_checkpoints_status(
     database: Arc<DatabaseWrapper>,
 ) -> anyhow::Result<()> {
     let checkpoint_db = CheckpointService::new(&database.db);
-    let mut idx = checkpoint_db.get_earliest_unfinalized_checkpoint_idx().await.ok_or_else(|| {
-        info!("No unfinalized checkpoints found.");
-        anyhow::anyhow!("No unfinalized checkpoints")
-    })?;
+    // handle the case for None as not error because returning function is returning
+    // Some(checkpoint.idx) or None or Anyhow error
+    let mut idx = match checkpoint_db.get_earliest_unfinalized_checkpoint_idx().await {
+        Some(i) => i,
+        None => {
+            info!("No unfinalized checkpoints found.");
+            return Ok(());
+        }
+    }; 
 
     loop {
         let i = PgU64::from_i64(idx).0;
