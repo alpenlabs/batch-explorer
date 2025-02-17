@@ -13,7 +13,7 @@ services:
 
   migration:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: batch_explorer_migration
     depends_on:
@@ -21,22 +21,35 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
     command: ["./migration"]
-    restart: "no" # Exit after running migrations
+    restart: "no"
 
-  batch-explorer:
+  backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: batch_explorer_app
+    container_name: batch_explorer_backend
     environment:
       APP_DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
-      STRATA_FULLNODE: "https://fnclientbcc5fe8c4454c314eb0a00cd3882.temp6-testnet1-staging.stratabtc.org/"
-      APP_FETCH_INTERVAL : 5
+      STRATA_FULLNODE: "https://fnclientbcc5fe8c4454c314eb0a00cd3882.temp6-testnet1-staging.stratabtc.org"
+      APP_FETCH_INTERVAL: 5
     ports:
       - "3000:3000"
     depends_on:
       - migration
     command: ["./batch-explorer"]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: batch_explorer_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    command: ["npm", "run", "dev", "--", "--host"]
 
 volumes:
   postgres_data:
