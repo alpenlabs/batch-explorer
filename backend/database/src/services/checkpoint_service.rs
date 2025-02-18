@@ -1,4 +1,4 @@
-use model::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo}, block:: Entity as Block};
+use model::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo, RpcCheckpointInfoBatchExp}, block:: Entity as Block};
 use sea_orm::{
     prelude::*, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Order,
     QuerySelect, Set
@@ -27,9 +27,11 @@ impl<'a> CheckpointService<'a> {
     pub async fn insert_checkpoint(&self, checkpoint: RpcCheckpointInfo) {
         let idx: i64 = PgU64(checkpoint.idx).to_i64();
 
-        if let Some(previous_idx) = idx.checked_sub(1){
+        // for the first checkpoint, no need to check the previous checkpoint
+        if idx > i64::MIN {
+            if let Some(previous_idx) = idx.checked_sub(1) {
             let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
-
+    
             // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
             if !previous_checkpoint_exists {
                 error!(
@@ -37,6 +39,7 @@ impl<'a> CheckpointService<'a> {
                     checkpoint.idx, previous_idx
                 );
                 return;
+            }
             }
         }
 
@@ -49,7 +52,7 @@ impl<'a> CheckpointService<'a> {
     }
 
     /// Fetch a checkpoint by its index
-    pub async fn get_checkpoint_by_idx(&self, idx: i64) -> Option<RpcCheckpointInfo> {
+    pub async fn get_checkpoint_by_idx(&self, idx: i64) -> Option<RpcCheckpointInfoBatchExp> {
         match Checkpoint::find()
             .filter(model::checkpoint::Column::Idx.eq(idx))
             .one(self.db)
@@ -124,7 +127,7 @@ impl<'a> CheckpointService<'a> {
         page_size: u64,
         absolute_first_page: u64,
         order: Option<&str>
-    ) -> PaginatedData<RpcCheckpointInfo> {
+    ) -> PaginatedData<RpcCheckpointInfoBatchExp> {
         let total_checkpoints = self.get_total_checkpoint_count().await;
         let total_pages = (total_checkpoints as f64 / page_size as f64).ceil() as u64;
         let offset = (current_page - absolute_first_page) * page_size; // Adjust based on the first page
@@ -191,6 +194,8 @@ impl<'a> CheckpointService<'a> {
 
     /// Get the earliest checkpoint index whose status is either `Pending` or `Confirmed` or `-`
     pub async fn get_earliest_unfinalized_checkpoint_idx(&self) -> Option<i64> {
+        // add the condition to check no checkpoint at all
+        self.get_latest_checkpoint_index().await?;
         match Checkpoint::find()
             .filter(
                 model::checkpoint::Column::Status.eq("Pending")

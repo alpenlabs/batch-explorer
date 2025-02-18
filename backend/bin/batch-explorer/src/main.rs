@@ -22,8 +22,8 @@ async fn main() {
 
     // Initialize logging
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::INFO)
-        .finish();
+    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env()) // Uses RUST_LOG
+    .finish();
     tracing::subscriber::set_global_default(subscriber).expect("Failed to set logging subscriber");
 
     // Initialize database and fetcher
@@ -58,13 +58,6 @@ async fn main() {
     // Initialize Jinja2 templates
     let env = initialize_templates();
 
-    // Define CORS rules
-    let cors = CorsLayer::new()
-        .allow_origin(Any) // FIXME: should this be restrictive?
-        .allow_methods([Method::GET, Method::POST])
-        .allow_headers(Any)
-        .expose_headers(Any);
-
     // api routes
     let api_routes = Router::new()
         .route("/checkpoints", get(services::api_service::checkpoints))
@@ -79,8 +72,7 @@ async fn main() {
         .nest_service("/static", ServeDir::new("static"))
         .nest("/api", api_routes)
         .with_state(database.clone())
-        .layer(axum::Extension(Arc::new(env)))
-        .layer(cors);
+        .layer(axum::Extension(Arc::new(env)));
 
     // Start the server
     let addr = "0.0.0.0:3000".parse().unwrap();

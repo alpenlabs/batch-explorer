@@ -50,8 +50,10 @@ async fn fetch_checkpoints(
     info!(fn_chkpt_i64, starting_checkpoint, "fetching checkpoints");
     for idx in (starting_checkpoint)..=fn_chkpt_i64 {
         if !checkpoint_db.checkpoint_exists(idx).await{
+            info!("Checkpoint does not exist in db, fetching checkpoint with idx {}", idx);
             let i = PgU64::from_i64(idx).0;
             if let Ok(checkpoint) = fetcher.fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", i).await {
+                info!("Inserting checkpoint with idx {}", idx);
                 checkpoint_db.insert_checkpoint(checkpoint.clone()).await;
             }
         }

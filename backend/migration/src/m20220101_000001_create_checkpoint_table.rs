@@ -35,12 +35,6 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Checkpoints::L2End).big_integer().not_null())
                     .col(
-                        ColumnDef::new(Checkpoints::L2BlockId)
-                            .string()
-                            .not_null()
-                            .unique_key(),
-                    )
-                    .col(
                         ColumnDef::new(Checkpoints::BatchTxid)
                         .string()
                         .not_null()
@@ -56,15 +50,15 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
-        manager
-            .create_index(
-                Index::create()
-                    .name("idx_checkpoints_l2_blockid")
-                    .table(Checkpoints::Table)
-                    .col(Checkpoints::L2BlockId)
-                    .to_owned(),
-            )
-            .await?;
+        // manager
+        //     .create_index(
+        //         Index::create()
+        //             .name("idx_checkpoints_l2_blockid")
+        //             .table(Checkpoints::Table)
+        //             .col(Checkpoints::L2BlockId)
+        //             .to_owned(),
+        //     )
+        //     .await?;
 
         manager
             .create_index(
@@ -104,7 +98,6 @@ enum Checkpoints {
     L1End,
     L2Start,
     L2End,
-    L2BlockId,
     BatchTxid,
     Status,
 }

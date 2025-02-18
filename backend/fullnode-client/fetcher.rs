@@ -108,12 +108,14 @@ impl StrataFetcher {
                 anyhow::bail!("No data exists for index ID: {}", idx);
             }
             Some(result) => {
-                // let data: T = serde_json::from_value(result.clone())
-                //     .context("Failed to deserialize response data")?;
                 tracing::debug!("Raw response for idx {}: {:?}", idx, result);
-                let data  = serde_json::from_value(result.clone())
-                    .context("Failed to deserialize response data")?;
-                Ok(data)
+                match serde_json::from_value::<T>(result.clone()) {
+                    Ok(data) => Ok(data),
+                    Err(e) => {
+                        tracing::error!("Deserialization failed for idx {}: {:?}", idx, e);
+                        Err(anyhow::anyhow!("Failed to deserialize response data: {:?}", e))
+                    }
+                }
             }
         }
     }

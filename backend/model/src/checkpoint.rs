@@ -8,6 +8,7 @@ use std::result::Result;
 use std::str::FromStr;
 /// Represents an L2 Block ID.
 pub type L2BlockId = String;
+pub type L1BlockId = String;
 
 /// Represents the checkpoint information returned by the RPC.
 /// Name for this struct comes from the Strata RPC endpoint.
@@ -16,17 +17,25 @@ pub struct RpcCheckpointInfo {
     /// The index of the checkpoint
     pub idx: u64,
     /// The L1 height range that the checkpoint covers (start, end)
-    pub l1_range: (u64, u64),
+    pub l1_range: (L1BlockCommitment, L1BlockCommitment),
     /// The L2 height range that the checkpoint covers (start, end)
-    pub l2_range: (u64, u64),
-    /// The L2 block ID that this checkpoint covers
-    pub l2_blockid: L2BlockId,
+    pub l2_range: (L2BlockCommitment, L2BlockCommitment),
     /// Info on txn where checkpoint is committed on chain
     pub commitment: Option<RpcCheckpointCommitmentInfo>,
     /// Confirmation status of checkpoint
     pub confirmation_status: Option<RpcCheckpointConfStatus>,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct L1BlockCommitment {
+    height: u64,
+    blkid: L1BlockId,
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct L2BlockCommitment {
+    slot: u64,
+    blkid: L2BlockId,
+}
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum RpcCheckpointConfStatus {
@@ -91,7 +100,6 @@ pub struct Model {
     pub l1_end: i64,
     pub l2_start: i64,
     pub l2_end: i64,
-    pub l2_block_id: L2BlockId,
     pub batch_txid: String,
     pub status: String,
 }
@@ -103,11 +111,10 @@ impl From<RpcCheckpointInfo> for ActiveModel {
     fn from(info: RpcCheckpointInfo) -> Self {
         Self {
             idx: Set(PgU64(info.idx).to_i64()),
-            l1_start: Set(PgU64(info.l1_range.0).to_i64()),
-            l1_end: Set(PgU64(info.l1_range.1).to_i64()),
-            l2_start: Set(PgU64(info.l2_range.0).to_i64()),
-            l2_end: Set(PgU64(info.l2_range.1).to_i64()),
-            l2_block_id: Set(info.l2_blockid),
+            l1_start: Set(PgU64(info.l1_range.0.height).to_i64()),
+            l1_end: Set(PgU64(info.l1_range.1.height).to_i64()),
+            l2_start: Set(PgU64(info.l2_range.0.slot).to_i64()),
+            l2_end: Set(PgU64(info.l2_range.1.slot).to_i64()),
             batch_txid: Set(info
                 .commitment
                 .as_ref()
@@ -120,7 +127,21 @@ impl From<RpcCheckpointInfo> for ActiveModel {
     }
 }
 
-impl From<Model> for RpcCheckpointInfo {
+/// Represents the checkpoint information returned by the RPC to the frontend.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RpcCheckpointInfoBatchExp {
+    /// The index of the checkpoint
+    pub idx: u64,
+    /// The L1 height range that the checkpoint covers (start, end)
+    pub l1_range: (u64, u64),
+    /// The L2 height range that the checkpoint covers (start, end)
+    pub l2_range: (u64, u64),
+    /// Info on txn where checkpoint is committed on chain
+    pub commitment: Option<RpcCheckpointCommitmentInfo>,
+    /// Confirmation status of checkpoint
+    pub confirmation_status: Option<RpcCheckpointConfStatus>,
+}
+impl From<Model> for RpcCheckpointInfoBatchExp {
     fn from(model: Model) -> Self {
         Self {
             idx: PgU64::from_i64(model.idx).0,
@@ -132,7 +153,6 @@ impl From<Model> for RpcCheckpointInfo {
                 PgU64::from_i64(model.l2_start).0,
                 PgU64::from_i64(model.l2_end).0,
             ),
-            l2_blockid: model.l2_block_id,
             commitment: Some(RpcCheckpointCommitmentInfo {
                 blockhash: String::new(),
                 txid: model.batch_txid,
