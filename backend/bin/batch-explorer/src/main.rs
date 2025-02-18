@@ -1,13 +1,15 @@
 mod services;
 mod utils;
+// mod cors;
 
-use axum::{routing::get, Router};
+use axum::{routing::get, Router, http::Method};
 use database::connection::DatabaseWrapper;
 use fullnode_client::fetcher::StrataFetcher;
 use tower_http::services::ServeDir;
 use services::{block_service::run_block_fetcher, checkpoint_service::{start_checkpoint_status_updater_task, start_checkpoint_fetcher}, template_service::initialize_templates};
 use std::sync::Arc;
 use tokio::sync::mpsc;
+use tower_http::cors::{CorsLayer, Any};
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 use utils::config::Config;
@@ -56,6 +58,13 @@ async fn main() {
     // Initialize Jinja2 templates
     let env = initialize_templates();
 
+    // Define CORS rules
+    let cors = CorsLayer::new()
+        .allow_origin(Any) // FIXME: should this be restrictive?
+        .allow_methods([Method::GET, Method::POST])
+        .allow_headers(Any)
+        .expose_headers(Any);
+
     // api routes
     let api_routes = Router::new()
         .route("/checkpoints", get(services::api_service::checkpoints))
@@ -70,7 +79,8 @@ async fn main() {
         .nest_service("/static", ServeDir::new("static"))
         .nest("/api", api_routes)
         .with_state(database.clone())
-        .layer(axum::Extension(Arc::new(env)));
+        .layer(axum::Extension(Arc::new(env)))
+        .layer(cors);
 
     // Start the server
     let addr = "0.0.0.0:3000".parse().unwrap();
