@@ -110,9 +110,17 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPa
                     »
                 </button>
 
-                <div className={styles.pageInfo}>
-                    Page {currentPage} of {totalPages}
-                </div>
+                {
+                    totalPages > 0 &&
+                    <div className={styles.pageInfo}>
+                        Page {currentPage} of {totalPages}
+                    </div>
+                }
+                {
+                    totalPages === 0 &&
+                    <div className={styles.pageInfo}>
+                        No data found
+                    </div>}
             </div>
             <div className={styles.alertWrapper}>
                 {showAlert && <AlertComponent />}
