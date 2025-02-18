@@ -1,4 +1,4 @@
-export interface RpcCheckpointInfo {
+export interface RpcCheckpointInfoBatchExp {
     idx: number;               // Index of the checkpoint
     l1_range: [number, number]; // L1 height range (start, end)
     l2_range: [number, number]; // L2 height range (start, end)

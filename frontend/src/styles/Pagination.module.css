@@ -33,8 +33,9 @@
     /* color: #fff; */
     /* background-color: var(--strata-sand-med); */
     border: 1px solid var(--strata-terracotta-med);
+    min-width: 30px;
     padding: 3px 6px;
-    border-radius: 0px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 14px;
     transition: all 0.3s ease;
@@ -53,7 +54,7 @@
 
 .pageButton.disabled {
     background-color: var(--strata-terracotta-med);
-    border-color: #aaa;
+    /* border-color: #aaa; */
     color: #ddd;
     cursor: not-allowed;
 }

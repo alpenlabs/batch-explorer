@@ -26,7 +26,7 @@ const Header = () => {
                     </div>
                 </nav>
                 <div className={styles.devnetButtonWrapper}>
-                    <a href="#open-form" className={styles.devnetButton}>Access DevNet</a>
+                    <a href="#open-form" className={styles.devnetButton}>Access testnet</a>
                 </div>
             </div>
             {/* Menu Button for Mobile */}

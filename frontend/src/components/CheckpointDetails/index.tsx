@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styles from "../../styles/CheckpointDetails.module.css";
-import { RpcCheckpointInfo } from "../../types";
+import { RpcCheckpointInfoBatchExp } from "../../types";
 import Pagination from "../Paginator/Pagination/index";
 
 const CheckpointDetails = () => {
@@ -10,7 +10,7 @@ const CheckpointDetails = () => {
 
     // Ensure `currentPage` updates when `p` changes
     const [currentPage, setCurrentPage] = useState<number>(Number(page) || 0);
-    const [checkpoint, setData] = useState<RpcCheckpointInfo | null>(null);
+    const [checkpoint, setData] = useState<RpcCheckpointInfoBatchExp | null>(null);
     const [totalPages, setTotalPages] = useState(0);
     const [firstPage, setFirstPage] = useState(0);
     const rowsPerPage = 1; // Fixed value

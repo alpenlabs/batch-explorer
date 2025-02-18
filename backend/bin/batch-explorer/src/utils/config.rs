@@ -2,10 +2,10 @@ use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "Batch Explorer",
+    name = "Batch explorer",
     author = "Your Name",
     version = "1.0",
-    about = "A Batch Explorer Application"
+    about = "A Batch explorer Application"
 )]
 pub struct Config {
     /// The URL of the Strata Fullnode

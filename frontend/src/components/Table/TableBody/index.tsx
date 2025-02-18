@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { RpcCheckpointInfo } from "../../../types";
+import { RpcCheckpointInfoBatchExp } from "../../../types";
+import { shortenIds } from "../../../utils/lib";
 import Pagination from "../../Paginator/Pagination";
 import styles from "./Table.module.css";
-
 const TableBody: React.FC = () => {
-    const [data, setData] = useState<RpcCheckpointInfo[]>([]);
+    const [data, setData] = useState<RpcCheckpointInfoBatchExp[]>([]);
     const [rowsPerPage] = useState(10); // Fixed value
     const [totalPages, setTotalPages] = useState(0);
     const [firstPage, setFirstPage] = useState(1);
@@ -15,6 +15,8 @@ const TableBody: React.FC = () => {
     const pageFromUrl = Number(searchParams.get("p")) || 1;
     const [currentPage, setCurrentPage] = useState(pageFromUrl);
 
+    const MEMPOOL_BASE_URL = import.meta.env.VITE_MEMPOOL_BASE_URL || "https://default-mempool-url.com";
+    const BLOCKSCOUT_BASE_URL = import.meta.env.VITE_BLOCKSCOUT_BASE_URL || "https://default-blockscout-url.com";
 
     useEffect(() => {
         if (currentPage !== pageFromUrl) {
@@ -72,30 +74,32 @@ const TableBody: React.FC = () => {
                 <tbody>
                     {data.map((checkpoint) => (
                         <tr className={styles.tableRowItems} key={checkpoint.idx}>
-                            <td className={styles.tableCell}>
-                                {checkpoint.commitment?.txid}
+                            <td className={styles.tableCell} title={checkpoint.commitment?.txid}>
+                                <a href={`${MEMPOOL_BASE_URL}${checkpoint.commitment?.txid}`} target="_blank" rel="noreferrer">
+                                    {shortenIds(checkpoint.commitment?.txid)}
+                                </a>
                             </td>
                             <td className={styles.tableCell}>
                                 <a href={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</a>
                             </td>
                             <td className={styles.tableCell}>{checkpoint.confirmation_status}</td>
                             <td className={styles.tableCell}>
-                                <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
+                                <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l1_range[0]}
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[1]}`} target="_blank" rel="noreferrer">
+                                <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[1]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l1_range[1]}
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
+                                <a href={`${BLOCKSCOUT_BASE_URL}${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l2_range[0]}
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
+                                <a href={`${BLOCKSCOUT_BASE_URL}${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l2_range[1]}
                                 </a>
                             </td>

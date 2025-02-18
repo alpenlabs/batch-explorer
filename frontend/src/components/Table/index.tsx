@@ -1,9 +1,9 @@
-import { RpcCheckpointInfo } from "../../types";
+import { RpcCheckpointInfoBatchExp } from "../../types";
 import TableBody from "./TableBody";
 // Define the props for the Table component
 
 interface TableProps {
-    data: RpcCheckpointInfo[],
+    data: RpcCheckpointInfoBatchExp[],
 }
 const Table: React.FC<TableProps> = ({ }) => {
     return (
