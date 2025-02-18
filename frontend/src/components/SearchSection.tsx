@@ -13,7 +13,7 @@ const SearchSection = () => {
 
         try {
             // modify the code to get base url from .env file
-            const baseUrl = import.meta.env.API_BASE_URL || 'http://localhost:3000';
+            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
             const response = await fetch(
                 `${baseUrl}/api/search?query=${query.trim()}&ps=1`);
             const result = await response.json();

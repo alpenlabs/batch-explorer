@@ -28,7 +28,7 @@ const TableBody: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const baseUrl = import.meta.env.API_BASE_URL || 'http://localhost:3000';
+                const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
                 const response = await fetch(
                     `${baseUrl}/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
                 );
@@ -103,12 +103,17 @@ const TableBody: React.FC = () => {
                     ))}
                 </tbody>
             </table>
-            <Pagination
-                currentPage={currentPage}
-                firstPage={firstPage}
-                totalPages={totalPages}
-                setPage={setPage}
-            />
+            {
+                totalPages == 0 && <div className={styles.noData}>No data available</div>
+            }
+            {
+                totalPages > 0 && <Pagination
+                    currentPage={currentPage}
+                    firstPage={firstPage}
+                    totalPages={totalPages}
+                    setPage={setPage}
+                />
+            }
         </>
     );
 };
