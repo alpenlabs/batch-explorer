@@ -1,10 +1,18 @@
 .title {
-    font-size: 36px;
+    font-size: 24px;
     font-weight: bold;
     color: var(--strata-sand-med);
     margin-bottom: 20px;
 }
 
+.title h1 {
+    font-size: 3.2rem;
+}
+
+/* prevent color change on hover of title */
+.title:hover {
+    color: var(--strata-sand-med);
+}
 
 /* Search Section */
 .searchSection {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from '../styles/SearchSection.module.css';
 
 const SearchSection = () => {
@@ -33,11 +33,15 @@ const SearchSection = () => {
             console.error("UNKNOWN Error fetching data:", error);
         }
     };
-
+    // const handleTitleClick = () => {
+    //     navigate("/");
+    // };
     return (
         <div className={styles.searchSection}>
             <>
-                <a href="/"><h1 className={styles.title}>Batch explorer</h1></a>
+                <Link to="/" className={styles.title}>
+                    <h1>Batch explorer</h1>
+                </Link>
                 <form onSubmit={handleSearch} className={styles.searchBox}>
                     <input
                         type="text"

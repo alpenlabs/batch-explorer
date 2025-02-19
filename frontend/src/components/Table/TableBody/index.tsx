@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { RpcCheckpointInfoBatchExp } from "../../../types";
 import { shortenIds } from "../../../utils/lib";
 import Pagination from "../../Paginator/Pagination";
@@ -80,7 +80,7 @@ const TableBody: React.FC = () => {
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</a>
+                                <Link to={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</Link>
                             </td>
                             <td className={styles.tableCell}>{checkpoint.confirmation_status}</td>
                             <td className={styles.tableCell}>
