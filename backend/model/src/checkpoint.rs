@@ -36,7 +36,7 @@ pub struct L2BlockCommitment {
     slot: u64,
     blkid: L2BlockId,
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum RpcCheckpointConfStatus {
     /// Pending to be posted on L1

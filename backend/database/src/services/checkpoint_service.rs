@@ -1,7 +1,7 @@
 use model::{checkpoint::{ActiveModel, Entity as Checkpoint, RpcCheckpointInfo, RpcCheckpointInfoBatchExp}, block:: Entity as Block};
 use sea_orm::{
     prelude::*, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Order,
-    QuerySelect, Set
+    QuerySelect
 };
 use tracing::{error, info};
 use model::pgu64::PgU64;
@@ -214,9 +214,69 @@ impl<'a> CheckpointService<'a> {
             }
         }
     }
+    /// Get the earliest checkpoint index whose status is `Pending`
+    pub async fn get_earliest_pending_checkpoint_idx(&self) -> Option<i64> {
+        // add the condition to check no checkpoint at all
+        self.get_latest_checkpoint_index().await?;
+        match Checkpoint::find()
+            .filter(
+                model::checkpoint::Column::Status.eq("Pending"),
+            )
+            .order_by(model::checkpoint::Column::Idx, Order::Asc)
+            .one(self.db)
+            .await
+        {
+            Ok(Some(checkpoint)) => Some(checkpoint.idx),
+            Ok(None) => None,
+            Err(err) => {
+                error!("Error fetching earliest pending checkpoint: {:?}", err);
+                None
+            }
+        }
+    }
+    /// Get the earliest checkpoint index whose status is `Pending`
+    pub async fn get_earliest_confirmed_checkpoint_idx(&self) -> Option<i64> {
+        // add the condition to check no checkpoint at all
+        self.get_latest_checkpoint_index().await?;
+        match Checkpoint::find()
+            .filter(
+                model::checkpoint::Column::Status.eq("Confirmed"),
+            )
+            .order_by(model::checkpoint::Column::Idx, Order::Asc)
+            .one(self.db)
+            .await
+        {
+            Ok(Some(checkpoint)) => Some(checkpoint.idx),
+            Ok(None) => None,
+            Err(err) => {
+                error!("Error fetching earliest confirmed checkpoint: {:?}", err);
+                None
+            }
+        }
+    }
+    /// Get the earliest checkpoint index whose status is `Pending`
+    pub async fn get_last_finalized_checkpoint_idx(&self) -> Option<i64> {
+        // add the condition to check no checkpoint at all
+        self.get_latest_checkpoint_index().await?;
+        match Checkpoint::find()
+            .filter(
+                model::checkpoint::Column::Status.eq("Finalized"),
+            )
+            .order_by(model::checkpoint::Column::Idx, Order::Desc)
+            .one(self.db)
+            .await
+        {
+            Ok(Some(checkpoint)) => Some(checkpoint.idx),
+            Ok(None) => None,
+            Err(err) => {
+                error!("Error fetching last finalized checkpoint: {:?}", err);
+                None
+            }
+        }
+    }
 
     /// Update the status of a checkpoint
-    pub async fn update_checkpoint_status(&self, checkpoint_idx: i64, status: String) -> Result<(), DbErr> {
+    pub async fn update_checkpoint(&self, checkpoint_idx: i64, updated_checkpoint: RpcCheckpointInfo) -> Result<(), DbErr> {
         match Checkpoint::find()
             .filter(model::checkpoint::Column::Idx.eq(checkpoint_idx))
             .one(self.db)
@@ -224,13 +284,16 @@ impl<'a> CheckpointService<'a> {
         {
             Ok(Some(checkpoint)) => {
                 let mut active_model: ActiveModel = checkpoint.into();
-                active_model.status = Set(status.to_string());
+                let updated_checkpoint: ActiveModel = updated_checkpoint.into();
+                let status = updated_checkpoint.status.clone();
+                active_model.status = status;
+                active_model.batch_txid = updated_checkpoint.batch_txid;
 
                 match active_model.update(self.db).await {
                     Ok(_) => {
                         info!(
-                            "Checkpoint with idx {} updated successfully to status: {}",
-                            checkpoint_idx, status
+                            "Checkpoint with idx {} updated successfully",
+                            checkpoint_idx
                         );
                         Ok(())
                     },

@@ -96,15 +96,34 @@ pub async fn start_checkpoint_status_updater_task(
     update_interval: u64,
 ) {
     info!("Starting checkpoint status updater...");
-    let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(update_interval));
 
-    loop {
-        interval.tick().await;
-        match update_checkpoints_status(fetcher.clone(), database.clone()).await {
-            Ok(_) => (),
-            Err(e) => tracing::error!("Error fetching checkpoints: {}", e),
+    // Spawn the "pending" checkpoint updater loop
+    let fetcher_clone = fetcher.clone();
+    let database_clone = database.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(update_interval));
+
+        loop {
+            interval.tick().await;
+
+            if let Err(e) = update_checkpoints_status(fetcher_clone.clone(), database_clone.clone(), "pending").await {
+                tracing::error!("Error fetching pending checkpoints: {}", e);
+            }
         }
-    }
+    });
+
+    // Spawn the "confirmed" checkpoint updater loop
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(update_interval));
+
+        loop {
+            interval.tick().await;
+
+            if let Err(e) = update_checkpoints_status(fetcher.clone(), database.clone(), "confirmed").await {
+                tracing::error!("Error fetching confirmed checkpoints: {}", e);
+            }
+        }
+    });
 }
 
 /// This function continuously updates the status of the checkpoints which are yet to be finalized.
@@ -122,17 +141,36 @@ pub async fn start_checkpoint_status_updater_task(
 async fn update_checkpoints_status(
     fetcher: Arc<StrataFetcher>,
     database: Arc<DatabaseWrapper>,
+    status: &str,
 ) -> anyhow::Result<()> {
     let checkpoint_db = CheckpointService::new(&database.db);
-    // handle the case for None as not error because returning function is returning
-    // Some(checkpoint.idx) or None or Anyhow error
-    let mut idx = match checkpoint_db.get_earliest_unfinalized_checkpoint_idx().await {
-        Some(i) => i,
-        None => {
-            info!("No unfinalized checkpoints found.");
-            return Ok(());
-        }
-    }; 
+    
+    let mut idx = -1;
+    if status == "pending" {
+        idx = match checkpoint_db.get_earliest_pending_checkpoint_idx().await {
+            Some(i) => i,
+            None => {
+                info!("No pending checkpoints found.");
+                return Ok(());
+            }
+        };
+    } else if status == "confirmed" {
+        idx = match checkpoint_db.get_earliest_confirmed_checkpoint_idx().await {
+            Some(i) => i,
+            None => {
+                info!("No confirmed checkpoints found.");
+                return Ok(());
+            }
+        };
+    }
+    // let mut idx = match checkpoint_db.get_earliest_unfinalized_checkpoint_idx().await {
+    //     Some(i) => i,
+    //     None => {
+    //         info!("No unfinalized checkpoints found.");
+    //         return Ok(());
+    //     }
+    // };
+    info!("updating status for checkpoint: {}", idx); 
 
     loop {
         let i = PgU64::from_i64(idx).0;
@@ -156,17 +194,21 @@ async fn update_checkpoints_status(
                 return Ok(()); // Simply return and continue execution instead of erroring  
             }
         };
+
         info!("Updating checkpoint status: idx={}, status={}", idx, status.clone());
         // if there is no change in status, return by doing nothing
         if checkpoint_in_db
         .confirmation_status
         .map_or("-".to_string(), |s| s.to_string()) == status.to_string() 
         {
+            // if the status is unchanged then do nothing
             return Ok(());
         }
         
+        // update the db with the new checkpoint record instead of tweaking the existing one
+        // as there could be change in both status and txid
         checkpoint_db
-        .update_checkpoint_status(idx, status.to_string())
+        .update_checkpoint(idx, checkpoint_from_rpc)
         .await
         .map_err(|e| {
             error!("Error updating checkpoint status: {:?}", e);

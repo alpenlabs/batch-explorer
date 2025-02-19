@@ -2,19 +2,20 @@ mod services;
 mod utils;
 // mod cors;
 
-use axum::{routing::get, Router, http::Method};
+use axum::{routing::get, Router};
 use database::connection::DatabaseWrapper;
 use fullnode_client::fetcher::StrataFetcher;
 use tower_http::services::ServeDir;
 use services::{block_service::run_block_fetcher, checkpoint_service::{start_checkpoint_status_updater_task, start_checkpoint_fetcher}, template_service::initialize_templates};
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use tower_http::cors::{CorsLayer, Any};
-use tracing::{info, Level};
+use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 use utils::config::Config;
 use dotenvy::dotenv;
 use clap::Parser;
+
+
 #[tokio::main]
 async fn main() {
     dotenv().ok();
@@ -51,7 +52,6 @@ async fn main() {
     let fetcher_clone = fetcher.clone();
     let database_clone = database.clone();
     tokio::spawn(async move {
-        // TODO: Make the interval configurable, for now set to 5 minutes
         start_checkpoint_status_updater_task(fetcher_clone, database_clone, config.status_update_interval).await;
     }); 
 
