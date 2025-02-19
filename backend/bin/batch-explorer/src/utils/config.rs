@@ -30,10 +30,19 @@ pub struct Config {
     #[arg(
         long,
         env = "APP_FETCH_INTERVAL",
-        default_value_t = 100,
+        default_value_t = 30,
         help = "Fetch interval in seconds"
     )]
     pub fetch_interval: u64,
+
+    /// The status update interval in seconds
+    #[arg(
+        long,
+        env = "APP_STATUS_UPDATE_INTERVAL",
+        default_value_t = 30,
+        help = "Status update interval in seconds"
+    )]
+    pub status_update_interval: u64,
 
     #[arg(
         long,
