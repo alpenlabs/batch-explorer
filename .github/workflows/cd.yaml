@@ -109,7 +109,8 @@ jobs:
 
       - name: Update Docker image tag in Helm values
         if: |
-          (matrix.service == needs.build-and-push.outputs.service && needs.build-and-push.outputs.image_tag != '')
+          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
+          (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         env:
           SERVICE: ${{ matrix.service }}
           SHORT_TAG: ${{ github.sha }}

@@ -34,7 +34,6 @@ WORKDIR /usr/src/app
 # Copy the pre-built binaries from the build stage
 COPY --from=builder /usr/src/app/target/debug/batch-explorer .
 COPY --from=builder /usr/src/app/target/debug/migration .
-COPY static static
 COPY .env* .
 # Expose the application port (default is 3000 for batch-explorer)
 EXPOSE 3000
