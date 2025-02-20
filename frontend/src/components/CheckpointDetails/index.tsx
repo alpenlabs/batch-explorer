@@ -44,7 +44,7 @@ const CheckpointDetails = () => {
     }, [currentPage, rowsPerPage]);
 
     if (!checkpoint) {
-        return <div>No checkpoint data available</div>;
+        return <div className={styles.noData}>Loading...</div>
     }
     return (
         <>
