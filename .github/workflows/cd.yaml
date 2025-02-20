@@ -84,7 +84,7 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
   update-helm-values:
     name: Update Helm Values
-    needs: build-and-push
+    needs: [build-and-push, detect-changes]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -109,8 +109,7 @@ jobs:
 
       - name: Update Docker image tag in Helm values
         if: |
-          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
-          (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
+          (matrix.service == needs.build-and-push.outputs.service && needs.build-and-push.outputs.image_tag != '')
         env:
           SERVICE: ${{ matrix.service }}
           SHORT_TAG: ${{ github.sha }}

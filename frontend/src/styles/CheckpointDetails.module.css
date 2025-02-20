@@ -29,8 +29,6 @@
     position: fixed;
     bottom: 20px;
     left: 20px;
-    /* right: 50%; */
-    /* transform: translateX(30%); */
     background-color: var(--strata-terracotta-light);
     color: var(--strata-sand-light);
     padding: 10px 20px;
