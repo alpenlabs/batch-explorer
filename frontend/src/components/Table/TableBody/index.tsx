@@ -59,56 +59,58 @@ const TableBody: React.FC = () => {
 
     return (
         <>
-            <table className={styles.table}>
-                <thead className={styles.tableRowHeader}>
-                    <tr>
-                        <th className={styles.tableHeader}>Batch TXID</th>
-                        <th className={styles.tableHeader}>Epoch index</th>
-                        <th className={styles.tableHeader}>Status</th>
-                        <th className={styles.tableHeader}>Signet start block</th>
-                        <th className={styles.tableHeader}>Signet end block</th>
-                        <th className={styles.tableHeader}>Strata start block</th>
-                        <th className={styles.tableHeader}>Strata end block</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((checkpoint) => (
-                        <tr className={styles.tableRowItems} key={checkpoint.idx}>
-                            <td className={styles.tableCell} title={checkpoint.commitment?.txid}>
-                                <a href={`${MEMPOOL_BASE_URL}tx/${checkpoint.commitment?.txid}`} target="_blank" rel="noreferrer">
-                                    {shortenIds(checkpoint.commitment?.txid)}
-                                </a>
-                            </td>
-                            <td className={styles.tableCell}>
-                                <Link to={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</Link>
-                            </td>
-                            <td className={styles.tableCell}>{checkpoint.confirmation_status}</td>
-                            <td className={styles.tableCell}>
-                                <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
-                                    {checkpoint.l1_range[0]}
-                                </a>
-                            </td>
-                            <td className={styles.tableCell}>
-                                <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[1]}`} target="_blank" rel="noreferrer">
-                                    {checkpoint.l1_range[1]}
-                                </a>
-                            </td>
-                            <td className={styles.tableCell}>
-                                <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
-                                    {checkpoint.l2_range[0]}
-                                </a>
-                            </td>
-                            <td className={styles.tableCell}>
-                                <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
-                                    {checkpoint.l2_range[1]}
-                                </a>
-                            </td>
+            <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                    <thead className={styles.tableRowHeader}>
+                        <tr>
+                            <th className={styles.tableHeader}>Batch TXID</th>
+                            <th className={styles.tableHeader}>Epoch index</th>
+                            <th className={styles.tableHeader}>Status</th>
+                            <th className={styles.tableHeader}>Signet start block</th>
+                            <th className={styles.tableHeader}>Signet end block</th>
+                            <th className={styles.tableHeader}>Strata start block</th>
+                            <th className={styles.tableHeader}>Strata end block</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {data.map((checkpoint) => (
+                            <tr className={styles.tableRowItems} key={checkpoint.idx}>
+                                <td className={styles.tableCell} title={checkpoint.commitment?.txid}>
+                                    <a href={`${MEMPOOL_BASE_URL}tx/${checkpoint.commitment?.txid}`} target="_blank" rel="noreferrer">
+                                        {shortenIds(checkpoint.commitment?.txid)}
+                                    </a>
+                                </td>
+                                <td className={styles.tableCell}>
+                                    <Link to={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</Link>
+                                </td>
+                                <td className={styles.tableCell}>{checkpoint.confirmation_status}</td>
+                                <td className={styles.tableCell}>
+                                    <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
+                                        {checkpoint.l1_range[0]}
+                                    </a>
+                                </td>
+                                <td className={styles.tableCell}>
+                                    <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[1]}`} target="_blank" rel="noreferrer">
+                                        {checkpoint.l1_range[1]}
+                                    </a>
+                                </td>
+                                <td className={styles.tableCell}>
+                                    <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
+                                        {checkpoint.l2_range[0]}
+                                    </a>
+                                </td>
+                                <td className={styles.tableCell}>
+                                    <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
+                                        {checkpoint.l2_range[1]}
+                                    </a>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
             {
-                totalPages == 0 && <div className={styles.noData}>No data available</div>
+                totalPages == 0 && <div className={styles.noData}>Loading...</div>
             }
             {
                 totalPages > 0 && <Pagination

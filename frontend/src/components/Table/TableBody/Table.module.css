@@ -1,7 +1,14 @@
+/* Wrapping container to enable horizontal scroll */
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+}
+
 /* Table  */
 .table {
     border-collapse: collapse;
     width: 100%;
+    min-width: 700px;
     /* background-color: white; */
 }
 
@@ -14,9 +21,11 @@
     border-bottom: 1px solid grey;
 }
 
-.tableHeader {
-    padding: 10px;
+.tableHeader,
+.tableCell {
+    padding: 5px;
     text-align: left;
+    /* white-space: nowrap; */
 }
 
 .tableRowItems {
@@ -35,6 +44,14 @@
     padding: 10px;
     font-size: 14px;
     color: var(--strata-terracotta-med);
+}
+
+.tableCell a {
+    /* word-break: break-word; */
+    max-width: 120px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .pagination {
@@ -57,4 +74,44 @@
     color: white;
     cursor: pointer;
     border-radius: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+
+    .tableHeader,
+    .tableCell {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .table {
+        min-width: 600px;
+        /* Slightly smaller for tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    .table {
+        min-width: 500px;
+        /* For mobile phones */
+    }
+
+    .tableHeader,
+    .tableCell {
+        font-size: 10px;
+        padding: 6px;
+    }
+
+    .tableCell a {
+        max-width: 80px;
+    }
+}
+
+/* No data placeholder */
+.noData {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+    color: var(--strata-terracotta-med);
 }

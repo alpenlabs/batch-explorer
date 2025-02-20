@@ -51,65 +51,66 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPa
         <>
 
             <div className={styles.footer}>
-                {/* First Button */}
-                <button
-                    className={`${styles.pageButton} ${currentPage === firstPage ? styles.disabled : ""}`}
-                    onClick={() => updatePage(firstPage)}
-                    disabled={currentPage === firstPage}
-                >
-                    «
-                </button>
+                <div className={styles.pageButtons}>
+                    {/* First Button */}
+                    <button
+                        className={`${styles.pageButton} ${currentPage === firstPage ? styles.disabled : ""}`}
+                        onClick={() => updatePage(firstPage)}
+                        disabled={currentPage === firstPage}
+                    >
+                        «
+                    </button>
 
-                {/* Previous Button */}
-                <button
-                    className={`${styles.pageButton} ${currentPage === firstPage ? styles.disabled : ""}`}
-                    onClick={() => updatePage(currentPage - 1)}
-                    disabled={currentPage === firstPage}
-                >
-                    ‹
-                </button>
+                    {/* Previous Button */}
+                    <button
+                        className={`${styles.pageButton} ${currentPage === firstPage ? styles.disabled : ""}`}
+                        onClick={() => updatePage(currentPage - 1)}
+                        disabled={currentPage === firstPage}
+                    >
+                        ‹
+                    </button>
 
-                {/* Page Buttons */}
-                {Array.from({ length: endPage - startPage + 1 }, (_, index) => {
-                    const page = startPage + index;
-                    return page === currentPage ? (
-                        <input
-                            key={page}
-                            className={styles.pageInput}
-                            value={editablePage}
-                            onChange={(e) => setEditablePage(e.target.value)}
-                            onBlur={handlePageChange}
-                            onKeyDown={(e) => e.key === "Enter" && handlePageChange()}
-                        />
-                    ) : (
-                        <button
-                            key={page}
-                            className={styles.pageButton}
-                            onClick={() => updatePage(page)}
-                        >
-                            {page}
-                        </button>
-                    );
-                })}
+                    {/* Page Buttons */}
+                    {Array.from({ length: endPage - startPage + 1 }, (_, index) => {
+                        const page = startPage + index;
+                        return page === currentPage ? (
+                            <input
+                                key={page}
+                                className={styles.pageInput}
+                                value={editablePage}
+                                onChange={(e) => setEditablePage(e.target.value)}
+                                onBlur={handlePageChange}
+                                onKeyDown={(e) => e.key === "Enter" && handlePageChange()}
+                            />
+                        ) : (
+                            <button
+                                key={page}
+                                className={styles.pageButton}
+                                onClick={() => updatePage(page)}
+                            >
+                                {page}
+                            </button>
+                        );
+                    })}
 
-                {/* Next Button */}
-                <button
-                    className={`${styles.pageButton} ${currentPage === totalPages ? styles.disabled : ""}`}
-                    onClick={() => updatePage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                >
-                    ›
-                </button>
+                    {/* Next Button */}
+                    <button
+                        className={`${styles.pageButton} ${currentPage === totalPages ? styles.disabled : ""}`}
+                        onClick={() => updatePage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        ›
+                    </button>
 
-                {/* Last Button */}
-                <button
-                    className={`${styles.pageButton} ${currentPage === totalPages ? styles.disabled : ""}`}
-                    onClick={() => updatePage(totalPages)}
-                    disabled={currentPage === totalPages}
-                >
-                    »
-                </button>
-
+                    {/* Last Button */}
+                    <button
+                        className={`${styles.pageButton} ${currentPage === totalPages ? styles.disabled : ""}`}
+                        onClick={() => updatePage(totalPages)}
+                        disabled={currentPage === totalPages}
+                    >
+                        »
+                    </button>
+                </div>
                 {
                     totalPages > 0 &&
                     <div className={styles.pageInfo}>

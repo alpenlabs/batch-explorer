@@ -1,86 +1,75 @@
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10px 0;
-}
-
-.pagination span {
-    margin: 0 5px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.pagination button {
-    padding: 5px 10px;
-    border: none;
-    background-color: #8b2624;
-    color: white;
-    cursor: pointer;
-    border-radius: 3px;
-}
-
 .footer {
     display: flex;
     justify-content: center;
+    /* Center both buttons and pageInfo */
     align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    /* Vertically center on larger screens */
+    flex-wrap: wrap;
+    /* Allow wrapping on smaller screens */
+    gap: 10px;
+    /* Space between buttons and pageInfo */
+    width: 100%;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pageButtons {
+    display: flex;
+    justify-content: center;
+    /* Center buttons */
+    flex-wrap: wrap;
+    /* Allow buttons to wrap if needed */
+    gap: 5px;
 }
 
 .pageButton {
-    /* background-color: #333; */
-    /* color: #fff; */
-    /* background-color: var(--strata-sand-med); */
-    border: 1px solid var(--strata-terracotta-med);
-    min-width: 30px;
-    padding: 3px 6px;
-    border-radius: 5px;
-    cursor: pointer;
+    padding: 6px 10px;
     font-size: 14px;
-    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid var(--strata-sand-med);
+    background-color: var(--strata-sand-med);
+    border-radius: 4px;
     color: var(--strata-terracotta-med);
-    background-color: var(--strata-sand-light);
-    margin: 0 1px;
-}
-
-.pageButton.arrow {
-    width: 1.3rem;
-}
-
-.pageButton:hover {
-    background-color: var(--strata-terracotta-light);
 }
 
 .pageButton.disabled {
-    background-color: var(--strata-terracotta-med);
-    /* border-color: #aaa; */
-    color: #ddd;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
 .pageInput {
     width: 50px;
-    padding: 3px 6px;
     text-align: center;
+    padding: 4px;
     font-size: 14px;
-    border: 1px solid var(--strata-terracotta-med);
-    /* border-radius: 4px; */
-    outline: none;
-    color-scheme: light;
     background-color: var(--strata-sand-light);
+    border: 1px solid var(--strata-sand-med);
+    border-radius: 4px;
     color: var(--strata-terracotta-med);
-}
 
-.pageInput:focus {
-    border-color: var(--strata-terracotta-med);
-    box-shadow: 0 0 3px var(--strata-terracotta-med);
 }
 
 .pageInfo {
-    width: 150px;
-    margin-left: 10px;
     font-size: 14px;
-    /* font-weight: bold; */
     color: var(--strata-terracotta-med);
+}
+
+/* 🪄 Responsive: On smaller screens, pageInfo moves to its own row */
+@media (max-width: 600px) {
+    .footer {
+        flex-direction: column;
+        /* Stack elements vertically */
+        align-items: center;
+        /* Center them in column layout */
+    }
+
+    .pageButtons {
+        margin-bottom: 5px;
+        /* Space between buttons and pageInfo */
+    }
+
+    .pageInfo {
+        font-size: 12px;
+        text-align: center;
+    }
 }
