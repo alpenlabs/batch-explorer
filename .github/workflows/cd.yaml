@@ -127,7 +127,11 @@ jobs:
         if: |
           (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
           (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
+        env:
+          SERVICE: ${{ matrix.service }}
+          SHORT_TAG: ${{ github.sha }}
         run: |
+          SHORT_TAG=${SHORT_TAG::7}
           cd deployments
           git config user.name "github-actions-batch-exp"
           git config user.email "github-actions@github.com"
