@@ -75,7 +75,7 @@ const TableBody: React.FC = () => {
                     {data.map((checkpoint) => (
                         <tr className={styles.tableRowItems} key={checkpoint.idx}>
                             <td className={styles.tableCell} title={checkpoint.commitment?.txid}>
-                                <a href={`${MEMPOOL_BASE_URL}${checkpoint.commitment?.txid}`} target="_blank" rel="noreferrer">
+                                <a href={`${MEMPOOL_BASE_URL}tx/${checkpoint.commitment?.txid}`} target="_blank" rel="noreferrer">
                                     {shortenIds(checkpoint.commitment?.txid)}
                                 </a>
                             </td>
@@ -94,12 +94,12 @@ const TableBody: React.FC = () => {
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`${BLOCKSCOUT_BASE_URL}${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
+                                <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l2_range[0]}
                                 </a>
                             </td>
                             <td className={styles.tableCell}>
-                                <a href={`${BLOCKSCOUT_BASE_URL}${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
+                                <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
                                     {checkpoint.l2_range[1]}
                                 </a>
                             </td>
