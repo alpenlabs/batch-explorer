@@ -113,9 +113,9 @@ jobs:
           (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         env:
           SERVICE: ${{ matrix.service }}
-          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          SHORT_TAG: ${{ github.sha }}
         run: |
-          SHORT_TAG=${IMAGE_TAG##*:}
+          SHORT_TAG=${SHORT_TAG::7}
           VALUES_FILE="deployments/clusters/temp6-testnet1-staging/values/strata-apps-values.yaml"
 
           if [[ "$SERVICE" == "frontend" ]]; then
