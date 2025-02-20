@@ -5,8 +5,7 @@ mod utils;
 use axum::{routing::get, Router};
 use database::connection::DatabaseWrapper;
 use fullnode_client::fetcher::StrataFetcher;
-use tower_http::services::ServeDir;
-use services::{block_service::run_block_fetcher, checkpoint_service::{start_checkpoint_status_updater_task, start_checkpoint_fetcher}, template_service::initialize_templates};
+use services::{block_service::run_block_fetcher, checkpoint_service::{start_checkpoint_status_updater_task, start_checkpoint_fetcher}};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tracing::info;
@@ -55,9 +54,6 @@ async fn main() {
         start_checkpoint_status_updater_task(fetcher_clone, database_clone, config.status_update_interval).await;
     }); 
 
-    // Initialize Jinja2 templates
-    let env = initialize_templates();
-
     // api routes
     let api_routes = Router::new()
         .route("/checkpoints", get(services::api_service::checkpoints))
@@ -66,13 +62,8 @@ async fn main() {
 
     // Setup Axum router
     let app: Router = Router::new()
-        .route("/", get(services::template_service::homepage))
-        .route("/checkpoint", get(services::template_service::checkpoint_details))
-        .route("/search", get(services::template_service::search_handler))
-        .nest_service("/static", ServeDir::new("static"))
         .nest("/api", api_routes)
-        .with_state(database.clone())
-        .layer(axum::Extension(Arc::new(env)));
+        .with_state(database.clone());
 
     // Start the server
     let addr = "0.0.0.0:3000".parse().unwrap();

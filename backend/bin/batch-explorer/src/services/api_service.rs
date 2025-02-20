@@ -5,8 +5,8 @@ use std::sync::Arc;
 use database::connection::DatabaseWrapper;
 use database::services::checkpoint_service::CheckpointService;
 use model::pgu64::PgU64;
-use super::template_service::QueryParams;
-use super::template_service::SearchQuery;
+use super::QueryParams;
+use super::SearchQuery;
 
 pub async fn checkpoints(State(database): State<Arc<DatabaseWrapper>>, Query(params): Query<QueryParams>) -> Json<serde_json::Value> {
     let current_page = params.p.unwrap_or(1);
