@@ -13,10 +13,6 @@
 }
 
 .tableRowHeader {
-    /* background-color: #DF896D; */
-    /* color: rgb(44, 43, 43); */
-    /* font-weight: bold; */
-    /* border-radius: 10px; */
     color: var(--strata-terracotta-med);
     border-bottom: 1px solid grey;
 }
