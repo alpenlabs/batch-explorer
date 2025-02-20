@@ -17,17 +17,13 @@ permissions:
 
 
 jobs:
-  build-test:
+  build-and-push-image:
     name: build docker images and push to ECR
     runs-on: ubuntu-latest
-
+    outputs:
+      image-pushed: ${{ steps.build-and-push.outcome }}
     steps:
       - uses: actions/checkout@v3
-    
-    #   - name: create environment file   
-    #     run: |
-    #       touch ./.env && echo "$env_kubernetes" >> ./.env
-
       - name: Configure AWS ECR Details
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -42,7 +38,7 @@ jobs:
           mask-password: "true"
 
       - name: FRONTEND, Build and push the tagged docker image to Amazon ECR
-        id: build-image
+        id: build-and-push
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: tn1/batch-exp/fe  #IMP
@@ -58,3 +54,55 @@ jobs:
       - name: Build an Image
         if: github.event_name == 'pull_request'
         run: docker build -t myimage:${{ github.sha }} .
+
+  update-helm-values:
+    name: Update Helm Values
+    runs-on: ubuntu-latest
+    needs: build-and-push-image
+    # Runs only if image building and pushing succeeds
+    if: needs.build-and-push-image.outputs.image-pushed == 'success'
+
+    steps:
+      - name: Set up SSH for private repo access
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOYMENTS_WRITE }}
+
+      - name: Clone alpenlabs/deployments repo (specific branch)
+        run: |
+          BRANCH_NAME="automated-cluster-creation"
+          git clone --depth=1 --branch $BRANCH_NAME git@github.com:alpenlabs/deployments.git deployments
+          cd deployments
+          git checkout $BRANCH_NAME
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update Docker image tag in Helm values
+        env:
+          NEW_TAG: ${{ github.sha }}
+        run: |
+          SHORT_TAG=$(echo "$NEW_TAG" | cut -c1-7)
+          echo "Updating tag to $SHORT_TAG"
+          yq -i '.batchExpFe.image.tag = strenv(SHORT_TAG)' deployments/clusters/temp6-testnet1-staging/values/strata-apps-values.yaml
+
+      - name: Commit and push changes
+        run: |
+          cd deployments
+          git config user.name "github-actions-batch-exp"
+          git config user.email "github-actions@github.com"
+
+          # Check if there are any changes before committing
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add clusters/temp6-testnet1-staging/values/strata-apps-values.yaml
+            git commit -m "Update batchExpFe image tag to $SHORT_TAG"
+            
+            # Pull latest changes to avoid push conflicts
+            git pull --rebase origin automated-cluster-creation
+
+            git push origin automated-cluster-creation
+          fi
