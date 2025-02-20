@@ -1,0 +1,60 @@
+name: Kubernetes CI/CD
+on:
+  push:
+    branches:
+      - main 
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+env:
+  CI: false
+  # env_kubernetes: ${{secrets.ENV}}
+
+permissions:
+  id-token: write
+  contents: read
+
+
+jobs:
+  build-test:
+    name: build docker images and push to ECR
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+    
+    #   - name: create environment file   
+    #     run: |
+    #       touch ./.env && echo "$env_kubernetes" >> ./.env
+
+      - name: Configure AWS ECR Details
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE}}
+          role-session-name: client-session
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: "true"
+
+      - name: FRONTEND, Build and push the tagged docker image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: tn1/batch-exp/fe  #IMP
+          COMMIT: ${{ github.sha }}
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          IMAGE_TAG=${COMMIT::7}
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile frontend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "IMAGE_URL=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Build an Image
+        if: github.event_name == 'pull_request'
+        run: docker build -t myimage:${{ github.sha }} .
