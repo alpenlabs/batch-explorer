@@ -76,7 +76,7 @@ jobs:
 
           DOCKERFILE_PATH="$SERVICE/Dockerfile"
           CONTEXT_DIR="$SERVICE"
-          ECR_REPOSITORY="tn1/batch-exp/${SERVICE:0:2}"
+          ECR_REPOSITORY="tn1/batch-exp/${SERVICE}"
 
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f $DOCKERFILE_PATH $CONTEXT_DIR
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

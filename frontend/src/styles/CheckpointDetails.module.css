@@ -41,3 +41,9 @@
     opacity: 0.8;
 
 }
+
+@media (max-width: 760px) {
+    .checkpointContainer {
+        margin: 30px 0%;
+    }
+}
