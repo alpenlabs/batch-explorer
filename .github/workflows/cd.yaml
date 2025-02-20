@@ -84,10 +84,9 @@ jobs:
         env:
           NEW_TAG: ${{ github.sha }}
         run: |
-          SHORT_TAG=$(echo "$NEW_TAG" | cut -c1-7)
+          SHORT_TAG=${NEW_TAG::7}
           echo "Updating tag to $SHORT_TAG"
-          yq -i '.batchExpFe.image.tag = strenv(SHORT_TAG)' deployments/clusters/temp6-testnet1-staging/values/strata-apps-values.yaml
-
+          yq eval -i ".batchExpFe.image.tag = \"$SHORT_TAG\"" deployments/clusters/temp6-testnet1-staging/values/strata-apps-values.yaml
       - name: Commit and push changes
         run: |
           cd deployments
