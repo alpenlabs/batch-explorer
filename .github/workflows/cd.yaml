@@ -1,34 +1,58 @@
 name: Kubernetes CI/CD
+
 on:
   push:
     branches:
-      - main 
+      - main
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
 env:
   CI: false
-  # env_kubernetes: ${{secrets.ENV}}
 
 permissions:
   id-token: write
   contents: read
 
-
 jobs:
-  build-and-push-image:
-    name: build docker images and push to ECR
+  detect-changes:
+    name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      image-pushed: ${{ steps.build-and-push.outcome }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      backend_changed: ${{ steps.filter.outputs.backend }}
     steps:
       - uses: actions/checkout@v3
+
+      - name: Check changed files
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  build-and-push:
+    name: Build and Push Docker Images
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [frontend, backend]
+    outputs:
+      image_tag: ${{ steps.build-and-push.outputs.image }}
+      service: ${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v3
+
       - name: Configure AWS ECR Details
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE}}
-          role-session-name: client-session
+          role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
@@ -37,38 +61,42 @@ jobs:
         with:
           mask-password: "true"
 
-      - name: FRONTEND, Build and push the tagged docker image to Amazon ECR
+      - name: Build and push Docker image
         id: build-and-push
+        if: |
+          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
+          (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: tn1/batch-exp/fe  #IMP
           COMMIT: ${{ github.sha }}
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           IMAGE_TAG=${COMMIT::7}
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile frontend
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          echo "IMAGE_URL=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+          SERVICE="${{ matrix.service }}"
+          echo "Building and pushing $SERVICE image with tag $IMAGE_TAG"
 
-      - name: Build an Image
-        if: github.event_name == 'pull_request'
-        run: docker build -t myimage:${{ github.sha }} .
+          DOCKERFILE_PATH="$SERVICE/Dockerfile"
+          CONTEXT_DIR="$SERVICE"
+          ECR_REPOSITORY="tn1/batch-exp/${SERVICE:0:2}"
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f $DOCKERFILE_PATH $CONTEXT_DIR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
   update-helm-values:
     name: Update Helm Values
+    needs: build-and-push
     runs-on: ubuntu-latest
-    needs: build-and-push-image
-    # Runs only if image building and pushing succeeds
-    if: needs.build-and-push-image.outputs.image-pushed == 'success'
-
+    strategy:
+      matrix:
+        service: [frontend, backend]
     steps:
       - name: Set up SSH for private repo access
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.DEPLOYMENTS_WRITE }}
 
-      - name: Clone alpenlabs/deployments repo (specific branch)
+      - name: Clone deployments repo (specific branch)
         run: |
           BRANCH_NAME="automated-cluster-creation"
           git clone --depth=1 --branch $BRANCH_NAME git@github.com:alpenlabs/deployments.git deployments
@@ -81,27 +109,36 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
 
       - name: Update Docker image tag in Helm values
+        if: |
+          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
+          (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         env:
-          NEW_TAG: ${{ github.sha }}
+          SERVICE: ${{ matrix.service }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
-          SHORT_TAG=${NEW_TAG::7}
-          echo "Updating tag to $SHORT_TAG"
-          yq eval -i ".batchExpFe.image.tag = \"$SHORT_TAG\"" deployments/clusters/temp6-testnet1-staging/values/strata-apps-values.yaml
+          SHORT_TAG=${IMAGE_TAG##*:}
+          VALUES_FILE="deployments/clusters/temp6-testnet1-staging/values/strata-apps-values.yaml"
+
+          if [[ "$SERVICE" == "frontend" ]]; then
+            yq eval -i ".batchExpFe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
+          elif [[ "$SERVICE" == "backend" ]]; then
+            yq eval -i ".batchExpBe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
+          fi
+
       - name: Commit and push changes
+        if: |
+          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
+          (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         run: |
           cd deployments
           git config user.name "github-actions-batch-exp"
           git config user.email "github-actions@github.com"
 
-          # Check if there are any changes before committing
           if git diff --quiet; then
             echo "No changes to commit."
           else
             git add clusters/temp6-testnet1-staging/values/strata-apps-values.yaml
-            git commit -m "Update batchExpFe image tag to $SHORT_TAG"
-            
-            # Pull latest changes to avoid push conflicts
+            git commit -m "Update $SERVICE image tag to $SHORT_TAG"
             git pull --rebase origin automated-cluster-creation
-
             git push origin automated-cluster-creation
           fi
