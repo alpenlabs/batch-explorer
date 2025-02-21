@@ -43,7 +43,6 @@ impl<'a> BlockService<'a> {
             }
         }
     }
-    
     /// Get the latest checkpoint index stored in the database
     pub async fn get_latest_block_index(&self) -> Option<i64> {
         // use sea_orm::entity::prelude::*;

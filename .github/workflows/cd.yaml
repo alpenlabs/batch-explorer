@@ -28,9 +28,13 @@ jobs:
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
+    env:
+      # select environment based on branch or manual input
+      ENVIRONMENT: ${{ inputs.environment || (github.ref == 'refs/heads/main' && 'staging') }}
     outputs:
       frontend_changed: ${{ steps.filter.outputs.frontend }}
       backend_changed: ${{ steps.filter.outputs.backend }}
+      environment: ${{ env.ENVIRONMENT }}
     steps:
       - uses: actions/checkout@v3
 
@@ -45,9 +49,9 @@ jobs:
               - 'backend/**'
   build-and-push:
     name: Build and Push Docker Images
-    needs: detect-changes
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    needs: detect-changes
+    environment: ${{ needs.detect-changes.outputs.environment }}
     strategy:
       matrix:
         service: [frontend, backend]
@@ -88,7 +92,7 @@ jobs:
     name: Update Helm Values
     needs: [build-and-push, detect-changes]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: ${{ needs.detect-changes.outputs.environment }}
     strategy:
       matrix:
         service: [frontend, backend]
@@ -99,11 +103,11 @@ jobs:
           ssh-private-key: ${{ secrets.DEPLOYMENTS_WRITE }}
       - name: Clone deployments repo (specific branch)
         env:
-          : ${{ vars. }}
+          DEPLOYMENT_REPO_BRANCH: ${{ vars.DEPLOYMENT_REPO_BRANCH }}
         run: |
-          git clone --depth=1 --branch $ git@github.com:alpenlabs/deployments.git deployments
+          git clone --depth=1 --branch $DEPLOYMENT_REPO_BRANCH git@github.com:alpenlabs/deployments.git deployments
           cd deployments
-          git checkout $
+          git checkout $DEPLOYMENT_REPO_BRANCH
 
       - name: Install yq
         run: |
@@ -116,7 +120,7 @@ jobs:
           (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         env:
           SERVICE: ${{ matrix.service }}
-          SHORT_TAG: ${{ github.sha }}::7
+          SHORT_TAG: ${{ github.sha }}
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
         run: |
           SHORT_TAG=${SHORT_TAG::7}
@@ -136,7 +140,7 @@ jobs:
           SHORT_TAG: ${{ github.sha }}
           GH_ACTIONS_USER_NAME: ${{ vars.GH_ACTIONS_USER_NAME }}
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
-          : ${{ vars. }}
+          DEPLOYMENT_REPO_BRANCH: ${{ vars.DEPLOYMENT_REPO_BRANCH }}
         run: |
           SHORT_TAG=${SHORT_TAG::7}
           cd deployments
@@ -148,6 +152,6 @@ jobs:
           else
             git add clusters/$CLUSTER_NAME/values/strata-apps-values.yaml
             git commit -m "Update $SERVICE image tag to $SHORT_TAG"
-            git pull --rebase origin $
-            git push origin $ 
+            git pull --rebase origin $DEPLOYMENT_REPO_BRANCH
+            git push origin $DEPLOYMENT_REPO_BRANCH
           fi
