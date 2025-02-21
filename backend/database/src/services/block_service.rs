@@ -71,6 +71,7 @@ impl<'a> BlockService<'a> {
             .map(|result| result.is_some())
             .unwrap_or(false)
     }
+    
     async fn prev_block_exists(&self, height: i64) -> bool {
         if height == i64::MIN {
             // return true for the genesis block
