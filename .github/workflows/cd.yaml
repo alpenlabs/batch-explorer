@@ -52,6 +52,12 @@ jobs:
     needs: detect-changes
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    env:
+      CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
+      DEPLOYMENT_BRANCH: ${{ vars.DEPLOYMENT_BRANCH }}
+      ECR_REPOSITORY_PREFIX: ${{ vars.ECR_REPOSITORY_PREFIX }}
+      GITHUB_ACTIONS_USER_NAME: ${{ vars.GH_ACTIONS_USER_NAME }}
+      COMMIT: ${{ github.sha }}
     strategy:
       matrix:
         service: [frontend, backend]
@@ -92,6 +98,12 @@ jobs:
     needs: [build-and-push, detect-changes]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    env:
+      CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
+      DEPLOYMENT_BRANCH: ${{ vars.DEPLOYMENT_BRANCH }}
+      ECR_REPOSITORY_PREFIX: ${{ vars.ECR_REPOSITORY_PREFIX }}
+      GITHUB_ACTIONS_USER_NAME: ${{ vars.GH_ACTIONS_USER_NAME }}
+      COMMIT: ${{ github.sha }}
     strategy:
       matrix:
         service: [frontend, backend]

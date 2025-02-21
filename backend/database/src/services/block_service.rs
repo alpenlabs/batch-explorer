@@ -24,7 +24,6 @@ impl<'a> BlockService<'a> {
             panic!("last_block_height does not match the expected height!"); 
         }
 
-
         active_model.checkpoint_idx = Set(checkpoint_idx);
 
         // Insert the block using the Entity::insert() method
@@ -71,7 +70,7 @@ impl<'a> BlockService<'a> {
             .map(|result| result.is_some())
             .unwrap_or(false)
     }
-    
+
     async fn prev_block_exists(&self, height: i64) -> bool {
         if height == i64::MIN {
             // return true for the genesis block
