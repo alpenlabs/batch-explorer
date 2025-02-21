@@ -62,7 +62,7 @@ jobs:
       - name: Configure AWS ECR Details
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-to-assume: ${{ secrets.AWS_ECR_ROLE }}
           aws-region: us-east-1
       - name: Login to Amazon ECR
         id: login-ecr
@@ -100,7 +100,7 @@ jobs:
       - name: Set up SSH for private repo access
         uses: webfactory/ssh-agent@v0.7.0
         with:
-          ssh-private-key: ${{ secrets.DEPLOYMENTS_WRITE }}
+          ssh-private-key: ${{ secrets.DEPLOYMENTS_REPO_WRITE }}
       - name: Clone deployments repo (specific branch)
         env:
           DEPLOYMENT_REPO_BRANCH: ${{ vars.DEPLOYMENT_REPO_BRANCH }}
