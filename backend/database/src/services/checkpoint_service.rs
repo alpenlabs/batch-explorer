@@ -24,7 +24,7 @@ impl<'a> CheckpointService<'a> {
                 .map(|result| result.is_some())
                 .unwrap_or(false)
     }
-    
+
     /// Insert a new checkpoint into the database
     pub async fn insert_checkpoint(&self, checkpoint: RpcCheckpointInfo) {
         let idx: i64 = PgU64(checkpoint.idx).to_i64();
@@ -76,7 +76,6 @@ impl<'a> CheckpointService<'a> {
         &self,
         block_hash: &str,
     ) -> Result<Option<i64>, DbErr> {
-    
         match Block::find()
             .filter(model::block::Column::BlockHash.eq(block_hash))
             .one(self.db)
