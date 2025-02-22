@@ -5,6 +5,7 @@ import TableBody from "./TableBody";
 interface TableProps {
     data: RpcCheckpointInfoBatchExp[],
 }
+
 const Table: React.FC<TableProps> = ({ }) => {
     return (
         <>
