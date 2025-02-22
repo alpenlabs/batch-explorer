@@ -142,6 +142,7 @@ pub struct RpcCheckpointInfoBatchExp {
     /// Confirmation status of checkpoint
     pub confirmation_status: Option<RpcCheckpointConfStatus>,
 }
+
 impl From<Model> for RpcCheckpointInfoBatchExp {
     fn from(model: Model) -> Self {
         Self {
