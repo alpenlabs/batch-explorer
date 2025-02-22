@@ -100,8 +100,7 @@ impl StrataFetcher {
             .context("Request returned an error status")?
             .json()
             .await
-            .context("Failed to parse JSON response")?;
-        
+            .context("Failed to parse JSON response")?; 
         
         match response.get("result") {
             Some(Value::Null) | None => {

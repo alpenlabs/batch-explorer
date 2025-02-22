@@ -1,14 +1,14 @@
 name: Kubernetes CI/CD
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  pull_request:
+  push:
     branches:
       - main
-    types: 
-      - closed
+  # pull_request:
+  #   branches:
+  #     - main
+  #   types: 
+  #     - closed
   workflow_dispatch:
     inputs:
       environment:
@@ -22,14 +22,14 @@ on:
           - production
 env:
   CI: false
-  COMMIT: ${{ github.sha }}
+
 permissions:
   contents: read
   pull-requests: read
 jobs:
   detect-changes:
     # only run this job when a PR is merged or manually triggered
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    # if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     name: Detect Changes
     runs-on: ubuntu-latest
     env:
@@ -86,6 +86,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY_PREFIX: ${{ vars.ECR_REPOSITORY_PREFIX }}
+          COMMIT: ${{ github.sha }}
         run: |
           IMAGE_TAG=${COMMIT::7}
           SERVICE="${{ matrix.service }}"
@@ -123,23 +124,25 @@ jobs:
       - name: Update Docker image tag in Helm values
         env:
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
+          COMMIT: ${{ github.sha }}
         run: |
           SHORT_TAG=${COMMIT::7}
           VALUES_FILE="deployments/clusters/$CLUSTER_NAME/values/strata-apps-values.yaml"
 
           if [[ "${{ needs.detect-changes.outputs.frontend_changed }}" == "true" ]]; then
             echo "Updating frontend tag in $VALUES_FILE"
-            yq eval -i ".batchExpFe.image.tag = strenv(SHORT_TAG)" $VALUES_FILE
+            yq eval -i ".batchExpFe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
           fi
           if [[ "${{ needs.detect-changes.outputs.backend_changed }}" == "true" ]]; then
             echo "Updating backend tag in $VALUES_FILE"
-            yq eval -i ".batchExpBe.image.tag = strenv(SHORT_TAG)" $VALUES_FILE
+            yq eval -i ".batchExpBe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
           fi
       - name: Commit and push changes
         env:
           GH_ACTIONS_USER_NAME: ${{ vars.GH_ACTIONS_USER_NAME }}
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
           BRANCH_OF_DEPLOYMENT_REPO: ${{ vars.BRANCH_OF_DEPLOYMENT_REPO }}
+          COMMIT: ${{ github.sha }}
         run: |
           SHORT_TAG=${COMMIT::7}
           cd deployments

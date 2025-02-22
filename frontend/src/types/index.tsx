@@ -14,7 +14,6 @@ export interface PaginatedData<T> {
     items: T[],            // The items for the current page
 }
 
-
 export interface RpcCheckpointCommitmentInfo {
     blockhash: string;
     // for batch explorer `txid` is the only thing we care about.
