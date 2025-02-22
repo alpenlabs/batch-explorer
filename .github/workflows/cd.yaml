@@ -26,6 +26,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  pull-requests: read
 jobs:
   detect-changes:
     # only run this job when a PR is merged or manually triggered

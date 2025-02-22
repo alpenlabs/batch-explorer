@@ -15,6 +15,7 @@ impl<'a> CheckpointService<'a> {
     pub fn new(db: &'a DatabaseConnection) -> Self {
         Self { db }
     }
+    
     pub async fn checkpoint_exists(&self, idx: i64) -> bool {
         Checkpoint::find()
                 .filter(model::checkpoint::Column::Idx.eq(idx))
