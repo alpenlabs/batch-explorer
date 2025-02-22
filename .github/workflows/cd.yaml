@@ -41,8 +41,6 @@ jobs:
       environment: ${{ env.ENVIRONMENT }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check changed files
         id: filter
         uses: dorny/paths-filter@v2
@@ -66,8 +64,6 @@ jobs:
       service: ${{ matrix.service }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Configure AWS ECR Details
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -122,10 +118,9 @@ jobs:
 
       - name: Update Docker image tag in Helm values
         env:
-          SHORT_TAG: ${{ github.sha }}
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
         run: |
-          SHORT_TAG=${SHORT_TAG::7}
+          SHORT_TAG=${COMMIT::7}
           VALUES_FILE="deployments/clusters/$CLUSTER_NAME/values/strata-apps-values.yaml"
 
           if [[ "${{ needs.detect-changes.outputs.frontend_changed }}" == "true" ]]; then
@@ -138,12 +133,11 @@ jobs:
           fi
       - name: Commit and push changes
         env:
-          SHORT_TAG: ${{ github.sha }}
           GH_ACTIONS_USER_NAME: ${{ vars.GH_ACTIONS_USER_NAME }}
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
           BRANCH_OF_DEPLOYMENT_REPO: ${{ vars.BRANCH_OF_DEPLOYMENT_REPO }}
         run: |
-          SHORT_TAG=${SHORT_TAG::7}
+          SHORT_TAG=${COMMIT::7}
           cd deployments
           git config user.name "$GH_ACTIONS_USER_NAME"
           git config user.email "$GH_ACTIONS_USER_NAME@alpenlabs.io"
