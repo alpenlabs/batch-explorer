@@ -63,6 +63,7 @@ impl<'a> BlockService<'a> {
             }
         }
     }
+    
     async fn block_exists(&self, height: i64) -> bool {
         Block::find()
             .filter(model::block::Column::Height.eq(height))
