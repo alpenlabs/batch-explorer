@@ -111,4 +111,5 @@ const batchesData: Batch[] = [
         proofTransactionID: null
     }
 ];
+
 export default batchesData;
