@@ -10,6 +10,7 @@ const App = () => {
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };
+
   return (
     <Router>
       <main className={styles.container}>
