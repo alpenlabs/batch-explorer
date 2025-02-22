@@ -33,9 +33,7 @@ const SearchSection = () => {
             console.error("UNKNOWN Error fetching data:", error);
         }
     };
-    // const handleTitleClick = () => {
-    //     navigate("/");
-    // };
+
     return (
         <div className={styles.searchSection}>
             <>
