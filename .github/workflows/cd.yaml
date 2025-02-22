@@ -97,9 +97,6 @@ jobs:
     needs: [build-and-push, detect-changes]
     runs-on: ubuntu-latest
     environment: ${{ needs.detect-changes.outputs.environment }}
-    strategy:
-      matrix:
-        service: [frontend, backend]
     steps:
       - name: Set up SSH for private repo access
         uses: webfactory/ssh-agent@v0.7.0
@@ -119,9 +116,6 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
 
       - name: Update Docker image tag in Helm values
-        if: |
-          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
-          (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         env:
           SERVICE: ${{ matrix.service }}
           SHORT_TAG: ${{ github.sha }}
@@ -130,9 +124,9 @@ jobs:
           SHORT_TAG=${SHORT_TAG::7}
           VALUES_FILE="deployments/clusters/$CLUSTER_NAME/values/strata-apps-values.yaml"
 
-          if [[ "$SERVICE" == "frontend" ]]; then
+          if [[ "${{ needs.detect-changes.outputs.frontend_changed }}" == "true" ]]; then
             yq eval -i ".batchExpFe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
-          elif [[ "$SERVICE" == "backend" ]]; then
+          elif [["${{ needs.detect-changes.outputs.backend_changed }}" == "true" ]]; then
             yq eval -i ".batchExpBe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
           fi
       - name: Commit and push changes
