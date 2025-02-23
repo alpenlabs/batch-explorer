@@ -95,6 +95,7 @@ impl<'a> CheckpointService<'a> {
             }
         }
     }
+    
     /// Fetch a checkpoint by its L2 block height
     pub async fn get_checkpoint_idx_by_block_height(
         &self,

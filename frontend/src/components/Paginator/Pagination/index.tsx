@@ -34,7 +34,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPa
         } else {
             setShowAlert(true);
             setTimeout(() => {
-                // wait for 3 seconds and then set the alert to false
+                // wait for 2 seconds and then set the alert to false
                 setShowAlert(false);
             }, 2000);
             return;

@@ -30,7 +30,7 @@ services:
     container_name: batch_explorer_backend
     environment:
       APP_DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
-      STRATA_FULLNODE: "https://fnclientbcc5fe8c4454c314eb0a00cd3882.temp6-testnet1-staging.stratabtc.org"
+      STRATA_FULLNODE: "http://localhost:62095"
       APP_FETCH_INTERVAL: 5
     ports:
       - "3000:3000"
@@ -51,6 +51,7 @@ services:
       VITE_API_BASE_URL: http://localhost:3000
       VITE_BLOCKSCOUT_BASE_URL: https://blockscout.com/eth/mainnet/
       VITE_MEMPOOL_BASE_URL: https://explorer2dfa0bab08.temp6-testnet1-staging.stratabtc.org/
+      VITE_REFRESH_INTERVAL: 10000
     command: ["npm", "run", "dev", "--", "--host"]
 
 volumes:

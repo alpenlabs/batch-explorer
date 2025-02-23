@@ -30,6 +30,7 @@ const TableBody: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log("fetching data...");
                 const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
                 const response = await fetch(
                     `${baseUrl}/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
@@ -44,6 +45,11 @@ const TableBody: React.FC = () => {
         };
 
         fetchData();
+
+        const refreshDuration = import.meta.env.VITE_REFRESH_INTERVAL || 30000;
+        const interval = setInterval(fetchData, refreshDuration);
+
+        return () => clearInterval(interval); // Clear interval when unmounting or dependencies change
     }, [currentPage, rowsPerPage]); // Trigger fetch when `currentPage` changes
 
     /** 
