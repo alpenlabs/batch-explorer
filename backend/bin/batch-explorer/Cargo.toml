@@ -23,7 +23,6 @@ anyhow.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-minijinja.workspace = true
 sea-orm.workspace = true
 config.workspace = true
 dotenvy.workspace = true

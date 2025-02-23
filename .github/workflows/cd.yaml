@@ -130,7 +130,7 @@ jobs:
 
           if [[ "${{ needs.detect-changes.outputs.frontend_changed }}" == "true" ]]; then
             echo "Updating frontend tag in $VALUES_FILE"
-            yq eval -i ".batchExpFe.image.tag = strenv(SHORT_TAG)" $VALUES_FILE
+            yq eval -i ".batchExpFe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
           fi
           if [[ "${{ needs.detect-changes.outputs.backend_changed }}" == "true" ]]; then
             echo "Updating backend tag in $VALUES_FILE"
