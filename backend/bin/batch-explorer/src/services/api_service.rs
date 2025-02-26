@@ -35,7 +35,6 @@ pub async fn checkpoint(State(database): State<Arc<DatabaseWrapper>>, Query(para
 }
 
 
-
 pub async fn search(
     State(database): State<Arc<DatabaseWrapper>>, 
     Query(params): Query<SearchQuery>

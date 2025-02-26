@@ -4,6 +4,7 @@ const shortenIds = (value: string | null | undefined, startLength: number = 8, e
     if (value.length <= startLength + endLength) return value; // No need to shorten
     return `${value.slice(2, startLength)}...${value.slice(-endLength)}`;
 };
+
 function isRpcCheckpointInfo(data: any): data is RpcCheckpointInfoBatchExp[] {
     return (
         Array.isArray(data) && // Ensure it's an array

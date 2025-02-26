@@ -53,6 +53,15 @@ jobs:
               - 'frontend/**'
             backend:
               - 'backend/**'
+      - name: Export change detection outputs # Safely export outputs to env variables
+        env:
+          FRONTEND_CHANGED_OUTPUT: ${{ steps.filter.outputs.frontend }}
+          BACKEND_CHANGED_OUTPUT: ${{ steps.filter.outputs.backend }}
+        run: |
+          # Safely write environment variables using printf to avoid template injection
+          printf "FRONTEND_CHANGED=%q\n" "$FRONTEND_CHANGED_OUTPUT" >> "$GITHUB_ENV"
+          printf "BACKEND_CHANGED=%q\n" "$BACKEND_CHANGED_OUTPUT" >> "$GITHUB_ENV"
+
   build-and-push:
     permissions:
       id-token: write
@@ -121,28 +130,38 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Update Docker image tag in Helm values
+      - name: Update Docker image tag in Helm values # Sanitized SHORT_TAG and safe yq usage
         env:
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
         run: |
-          SHORT_TAG=${COMMIT::7}
+          # Sanitize and truncate SHORT_TAG
+          SHORT_TAG="${COMMIT//[^a-zA-Z0-9._-]/}"
+          SHORT_TAG="${SHORT_TAG:0:7}"
+
           VALUES_FILE="deployments/clusters/$CLUSTER_NAME/values/strata-apps-values.yaml"
 
-          if [[ "${{ needs.detect-changes.outputs.frontend_changed }}" == "true" ]]; then
+          # Added boolean validation function
+          validate_boolean() { [[ "$1" == "true" || "$1" == "false" ]]; }
+
+          if validate_boolean "$FRONTEND_CHANGED" && [[ "$FRONTEND_CHANGED" == "true" ]]; then
             echo "Updating frontend tag in $VALUES_FILE"
-            yq eval -i ".batchExpFe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
+            yq eval -i --arg tag "$SHORT_TAG" '.batchExpFe.image.tag = $tag' "$VALUES_FILE" 
           fi
-          if [[ "${{ needs.detect-changes.outputs.backend_changed }}" == "true" ]]; then
+
+          if validate_boolean "$BACKEND_CHANGED" && [[ "$BACKEND_CHANGED" == "true" ]]; then
             echo "Updating backend tag in $VALUES_FILE"
-            yq eval -i ".batchExpBe.image.tag = \"$SHORT_TAG\"" $VALUES_FILE
+            yq eval -i --arg tag "$SHORT_TAG" '.batchExpBe.image.tag = $tag' "$VALUES_FILE" 
           fi
+
       - name: Commit and push changes
         env:
           GH_ACTIONS_USER_NAME: ${{ vars.GH_ACTIONS_USER_NAME }}
           CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
           BRANCH_OF_DEPLOYMENT_REPO: ${{ vars.BRANCH_OF_DEPLOYMENT_REPO }}
         run: |
-          SHORT_TAG=${COMMIT::7}
+          SHORT_TAG="${COMMIT//[^a-zA-Z0-9._-]/}"
+          SHORT_TAG="${SHORT_TAG:0:7}"
+          
           cd deployments
           git config user.name "$GH_ACTIONS_USER_NAME"
           git config user.email "$GH_ACTIONS_USER_NAME@alpenlabs.io"
