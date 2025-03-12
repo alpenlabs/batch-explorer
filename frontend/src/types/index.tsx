@@ -3,7 +3,7 @@ export interface RpcCheckpointInfoBatchExp {
     l1_range: [number, number]; // L1 height range (start, end)
     l2_range: [number, number]; // L2 height range (start, end)
     l2_blockid: string;        // L2 block ID
-    commitment?: RpcCheckpointCommitmentInfo;
+    l1_reference?: CheckpointL1Ref;
     confirmation_status?: string;
 }
 
@@ -14,11 +14,13 @@ export interface PaginatedData<T> {
     items: T[],            // The items for the current page
 }
 
-export interface RpcCheckpointCommitmentInfo {
-    blockhash: string;
-    // for batch explorer `txid` is the only thing we care about.
-    txid: string
-    wtxid: string
-    height: number,
-    position: number,
+export interface CheckpointL1Ref {
+    l1_commitment: L1BlockCommitment;
+    txid: string;
+    wtxid: string;
+}
+
+export interface L1BlockCommitment {
+    height: number;
+    blkid: string;
 }

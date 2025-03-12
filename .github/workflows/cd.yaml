@@ -90,9 +90,6 @@ jobs:
           mask-password: "true"
       - name: Build and push Docker image
         id: build-and-push
-        if: |
-          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend_changed == 'true') ||
-          (matrix.service == 'backend' && needs.detect-changes.outputs.backend_changed == 'true')
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY_PREFIX: ${{ vars.ECR_REPOSITORY_PREFIX }}
@@ -140,18 +137,11 @@ jobs:
 
           VALUES_FILE="deployments/clusters/$CLUSTER_NAME/values/strata-apps-values.yaml"
 
-          # Added boolean validation function
-          validate_boolean() { [[ "$1" == "true" || "$1" == "false" ]]; }
+          echo "Updating frontend tag in $VALUES_FILE"
+          yq eval -i  ".batchExpFe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE" 
 
-          if validate_boolean "$FRONTEND_CHANGED" && [[ "$FRONTEND_CHANGED" == "true" ]]; then
-            echo "Updating frontend tag in $VALUES_FILE"
-            yq eval -i --arg tag "$SHORT_TAG" '.batchExpFe.image.tag = $tag' "$VALUES_FILE" 
-          fi
-
-          if validate_boolean "$BACKEND_CHANGED" && [[ "$BACKEND_CHANGED" == "true" ]]; then
-            echo "Updating backend tag in $VALUES_FILE"
-            yq eval -i --arg tag "$SHORT_TAG" '.batchExpBe.image.tag = $tag' "$VALUES_FILE" 
-          fi
+          echo "Updating backend tag in $VALUES_FILE"
+          yq eval -i  ".batchExpBe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE" 
 
       - name: Commit and push changes
         env:

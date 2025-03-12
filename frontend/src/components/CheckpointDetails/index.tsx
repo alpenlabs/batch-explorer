@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styles from "../../styles/CheckpointDetails.module.css";
 import { RpcCheckpointInfoBatchExp } from "../../types";
+import { reverseEndian } from "../../utils/lib";
 import Pagination from "../Paginator/Pagination/index";
-
 const CheckpointDetails = () => {
     const [searchParams] = useSearchParams();
     const page = searchParams.get("p"); // Get the "p" query parameter
@@ -14,6 +14,9 @@ const CheckpointDetails = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [firstPage, setFirstPage] = useState(0);
     const rowsPerPage = 1; // Fixed value
+
+    const MEMPOOL_BASE_URL = import.meta.env.VITE_MEMPOOL_BASE_URL || "https://default-mempool-url.com";
+    const BLOCKSCOUT_BASE_URL = import.meta.env.VITE_BLOCKSCOUT_BASE_URL || "https://default-blockscout-url.com";
 
     useEffect(() => {
         // Convert the query param `p` to a number
@@ -51,7 +54,14 @@ const CheckpointDetails = () => {
             <div className={styles.checkpointContainer}>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Batch TXID:</span>
-                    <span className={styles.checkpointValue}>{checkpoint.commitment?.txid}</span>
+                    <a
+                        href={`${MEMPOOL_BASE_URL}tx/${reverseEndian(checkpoint.l1_reference?.txid)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {reverseEndian(checkpoint.l1_reference?.txid)}
+                    </a>
+
                 </div>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Epoch index:</span>
@@ -65,7 +75,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Signet start block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[0]}`}
+                            href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[0]}`}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -77,7 +87,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Signet end block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`https://mempool0713bb23.devnet-annapurna.stratabtc.org/block/${checkpoint.l1_range[1]}`}
+                            href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[1]}`}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -89,7 +99,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Strata start block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[0]}`}
+                            href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[0]}`}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -101,7 +111,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Strata end block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`https://blockscoutb86fae58ae.devnet-annapurna.stratabtc.org/block/${checkpoint.l2_range[1]}`}
+                            href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[1]}`}
                             target="_blank"
                             rel="noreferrer"
                         >

@@ -30,7 +30,7 @@ services:
     container_name: batch_explorer_app
     environment:
       APP_DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
-      STRATA_FULLNODE: "https://fnclientbcc5fe8c4454c314eb0a00cd3882.temp6-testnet1-staging.stratabtc.org/"
+      STRATA_FULLNODE: "https://strataseq.temp6-testnet1-staging.stratabtc.org/"
       APP_FETCH_INTERVAL : 5
     ports:
       - "3000:3000"

@@ -22,4 +22,10 @@ function isRpcCheckpointInfo(data: any): data is RpcCheckpointInfoBatchExp[] {
         typeof data[0].l2_blockid === "string"
     );
 }
-export { isRpcCheckpointInfo, shortenIds };
+function reverseEndian(value: string | null | undefined): string {
+    if (!value) return "N/A";
+    const match = value.match(/.{2}/g);
+    return match ? match.reverse().join("") : "N/A"; // Return fallback if match fails
+}
+export { isRpcCheckpointInfo, reverseEndian, shortenIds };
+

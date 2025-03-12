@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { RpcCheckpointInfoBatchExp } from "../../../types";
-import { shortenIds } from "../../../utils/lib";
+import { reverseEndian, shortenIds } from "../../../utils/lib";
 import Pagination from "../../Paginator/Pagination";
 import styles from "./Table.module.css";
 const TableBody: React.FC = () => {
@@ -81,9 +81,9 @@ const TableBody: React.FC = () => {
                     <tbody>
                         {data.map((checkpoint) => (
                             <tr className={styles.tableRowItems} key={checkpoint.idx}>
-                                <td className={styles.tableCell} title={checkpoint.commitment?.txid}>
-                                    <a href={`${MEMPOOL_BASE_URL}tx/${checkpoint.commitment?.txid}`} target="_blank" rel="noreferrer">
-                                        {shortenIds(checkpoint.commitment?.txid)}
+                                <td className={styles.tableCell} title={checkpoint.l1_reference?.txid}>
+                                    <a href={`${MEMPOOL_BASE_URL}tx/${reverseEndian(checkpoint.l1_reference?.txid)}`} target="_blank" rel="noreferrer">
+                                        {shortenIds(reverseEndian(checkpoint.l1_reference?.txid))}
                                     </a>
                                 </td>
                                 <td className={styles.tableCell}>

@@ -21,15 +21,24 @@ pub struct RpcCheckpointInfo {
     /// The L2 height range that the checkpoint covers (start, end)
     pub l2_range: (L2BlockCommitment, L2BlockCommitment),
     /// Info on txn where checkpoint is committed on chain
-    pub commitment: Option<RpcCheckpointCommitmentInfo>,
+    pub l1_reference: Option<CheckpointL1Ref>,
     /// Confirmation status of checkpoint
     pub confirmation_status: Option<RpcCheckpointConfStatus>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct L1BlockCommitment {
-    height: u64,
-    blkid: L1BlockId,
+    pub height: u64,
+    pub blkid: L1BlockId,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Buf32(pub [u8; 32]);
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CheckpointL1Ref {
+    pub l1_commitment: L1BlockCommitment,
+    pub txid: String,
+    pub wtxid: String,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct L2BlockCommitment {
@@ -72,24 +81,6 @@ impl Display for RpcCheckpointConfStatus {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct RpcCheckpointCommitmentInfo {
-    /// block where checkpoint was posted
-    pub blockhash: String,
-
-    /// txid of txn for this checkpoint
-    pub txid: String,
-
-    /// wtxid of txn for this checkpoint
-    pub wtxid: String,
-
-    /// The height of the block where the checkpoint was posted.
-    pub height: u64,
-
-    /// The position of the checkpoint in the block.
-    pub position: u32,
-}
-
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, DeriveActiveModelBehavior, Serialize, Deserialize,
 )]
@@ -117,7 +108,7 @@ impl From<RpcCheckpointInfo> for ActiveModel {
             l2_start: Set(PgU64(info.l2_range.0.slot).to_i64()),
             l2_end: Set(PgU64(info.l2_range.1.slot).to_i64()),
             batch_txid: Set(info
-                .commitment
+                .l1_reference
                 .as_ref()
                 .map_or("-".to_string(), |c| c.txid.clone())), // Extracting `txid`
             status: Set(info
@@ -138,7 +129,7 @@ pub struct RpcCheckpointInfoBatchExp {
     /// The L2 height range that the checkpoint covers (start, end)
     pub l2_range: (u64, u64),
     /// Info on txn where checkpoint is committed on chain
-    pub commitment: Option<RpcCheckpointCommitmentInfo>,
+    pub l1_reference: Option<CheckpointL1Ref>,
     /// Confirmation status of checkpoint
     pub confirmation_status: Option<RpcCheckpointConfStatus>,
 }
@@ -155,12 +146,13 @@ impl From<Model> for RpcCheckpointInfoBatchExp {
                 PgU64::from_i64(model.l2_start).0,
                 PgU64::from_i64(model.l2_end).0,
             ),
-            commitment: Some(RpcCheckpointCommitmentInfo {
-                blockhash: String::new(),
-                txid: model.batch_txid,
-                wtxid: String::new(),
-                height: 0,
-                position: 0,
+            l1_reference: Some(CheckpointL1Ref {
+                l1_commitment: L1BlockCommitment {
+                    height: 0,
+                    blkid: "dummy".to_string(),
+                },
+                txid: model.batch_txid.clone(),
+                wtxid: "dummy".to_string(),
             }),
             confirmation_status: model.status.parse().ok(), // Convert status string to `RpcCheckpointConfStatus`
         }
