@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styles from "../../styles/CheckpointDetails.module.css";
 import { RpcCheckpointInfoBatchExp } from "../../types";
-import { reverseEndian } from "../../utils/lib";
+import { reverseEndian , truncateTxid} from "../../utils/lib";
 import Pagination from "../Paginator/Pagination/index";
 const CheckpointDetails = () => {
     const [searchParams] = useSearchParams();
@@ -59,7 +59,7 @@ const CheckpointDetails = () => {
                         target="_blank"
                         rel="noreferrer"
                     >
-                        {reverseEndian(checkpoint.l1_reference?.txid)}
+                      {truncateTxid(checkpoint.l1_reference?.txid)}
                     </a>
 
                 </div>

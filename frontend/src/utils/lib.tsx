@@ -27,5 +27,13 @@ function reverseEndian(value: string | null | undefined): string {
     const match = value.match(/.{2}/g);
     return match ? match.reverse().join("") : "N/A"; // Return fallback if match fails
 }
-export { isRpcCheckpointInfo, reverseEndian, shortenIds };
+
+function truncateTxid(value: string | null | undefined) : string{
+  console.log(value)
+  if (!value)  return "N/A"; 
+  if (value === "N/A" || value === "-") return value; 
+
+  return `${value.substring(0,4)}..${value.substring(value.length-5)}`;
+}
+export { isRpcCheckpointInfo, reverseEndian, truncateTxid, shortenIds };
 
