@@ -5,6 +5,7 @@ mod utils;
 use axum::{routing::get, Router};
 use database::connection::DatabaseWrapper;
 use fullnode_client::fetcher::StrataFetcher;
+use reqwest::Method;
 use services::{block_service::run_block_fetcher, checkpoint_service::{start_checkpoint_status_updater_task, start_checkpoint_fetcher}};
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -14,6 +15,7 @@ use utils::config::Config;
 use dotenvy::dotenv;
 use clap::Parser;
 
+use tower_http::cors::{Any, CorsLayer};
 
 #[tokio::main]
 async fn main() {
@@ -60,6 +62,13 @@ async fn main() {
         .route("/checkpoint", get(services::api_service::checkpoint))
         .route("/search", get(services::api_service::search));
 
+    // Add Cors layer for Allow cross origin request 
+    let cors = CorsLayer::new()
+    // allow `GET` and `POST` when accessing the resource
+    .allow_methods([Method::GET, Method::POST])
+    // allow requests from any origin
+    .allow_origin(Any);
+
     // Setup Axum router
     let app: Router = Router::new()
         .nest("/api", api_routes)
@@ -68,5 +77,8 @@ async fn main() {
     // Start the server
     let addr = "0.0.0.0:3000".parse().unwrap();
     info!("Listening on {}", addr);
-    axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
+    axum::Server::bind(&addr).serve(app
+        .layer(cors)
+        .into_make_service()
+        ).await.unwrap();
 }
