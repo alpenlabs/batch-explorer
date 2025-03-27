@@ -59,7 +59,7 @@ const CheckpointDetails = () => {
                         target="_blank"
                         rel="noreferrer"
                     >
-                      {truncateTxid(checkpoint.l1_reference?.txid)}
+                      {truncateTxid(reverseEndian(checkpoint.l1_reference?.txid))}
                     </a>
 
                 </div>
