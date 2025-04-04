@@ -21,7 +21,7 @@ pub struct RpcCheckpointInfo {
     /// The L2 height range that the checkpoint covers (start, end)
     pub l2_range: (L2BlockCommitment, L2BlockCommitment),
     /// Info on txn where checkpoint is committed on chain
-    pub l1_reference: Option<CheckpointL1Ref>,
+    pub l1_reference: Option<RpcCheckpointL1Ref>,
     /// Confirmation status of checkpoint
     pub confirmation_status: Option<RpcCheckpointConfStatus>,
 }
@@ -35,8 +35,9 @@ pub struct L1BlockCommitment {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Buf32(pub [u8; 32]);
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CheckpointL1Ref {
-    pub l1_commitment: L1BlockCommitment,
+pub struct RpcCheckpointL1Ref {
+    pub block_height: u64,
+    pub block_id: String,
     pub txid: String,
     pub wtxid: String,
 }
@@ -129,7 +130,7 @@ pub struct RpcCheckpointInfoBatchExp {
     /// The L2 height range that the checkpoint covers (start, end)
     pub l2_range: (u64, u64),
     /// Info on txn where checkpoint is committed on chain
-    pub l1_reference: Option<CheckpointL1Ref>,
+    pub l1_reference: Option<RpcCheckpointL1Ref>,
     /// Confirmation status of checkpoint
     pub confirmation_status: Option<RpcCheckpointConfStatus>,
 }
@@ -146,11 +147,9 @@ impl From<Model> for RpcCheckpointInfoBatchExp {
                 PgU64::from_i64(model.l2_start).0,
                 PgU64::from_i64(model.l2_end).0,
             ),
-            l1_reference: Some(CheckpointL1Ref {
-                l1_commitment: L1BlockCommitment {
-                    height: 0,
-                    blkid: "dummy".to_string(),
-                },
+            l1_reference: Some(RpcCheckpointL1Ref {
+                block_height: 0,
+                block_id: "dummy".to_string(),
                 txid: model.batch_txid.clone(),
                 wtxid: "dummy".to_string(),
             }),
