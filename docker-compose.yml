@@ -32,6 +32,7 @@ services:
       APP_DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
       STRATA_FULLNODE: "https://rpc.testnet-staging.stratabtc.org/"
       APP_FETCH_INTERVAL: 5
+      RUST_LOG: "info"
     ports:
       - "3000:3000"
     depends_on:

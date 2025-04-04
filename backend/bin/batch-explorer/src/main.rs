@@ -27,6 +27,7 @@ async fn main() {
     .with_env_filter(tracing_subscriber::EnvFilter::from_default_env()) // Uses RUST_LOG
     .finish();
     tracing::subscriber::set_global_default(subscriber).expect("Failed to set logging subscriber");
+    tracing::info!("Starting Batch Explorer with config: {:?}", config);
 
     // Initialize database and fetcher
     let database = Arc::new(DatabaseWrapper::new(&config.database_url).await);

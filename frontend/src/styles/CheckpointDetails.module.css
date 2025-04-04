@@ -1,6 +1,5 @@
 /* Checkpoint page */
 .checkpointContainer {
-
     padding: 20px;
     margin: 30px 20%;
 }
@@ -9,8 +8,11 @@
     display: flex;
     justify-content: space-between;
     padding: 10px 0;
-    border-bottom: 1px solid #ddd;
     overflow: hidden;
+}
+
+.checkpointRow:not(:last-child) td {
+    border-bottom: 1px solid #ECECEC;
 }
 
 .checkpointLabel {
@@ -19,7 +21,6 @@
 }
 
 .checkpointValue {
-
     /* Slightly lighter gray for values */
     color: black;
     text-align: right;
