@@ -117,7 +117,7 @@
     .burgerBar {
         width: 25px;
         height: 3px;
-        background-color: white;
+        background-color: black;
         border-radius: 2px;
     }
 
@@ -136,6 +136,7 @@
     /* Cross Icon */
     .cross {
         position: relative;
+        background-color: black;
         width: 25px;
         height: 25px;
         display: flex;
