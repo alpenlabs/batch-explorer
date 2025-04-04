@@ -12,7 +12,7 @@ const Header = () => {
             {/* Logo Wrapper */}
             <a href="/" className={styles.logoWrapper}>
                 <div className={styles.logoSvg}>
-                    <img src="/Strata_full_logo_sand.png" alt="STRATA" />
+                    <img src="/alpen-logo.svg" alt="ALPEN" />
                 </div>
             </a>
 
@@ -21,7 +21,7 @@ const Header = () => {
                 }`}>
                 <nav className={styles.navMenu} role="navigation">
                     <div className={styles.navLinks}>
-                        <a href="https://docs.stratabtc.org/" target="_blank" className={styles.navLink}>Documentation</a>
+                        <a href="https://docs.alpenlabs.io/" target="_blank" className={styles.navLink}>Documentation</a>
                         <a href="#blog" className={styles.navLink}>Blog</a>
                     </div>
                 </nav>

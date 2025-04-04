@@ -5,8 +5,9 @@
     align-items: center;
     width: 100%;
     padding: 20px 15px;
-    background-color: var(--strata-terracotta-med);
-    color: var(--strata-sand-med);
+    color: black;
+    background: #FFFFFF;
+    border-bottom: 1px solid #ECECEC;
     box-sizing: border-box;
 }
 
@@ -18,8 +19,9 @@
 }
 
 .logoSvg img {
-    max-width: 130px;
+    min-width: 112px;
     height: auto;
+
 }
 
 /* Navbar Menu */
@@ -40,11 +42,11 @@
 
 .navLink {
     text-decoration: none;
-    color: var(--strata-sand-med);
+    color: black;
 }
 
 .navLink:hover {
-    color: var(--strata-sand-light);
+    color: black;
 
 }
 
@@ -55,18 +57,18 @@
 
 .devnetButton {
     padding: 10px 20px;
-    background-color: var(--strata-sand-med);
-    border: 2px solid var(--strata-sand-med);
+    background-color: black;
+    border: 2px solid black;
     border-radius: 5px;
-    color: var(--strata-terracotta-med);
+    color: white;
     font-weight: bold;
     /* text-decoration: none; */
     cursor: pointer;
 }
 
 .devnetButton:hover {
-    background-color: var(--strata-terracotta-med);
-    color: var(--strata-sand-med);
+    background-color: black;
+    color: white;
     transition: color 0.5s ease;
 }
 
@@ -91,7 +93,7 @@
         top: 74px;
         left: 0;
         width: 100%;
-        background-color: var(--strata-terracotta-med);
+        background-color: white;
         z-index: 10;
         padding: 20px 0;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);

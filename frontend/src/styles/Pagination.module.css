@@ -26,10 +26,10 @@
     padding: 6px 10px;
     font-size: 14px;
     cursor: pointer;
-    border: 1px solid var(--strata-sand-med);
-    background-color: var(--strata-sand-med);
+    border: 1px solid black;
+    background-color: white;
     border-radius: 4px;
-    color: var(--strata-terracotta-med);
+    color: black;
 }
 
 .pageButton.disabled {
@@ -42,16 +42,16 @@
     text-align: center;
     padding: 4px;
     font-size: 14px;
-    background-color: var(--strata-sand-light);
-    border: 1px solid var(--strata-sand-med);
+    background-color: white;
+    border: 1px solid black;
     border-radius: 4px;
-    color: var(--strata-terracotta-med);
+    color: white;
 
 }
 
 .pageInfo {
     font-size: 14px;
-    color: var(--strata-terracotta-med);
+    color: black;
 }
 
 /* 🪄 Responsive: On smaller screens, pageInfo moves to its own row */
