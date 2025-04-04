@@ -85,7 +85,7 @@ impl StrataFetcher {
         let payload = json!({
             "jsonrpc": "2.0",
             "method": method,
-            "params": [idx],
+            "params": { "l1_commitment" : idx},
             "id": 1
         });
 
