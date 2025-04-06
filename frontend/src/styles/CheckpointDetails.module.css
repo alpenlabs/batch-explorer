@@ -12,8 +12,8 @@
     overflow: hidden;
 }
 
-.checkpointRow:not(:last-child) td {
-    border-bottom: 1px solid #00000066;
+.checkpointRow:not(:last-child) {
+    border-bottom: 1px solid #ECECEC;
 }
 
 .checkpointLabel {

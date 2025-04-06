@@ -7,11 +7,11 @@
 .tableHeader {
     padding: 10px;
     text-align: left;
-    border-bottom: 2px solid #00000066;
+    border-bottom: 1px solid #ECECEC;
 }
 
-.tableRowItems:not(:last-child) td {
-    border-bottom: 0.5px solid #00000066;
+.tableRowItems:not(:last-child) {
+    border-bottom: 1px solid #ECECEC;
 }
 
 .tableCell {
