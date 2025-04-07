@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { RpcCheckpointInfoBatchExp } from "../../../types";
 import { reverseEndian, truncateTxid, shortenIds } from "../../../utils/lib";
 import Pagination from "../../Paginator/Pagination";
-import styles from "./Table.module.css";
+import styles from "../../../styles/Table.module.css";
 const TableBody: React.FC = () => {
     const [data, setData] = useState<RpcCheckpointInfoBatchExp[]>([]);
     const [rowsPerPage] = useState(10); // Fixed value

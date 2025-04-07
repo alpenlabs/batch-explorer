@@ -1,13 +1,26 @@
+/* Wrapping container to enable horizontal scroll */
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+}
+
 /* Table  */
 .table {
     border-collapse: collapse;
     width: 100%;
+    min-width: 700px;
+    /* background-color: white; */
 }
 
-.tableHeader {
-    padding: 10px;
-    text-align: left;
+.tableRowHeader {
+    color: var(--strata-terracotta-med);
     border-bottom: 1px solid #ECECEC;
+}
+
+.tableHeader,
+.tableCell {
+    padding: 5px;
+    text-align: left;
 }
 
 .tableRowItems:not(:last-child) {
@@ -17,5 +30,75 @@
 .tableCell {
     padding: 10px;
     font-size: 14px;
-    color: black;
+    color: var(--strata-terracotta-med);
+}
+
+.tableCell a {
+    /* word-break: break-word; */
+    max-width: 120px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.pagination span {
+    margin: 0 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.pagination button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #8b2624;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+
+    .tableHeader,
+    .tableCell {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .table {
+        min-width: 600px;
+        /* Slightly smaller for tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    .table {
+        min-width: 500px;
+        /* For mobile phones */
+    }
+
+    .tableHeader,
+    .tableCell {
+        font-size: 10px;
+        padding: 6px;
+    }
+
+    .tableCell a {
+        max-width: 80px;
+    }
+}
+
+/* No data placeholder */
+.noData {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+    color: var(--strata-terracotta-med);
 }
