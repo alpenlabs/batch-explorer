@@ -43,7 +43,9 @@ button {
   font-size: 1em;
   font-weight: 500;
   /* font-family: inherit; */
-  background-color: white;
+  background-color: black;
+  color: white;
+  border-radius: 7px;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -54,27 +56,11 @@ button:hover {
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto black;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: white;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: white;
-  }
+  outline: 4px auto white;
 }
 
 #root {
   width: 100%;
   height: auto;
   margin: 0 auto;
-  /* padding: 2rem; */
 }
