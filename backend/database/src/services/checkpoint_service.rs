@@ -32,17 +32,17 @@ impl<'a> CheckpointService<'a> {
         // for the first checkpoint, no need to check the previous checkpoint
         if idx > i64::MIN {
             if let Some(previous_idx) = idx.checked_sub(1) {
-            let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
-    
-            // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
-            if !previous_checkpoint_exists {
-                error!(
-                    "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
-                    checkpoint.idx , 
-                    PgU64::i64_to_u64(previous_idx)
-                );
-                return;
-            }
+                let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
+        
+                // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
+                if !previous_checkpoint_exists {
+                    error!(
+                        "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
+                        checkpoint.idx , 
+                        PgU64::i64_to_u64(previous_idx)
+                    );
+                    return;
+                }
             }
         }
 
