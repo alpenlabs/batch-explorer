@@ -38,7 +38,8 @@ impl<'a> CheckpointService<'a> {
             if !previous_checkpoint_exists {
                 error!(
                     "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
-                    checkpoint.idx , PgU64::i64_to_u64(previous_idx)
+                    checkpoint.idx , 
+                    PgU64::i64_to_u64(previous_idx)
                 );
                 return;
             }
@@ -82,11 +83,11 @@ impl<'a> CheckpointService<'a> {
             .await
         {
             Ok(Some(block))=>{
-                // tracing::info!("Block found: {:?}", block);
+                tracing::debug!("Block found: {:?}", block);
                 Ok(Some(block.checkpoint_idx))
             }
             Ok(None) => {
-                tracing::info!("No block found for hash: {}", block_hash);
+                tracing::debug!("No block found for hash: {}", block_hash);
                 Ok(None)
             }
             Err(err) => {
@@ -109,11 +110,11 @@ impl<'a> CheckpointService<'a> {
             .await
         {
             Ok(Some(block)) => {
-                // tracing::info!("Block found: {:?}", block);
+                tracing::debug!("Block found: {:?}", block);
                 Ok(Some(block.checkpoint_idx))
             }
             Ok(None) => {
-                tracing::info!("No block found for height: {}", PgU64::i64_to_u64(block_height));
+                tracing::debug!("No block found for height: {}", PgU64::i64_to_u64(block_height));
                 Ok(None)
             }
             Err(err) => {
