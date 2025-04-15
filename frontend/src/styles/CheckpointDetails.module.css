@@ -1,27 +1,29 @@
 /* Checkpoint page */
 .checkpointContainer {
-
     padding: 20px;
     margin: 30px 20%;
+    border-collapse: collapse;
 }
 
 .checkpointRow {
     display: flex;
     justify-content: space-between;
     padding: 10px 0;
-    border-bottom: 1px solid #ddd;
     overflow: hidden;
+}
+
+.checkpointRow:not(:last-child) {
+    border-bottom: 1px solid #ECECEC;
 }
 
 .checkpointLabel {
     font-weight: bold;
-    color: var(--strata-terracotta-med);
+    color: black;
 }
 
 .checkpointValue {
-
     /* Slightly lighter gray for values */
-    color: var(--strata-terracotta-med);
+    color: black;
     text-align: right;
     /* Prevent long text from breaking the layout */
     word-break: break-word;
@@ -32,8 +34,8 @@
     position: fixed;
     bottom: 20px;
     left: 20px;
-    background-color: var(--strata-terracotta-light);
-    color: var(--strata-sand-light);
+    background-color: white;
+    color: black;
     padding: 10px 20px;
     border-radius: 5px;
     font-size: 16px;
@@ -46,7 +48,7 @@
 .noData {
     text-align: center;
     font-size: 20px;
-    color: var(--strata-terracotta-med);
+    color: black;
     margin-top: 20px;
 }
 

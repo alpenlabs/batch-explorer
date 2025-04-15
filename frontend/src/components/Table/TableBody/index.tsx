@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { RpcCheckpointInfoBatchExp } from "../../../types";
-import { reverseEndian, truncateTxid, shortenIds } from "../../../utils/lib";
+import { truncateTxid, shortenIds } from "../../../utils/lib";
 import Pagination from "../../Paginator/Pagination";
-import styles from "./Table.module.css";
+import styles from "../../../styles/Table.module.css";
 const TableBody: React.FC = () => {
     const [data, setData] = useState<RpcCheckpointInfoBatchExp[]>([]);
     const [rowsPerPage] = useState(10); // Fixed value
@@ -82,8 +82,8 @@ const TableBody: React.FC = () => {
                         {data.map((checkpoint) => (
                             <tr className={styles.tableRowItems} key={checkpoint.idx}>
                                 <td className={styles.tableCell} title={checkpoint.l1_reference?.txid}>
-                                    <a href={`${MEMPOOL_BASE_URL}tx/${reverseEndian(checkpoint.l1_reference?.txid)}`} target="_blank" rel="noreferrer">
-                                        {shortenIds(truncateTxid(reverseEndian(checkpoint.l1_reference?.txid)))}
+                                    <a href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`} target="_blank" rel="noreferrer">
+                                        {shortenIds(truncateTxid(checkpoint.l1_reference?.txid))}
                                     </a>
                                 </td>
                                 <td className={styles.tableCell}>

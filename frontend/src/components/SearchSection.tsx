@@ -45,7 +45,7 @@ const SearchSection = () => {
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="🔍 Search by Strata orchestration layer block number or block hash"
+                        placeholder="🔍 Search by orchestration layer block number or block hash"
                         className={styles.searchInput}
                         required
                     />
