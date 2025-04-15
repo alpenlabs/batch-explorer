@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styles from "../../styles/CheckpointDetails.module.css";
 import { RpcCheckpointInfoBatchExp } from "../../types";
-import { reverseEndian , truncateTxid} from "../../utils/lib";
+import { truncateTxid} from "../../utils/lib";
 import Pagination from "../Paginator/Pagination/index";
 const CheckpointDetails = () => {
     const [searchParams] = useSearchParams();
@@ -55,11 +55,11 @@ const CheckpointDetails = () => {
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Batch TXID:</span>
                     <a
-                        href={`${MEMPOOL_BASE_URL}tx/${reverseEndian(checkpoint.l1_reference?.txid)}`}
+                        href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`}
                         target="_blank"
                         rel="noreferrer"
                     >
-                      {truncateTxid(reverseEndian(checkpoint.l1_reference?.txid))}
+                      {truncateTxid(checkpoint.l1_reference?.txid)}
                     </a>
 
                 </div>
