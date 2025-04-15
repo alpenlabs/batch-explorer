@@ -54,6 +54,8 @@ const CheckpointDetails = () => {
             <div className={styles.checkpointContainer}>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Batch TXID:</span>
+                    {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" && 
+                    checkpoint.l1_reference.txid !== "-" ? (
                     <a
                         href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`}
                         target="_blank"
@@ -61,7 +63,9 @@ const CheckpointDetails = () => {
                     >
                       {truncateTxid(checkpoint.l1_reference?.txid)}
                     </a>
-
+                    ) : (
+                        checkpoint.l1_reference?.txid
+                    )}
                 </div>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Epoch index:</span>
