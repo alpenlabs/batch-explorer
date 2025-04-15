@@ -1,6 +1,8 @@
 use model::{block::{RpcBlockHeader, ActiveModel as BlockActiveModel, Entity as Block}};
 use sea_orm::{ ColumnTrait, DatabaseConnection,  EntityTrait, QueryFilter, QuerySelect, Set};
 use tracing::error;
+use model::pgu64::PgU64;
+
 /// Wrapper around the database connection
 pub struct BlockService<'a> {
     pub db: &'a DatabaseConnection,
@@ -30,15 +32,15 @@ impl<'a> BlockService<'a> {
         match Block::insert(active_model).exec(self.db).await {
             Ok(_) => {
                 tracing::info!(
-                    "Block inserted successfully: height={}, block_hash={}",
-                    height,
-                    hex::encode(block_id)
+                    "Block inserted & indexed successfully: height={}, block_hash={}",
+                    PgU64::i64_to_u64(height),
+                    block_id
                 );
             }
             Err(err) => {
                 tracing::error!(
                     "Error inserting block with height {}: {:?}",
-                    height, err
+                    PgU64::i64_to_u64(height), err
                 );
             }
         }
