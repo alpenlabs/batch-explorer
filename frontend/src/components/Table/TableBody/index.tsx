@@ -82,9 +82,18 @@ const TableBody: React.FC = () => {
                         {data.map((checkpoint) => (
                             <tr className={styles.tableRowItems} key={checkpoint.idx}>
                                 <td className={styles.tableCell} title={checkpoint.l1_reference?.txid}>
-                                    <a href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`} target="_blank" rel="noreferrer">
-                                        {shortenIds(truncateTxid(checkpoint.l1_reference?.txid))}
-                                    </a>
+                                    {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" && 
+                                        checkpoint.l1_reference.txid !== "-" ? (
+                                        <a
+                                            href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                        {truncateTxid(checkpoint.l1_reference?.txid)}
+                                        </a>
+                                    ) : (
+                                        checkpoint.l1_reference?.txid
+                                    )}
                                 </td>
                                 <td className={styles.tableCell}>
                                     <Link to={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</Link>
