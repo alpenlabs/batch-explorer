@@ -47,13 +47,13 @@ async fn fetch_checkpoints(
     }
     let fn_chkpt_i64 = PgU64(fullnode_last_checkpoint.unwrap()).to_i64();
     let starting_checkpoint = get_starting_checkpoint_idx(database.clone()).await?;
-    info!(fn_chkpt_i64, starting_checkpoint, "fetching checkpoints");
+    info!("latest checkpoint index in fullnode {}, local latest checkpoint index {}", PgU64::i64_to_u64(fn_chkpt_i64), PgU64::i64_to_u64(starting_checkpoint));
     for idx in (starting_checkpoint)..=fn_chkpt_i64 {
         if !checkpoint_db.checkpoint_exists(idx).await{
-            info!("Checkpoint does not exist in db, fetching checkpoint with idx {}", idx);
+            info!("Checkpoint does not exist in db, fetching checkpoint with idx {}", PgU64::i64_to_u64(idx));
             let i = PgU64::from_i64(idx).0;
             if let Ok(checkpoint) = fetcher.fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", i).await {
-                info!("Inserting checkpoint with idx {}", idx);
+                // info!("Inserting checkpoint with idx {}", idx);
                 checkpoint_db.insert_checkpoint(checkpoint.clone()).await;
             }
         }
@@ -170,7 +170,7 @@ async fn update_checkpoints_status(
     //         return Ok(());
     //     }
     // };
-    info!("updating status for checkpoint: {}", idx); 
+    // info!("updating status for checkpoint: {}", PgU64::i64_to_u64(idx)); 
 
     loop {
         let i = PgU64::from_i64(idx).0;
@@ -195,7 +195,7 @@ async fn update_checkpoints_status(
             }
         };
 
-        info!("Updating checkpoint status: idx={}, status={}", idx, status.clone());
+        info!("Updating checkpoint status: idx={}, status={}", PgU64::i64_to_u64(idx), status.clone());
         // if there is no change in status, return by doing nothing
         if checkpoint_in_db
         .confirmation_status

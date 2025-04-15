@@ -19,6 +19,10 @@ impl PgU64 {
     pub fn new(value: u64) -> Self {
         PgU64(value)
     }
+
+    pub fn i64_to_u64(value: i64) -> u64 {
+        PgU64::from_i64(value).0
+    }
 }
 
 impl Serialize for PgU64 {

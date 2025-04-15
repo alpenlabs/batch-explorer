@@ -26,7 +26,7 @@ pub async fn run_block_fetcher(
 ) {
     info!("Starting block fetcher...");
     while let Some(CheckpointFetch{idx}) = rx.recv().await {
-        info!("Received checkpoint: {:?}", idx);
+        info!("Received checkpoint: {:?}", PgU64::i64_to_u64(idx));
         fetch_blocks_in_checkpoint(fetcher.clone(), database.clone(), idx).await;
     }
 }
@@ -54,7 +54,11 @@ async fn fetch_blocks_in_checkpoint(
                 start = last_block_height_u64 + 1 ;
             } 
         }
-        info!("Fetching blocks from {} to {} for checkpoint {}", start, end, checkpoint_idx);
+        if start > end {
+            info!("No blocks to fetch for checkpoint {}", PgU64::i64_to_u64(checkpoint_idx));
+            return;
+        }
+        info!("Fetching blocks from {} to {} for checkpoint {}", start, end, PgU64::i64_to_u64(checkpoint_idx));
         for block_height in start..=end {
                 if let Ok(block_headers) = fetcher.fetch_data::<Vec<RpcBlockHeader>>("strata_getHeadersAtIdx", block_height).await {
                     for block_header in block_headers {

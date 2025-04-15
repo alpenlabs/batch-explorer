@@ -30,9 +30,9 @@ services:
     container_name: batch_explorer_backend
     environment:
       APP_DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
-      STRATA_FULLNODE: "https://rpc.testnet-staging.stratabtc.org/"
+      STRATA_FULLNODE: "https://rpc.testnet.alpenlabs.io/"
       APP_FETCH_INTERVAL: 5
-      RUST_LOG: "info"
+      RUST_LOG: "info,sqlx::query=warn"
     ports:
       - "3000:3000"
     depends_on:

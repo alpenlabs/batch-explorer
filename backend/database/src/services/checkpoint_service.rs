@@ -38,7 +38,8 @@ impl<'a> CheckpointService<'a> {
             if !previous_checkpoint_exists {
                 error!(
                     "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
-                    checkpoint.idx, previous_idx
+                    checkpoint.idx , 
+                    PgU64::i64_to_u64(previous_idx)
                 );
                 return;
             }
@@ -48,8 +49,8 @@ impl<'a> CheckpointService<'a> {
         // Insert the checkpoint
         let active_model: ActiveModel = checkpoint.into();
         match Checkpoint::insert(active_model).exec(self.db).await {
-            Ok(_) => info!("Checkpoint with idx {} inserted successfully", idx),
-            Err(err) => error!("Error inserting checkpoint with idx {}: {:?}", idx, err),
+            Ok(_) => info!("Checkpoint with idx {} inserted successfully", PgU64::i64_to_u64(idx)),
+            Err(err) => error!("Error inserting checkpoint with idx {}: {:?}", PgU64::i64_to_u64(idx), err),
         }
     }
 
@@ -82,11 +83,11 @@ impl<'a> CheckpointService<'a> {
             .await
         {
             Ok(Some(block))=>{
-                tracing::info!("Block found: {:?}", block);
+                tracing::debug!("Block found: {:?}", block);
                 Ok(Some(block.checkpoint_idx))
             }
             Ok(None) => {
-                tracing::info!("No block found for hash: {}", block_hash);
+                tracing::debug!("No block found for hash: {}", block_hash);
                 Ok(None)
             }
             Err(err) => {
@@ -101,7 +102,7 @@ impl<'a> CheckpointService<'a> {
         &self,
         block_height: i64,
     ) -> Result<Option<i64>, DbErr> {
-        tracing::debug!("Searching for block with height: {}", block_height);
+        tracing::debug!("Searching for block with height: {}", PgU64::i64_to_u64(block_height));
     
         match Block::find()
             .filter(model::block::Column::Height.eq(block_height))
@@ -109,11 +110,11 @@ impl<'a> CheckpointService<'a> {
             .await
         {
             Ok(Some(block)) => {
-                tracing::info!("Block found: {:?}", block);
+                tracing::debug!("Block found: {:?}", block);
                 Ok(Some(block.checkpoint_idx))
             }
             Ok(None) => {
-                tracing::info!("No block found for height: {}", block_height);
+                tracing::debug!("No block found for height: {}", PgU64::i64_to_u64(block_height));
                 Ok(None)
             }
             Err(err) => {
@@ -295,27 +296,27 @@ impl<'a> CheckpointService<'a> {
                     Ok(_) => {
                         info!(
                             "Checkpoint with idx {} updated successfully",
-                            checkpoint_idx
+                            PgU64::i64_to_u64(checkpoint_idx)
                         );
                         Ok(())
                     },
                     Err(err) => {
                         error!(
                             "Failed to update checkpoint with idx {}: {:?}",
-                            checkpoint_idx, err
+                            PgU64::i64_to_u64(checkpoint_idx), err
                         );
                         Err(err)
                     },
                 }
             }
             Ok(None) => {
-                error!("Checkpoint with idx {} not found", checkpoint_idx);
-                Err(DbErr::RecordNotFound(format!("Checkpoint with idx {} not found", checkpoint_idx)))
+                error!("Checkpoint with idx {} not found", PgU64::i64_to_u64(checkpoint_idx));
+                Err(DbErr::RecordNotFound(format!("Checkpoint with idx {} not found", PgU64::i64_to_u64(checkpoint_idx))))
             }
             Err(err) => {
                 error!(
                     "Error querying checkpoint with idx {}: {:?}",
-                    checkpoint_idx, err
+                    PgU64::i64_to_u64(checkpoint_idx), err
                 );
                 Err(err)
             }
