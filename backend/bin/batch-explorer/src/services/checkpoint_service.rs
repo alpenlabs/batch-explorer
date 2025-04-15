@@ -195,7 +195,6 @@ async fn update_checkpoints_status(
             }
         };
 
-        info!("Updating checkpoint status: idx={}, status={}", PgU64::i64_to_u64(idx), status.clone());
         // if there is no change in status, return by doing nothing
         if checkpoint_in_db
         .confirmation_status
@@ -205,6 +204,7 @@ async fn update_checkpoints_status(
             return Ok(());
         }
         
+        info!("Updating checkpoint status: idx={}, status={}", PgU64::i64_to_u64(idx), status.clone());
         // update the db with the new checkpoint record instead of tweaking the existing one
         // as there could be change in both status and txid
         checkpoint_db
