@@ -165,14 +165,14 @@ async fn update_checkpoints_status(
     }
 
     loop {
-        let i = PgU64::from_i64(idx).0;
-
         // This is the stopping condition for the loop. If the checkpoint is not found in the database, 
         // break the loop as we have already updated all the checkpoints.
         let Some(checkpoint_in_db) = checkpoint_db.get_checkpoint_by_idx(idx).await else {
             info!("Status of all checkpoints in db is already updated.");
             return Ok(());
         };
+        
+        let i = PgU64::from_i64(idx).0;
 
         let Ok(checkpoint_from_rpc) = fetcher
             .fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", i)
