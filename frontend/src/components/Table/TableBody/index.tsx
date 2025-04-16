@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { RpcCheckpointInfoBatchExp } from "../../../types";
-import { truncateTxid, shortenIds } from "../../../utils/lib";
+import { truncateTxid } from "../../../utils/lib";
 import Pagination from "../../Paginator/Pagination";
 import styles from "../../../styles/Table.module.css";
 const TableBody: React.FC = () => {
@@ -24,7 +24,7 @@ const TableBody: React.FC = () => {
         }
     }, [pageFromUrl]);
 
-    /** 
+    /**
      * - Ensures data reloads when the user changes pages.
      */
     useEffect(() => {
@@ -52,8 +52,8 @@ const TableBody: React.FC = () => {
         return () => clearInterval(interval); // Clear interval when unmounting or dependencies change
     }, [currentPage, rowsPerPage]); // Trigger fetch when `currentPage` changes
 
-    /** 
-     * Immediately update `searchParams` and state 
+    /**
+     * Immediately update `searchParams` and state
      * - Prevents the need for a second click.
      */
     const setPage = (page: number) => {
@@ -74,15 +74,15 @@ const TableBody: React.FC = () => {
                             <th className={styles.tableHeader}>Status</th>
                             <th className={styles.tableHeader}>Signet start block</th>
                             <th className={styles.tableHeader}>Signet end block</th>
-                            <th className={styles.tableHeader}>Strata start block</th>
-                            <th className={styles.tableHeader}>Strata end block</th>
+                            <th className={styles.tableHeader}>Alpen start block</th>
+                            <th className={styles.tableHeader}>Alpen end block</th>
                         </tr>
                     </thead>
                     <tbody>
                         {data.map((checkpoint) => (
                             <tr className={styles.tableRowItems} key={checkpoint.idx}>
                                 <td className={styles.tableCell} title={checkpoint.l1_reference?.txid}>
-                                    {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" && 
+                                    {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" &&
                                         checkpoint.l1_reference.txid !== "-" ? (
                                         <a
                                             href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`}

@@ -54,7 +54,7 @@ const CheckpointDetails = () => {
             <div className={styles.checkpointContainer}>
                 <div className={styles.checkpointRow}>
                     <span className={styles.checkpointLabel}>Batch TXID:</span>
-                    {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" && 
+                    {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" &&
                     checkpoint.l1_reference.txid !== "-" ? (
                     <a
                         href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`}
@@ -100,7 +100,7 @@ const CheckpointDetails = () => {
                     </span>
                 </div>
                 <div className={styles.checkpointRow}>
-                    <span className={styles.checkpointLabel}>Strata start block:</span>
+                    <span className={styles.checkpointLabel}>Alpen start block:</span>
                     <span className={styles.checkpointValue}>
                         <a
                             href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[0]}`}
@@ -112,7 +112,7 @@ const CheckpointDetails = () => {
                     </span>
                 </div>
                 <div className={styles.checkpointRow}>
-                    <span className={styles.checkpointLabel}>Strata end block:</span>
+                    <span className={styles.checkpointLabel}>Alpen end block:</span>
                     <span className={styles.checkpointValue}>
                         <a
                             href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[1]}`}

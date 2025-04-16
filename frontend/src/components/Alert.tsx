@@ -8,10 +8,9 @@ function AlertComponent() {
             ].map((variant) => (
                 <Alert key={variant} variant={variant}
                     style={{
-                        color: "var(--strata-terracotta-med)",
-                        background: "var(--strata-sand-med)",
-                        border: "1px solid var(--strata-terracotta-med)",
-                        //width 30%
+                        color: "black",
+                        background: "white",
+                        border: "1px solid #ECECEC",
                         width: "30%",
                         margin: "10px ",
                     }}>
