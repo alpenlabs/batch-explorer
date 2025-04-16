@@ -31,7 +31,7 @@ impl<'a> BlockService<'a> {
         // Insert the block using the Entity::insert() method
         match Block::insert(active_model).exec(self.db).await {
             Ok(_) => {
-                tracing::info!(
+                tracing::debug!(
                     "Block inserted & indexed successfully: height={}, block_hash={}",
                     PgU64::i64_to_u64(height),
                     block_id
