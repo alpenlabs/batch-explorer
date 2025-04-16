@@ -69,8 +69,8 @@ const TableBody: React.FC = () => {
                 <table className={styles.table}>
                     <thead className={styles.tableRowHeader}>
                         <tr>
-                            <th className={styles.tableHeader}>Batch TXID</th>
                             <th className={styles.tableHeader}>Epoch index</th>
+                            <th className={styles.tableHeader}>Batch TXID</th>
                             <th className={styles.tableHeader}>Status</th>
                             <th className={styles.tableHeader}>Signet start block</th>
                             <th className={styles.tableHeader}>Signet end block</th>
@@ -81,6 +81,9 @@ const TableBody: React.FC = () => {
                     <tbody>
                         {data.map((checkpoint) => (
                             <tr className={styles.tableRowItems} key={checkpoint.idx}>
+                                <td className={styles.tableCell}>
+                                    <Link to={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</Link>
+                                </td>
                                 <td className={styles.tableCell} title={checkpoint.l1_reference?.txid}>
                                     {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" &&
                                         checkpoint.l1_reference.txid !== "-" ? (
@@ -94,9 +97,6 @@ const TableBody: React.FC = () => {
                                     ) : (
                                         checkpoint.l1_reference?.txid
                                     )}
-                                </td>
-                                <td className={styles.tableCell}>
-                                    <Link to={`/checkpoint?p=${checkpoint.idx}`}>{checkpoint.idx}</Link>
                                 </td>
                                 <td className={styles.tableCell}>{checkpoint.confirmation_status}</td>
                                 <td className={styles.tableCell}>
