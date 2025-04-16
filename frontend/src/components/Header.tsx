@@ -21,13 +21,11 @@ const Header = () => {
                 }`}>
                 <nav className={styles.navMenu} role="navigation">
                     <div className={styles.navLinks}>
+                        <a href="https://alpenlabs.io/" target="_blank" className={styles.navLink}>Home</a>
                         <a href="https://docs.alpenlabs.io/" target="_blank" className={styles.navLink}>Documentation</a>
-                        <a href="#blog" className={styles.navLink}>Blog</a>
+                        <a href="https://www.alpenlabs.io/blog" target="_blank" className={styles.navLink}>Blog</a>
                     </div>
                 </nav>
-                <div className={styles.devnetButtonWrapper}>
-                    <a href="#open-form" className={styles.devnetButton}>Access testnet</a>
-                </div>
             </div>
             {/* Menu Button for Mobile */}
             <div
