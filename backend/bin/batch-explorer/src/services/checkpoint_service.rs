@@ -47,7 +47,7 @@ async fn fetch_checkpoints(
     }
     let fn_chkpt_i64 = PgU64(fullnode_last_checkpoint.unwrap()).to_i64();
     let starting_checkpoint = get_starting_checkpoint_idx(database.clone()).await?;
-    info!("latest checkpoint index in fullnode {}, local latest checkpoint index {}", PgU64::i64_to_u64(fn_chkpt_i64), PgU64::i64_to_u64(starting_checkpoint));
+    info!("latest checkpoint index in fullnode: {}, local checkpoint to start block indexing from: {}", PgU64::i64_to_u64(fn_chkpt_i64), PgU64::i64_to_u64(starting_checkpoint));
     for idx in (starting_checkpoint)..=fn_chkpt_i64 {
         if !checkpoint_db.checkpoint_exists(idx).await{
             info!("Checkpoint does not exist in db, fetching checkpoint with idx {}", PgU64::i64_to_u64(idx));
@@ -128,8 +128,8 @@ pub async fn start_checkpoint_status_updater_task(
 
 /// This function continuously updates the status of the checkpoints which are yet to be finalized.
 /// 
-/// This algorith works on the assumptions that the checkpoints must get finalized in the order they are created.
-/// or fullnode must have finalized the checkpoint before the next one is finalized.
+/// This algorithm works on the assumptions that the checkpoints must get finalized in the order they are created.
+/// i.e. (n-1)th checkpoint gets finalized before (n)th.
 /// 
 /// ** Algorithm **
 /// 1. Get the earliest checkpoint idx whose status is Either pending or Confirmed
@@ -150,7 +150,7 @@ async fn update_checkpoints_status(
         idx = match checkpoint_db.get_earliest_pending_checkpoint_idx().await {
             Some(i) => i,
             None => {
-                info!("No pending checkpoints found.");
+                info!("No more pending checkpoints locally.");
                 return Ok(());
             }
         };
@@ -158,34 +158,30 @@ async fn update_checkpoints_status(
         idx = match checkpoint_db.get_earliest_confirmed_checkpoint_idx().await {
             Some(i) => i,
             None => {
-                info!("No confirmed checkpoints found.");
+                info!("No more confirmed checkpoints locally.");
                 return Ok(());
             }
         };
     }
-    // let mut idx = match checkpoint_db.get_earliest_unfinalized_checkpoint_idx().await {
-    //     Some(i) => i,
-    //     None => {
-    //         info!("No unfinalized checkpoints found.");
-    //         return Ok(());
-    //     }
-    // };
-    // info!("updating status for checkpoint: {}", PgU64::i64_to_u64(idx)); 
 
     loop {
+        // This is the stopping condition for the loop. If the checkpoint is not found in the database, 
+        // break the loop as we have already updated all the checkpoints.
+        let Some(checkpoint_in_db) = checkpoint_db.get_checkpoint_by_idx(idx).await else {
+            info!("Status of all checkpoints in db is already updated.");
+            return Ok(());
+        };
+        
         let i = PgU64::from_i64(idx).0;
-        let checkpoint_from_rpc = fetcher
-            .fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", i)
-            .await
-            .map_err(|_| {
-                error!("Error fetching checkpoint from fullnode");
-                anyhow::anyhow!("Error fetching checkpoint from fullnode")
-            })?;
 
-        let checkpoint_in_db = checkpoint_db.get_checkpoint_by_idx(idx).await.ok_or_else(|| {
-            info!("No checkpoint found in database for idx {}", idx);
-            anyhow::anyhow!("No checkpoint in database")
-        })?;
+        let Ok(checkpoint_from_rpc) = fetcher
+            .fetch_data::<RpcCheckpointInfo>("strata_getCheckpointInfo", i)
+            .await else {
+                warn!("Checkpoint not found in fullnode for idx {}", PgU64::i64_to_u64(idx));
+                return Ok(());
+        };
+
+
 
         let status = match checkpoint_from_rpc.confirmation_status {
             Some(status) => status.to_string(),
@@ -195,7 +191,6 @@ async fn update_checkpoints_status(
             }
         };
 
-        info!("Updating checkpoint status: idx={}, status={}", PgU64::i64_to_u64(idx), status.clone());
         // if there is no change in status, return by doing nothing
         if checkpoint_in_db
         .confirmation_status
@@ -205,6 +200,7 @@ async fn update_checkpoints_status(
             return Ok(());
         }
         
+        info!("Updating checkpoint status: idx={}, status={}", PgU64::i64_to_u64(idx), status.clone());
         // update the db with the new checkpoint record instead of tweaking the existing one
         // as there could be change in both status and txid
         checkpoint_db
