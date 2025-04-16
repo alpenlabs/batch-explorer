@@ -3,7 +3,7 @@ use model::block::RpcBlockHeader;
 use fullnode_client::fetcher::StrataFetcher;
 use tokio::sync::mpsc::Receiver;
 use std::sync::Arc;
-use tracing::info;
+use tracing::{debug,info};
 use model::pgu64::PgU64;
 use database::services::{checkpoint_service::CheckpointService, block_service::BlockService};
 
@@ -26,7 +26,7 @@ pub async fn run_block_fetcher(
 ) {
     info!("Starting block fetcher...");
     while let Some(CheckpointFetch{idx}) = rx.recv().await {
-        info!("Received checkpoint: {:?}", PgU64::i64_to_u64(idx));
+        debug!("Received checkpoint: {:?}", PgU64::i64_to_u64(idx));
         fetch_blocks_in_checkpoint(fetcher.clone(), database.clone(), idx).await;
     }
 }

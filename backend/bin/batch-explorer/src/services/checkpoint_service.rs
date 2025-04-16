@@ -47,7 +47,7 @@ async fn fetch_checkpoints(
     }
     let fn_chkpt_i64 = PgU64(fullnode_last_checkpoint.unwrap()).to_i64();
     let starting_checkpoint = get_starting_checkpoint_idx(database.clone()).await?;
-    info!("latest checkpoint index in fullnode {}, local latest checkpoint index {}", PgU64::i64_to_u64(fn_chkpt_i64), PgU64::i64_to_u64(starting_checkpoint));
+    info!("latest checkpoint index in fullnode: {}, local checkpoint to start block indexing from: {}", PgU64::i64_to_u64(fn_chkpt_i64), PgU64::i64_to_u64(starting_checkpoint));
     for idx in (starting_checkpoint)..=fn_chkpt_i64 {
         if !checkpoint_db.checkpoint_exists(idx).await{
             info!("Checkpoint does not exist in db, fetching checkpoint with idx {}", PgU64::i64_to_u64(idx));
@@ -129,7 +129,7 @@ pub async fn start_checkpoint_status_updater_task(
 /// This function continuously updates the status of the checkpoints which are yet to be finalized.
 /// 
 /// This algorithm works on the assumptions that the checkpoints must get finalized in the order they are created.
-/// i.e. fullnode finalize (n-1)th checkpoint before (n)th checkpoint.
+/// i.e. (n-1)th checkpoint gets finalized before (n)th.
 /// 
 /// ** Algorithm **
 /// 1. Get the earliest checkpoint idx whose status is Either pending or Confirmed
