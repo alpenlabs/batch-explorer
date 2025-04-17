@@ -15,7 +15,7 @@ pub async fn wait_until_migration(database: &Arc<DatabaseWrapper>) {
     // Wait until the migration is done
     loop {
         tracing::info!("Waiting for migration to complete...");
-        if database.has_all_tables().await {
+        if database.migrations_applied().await {
             break;
         }
         sleep(Duration::from_secs(5)).await;
