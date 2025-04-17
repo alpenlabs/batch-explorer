@@ -14,7 +14,7 @@ pub(crate) fn resolve_order(order: Option<&str>) -> Order {
 pub async fn wait_until_migration(database: &Arc<DatabaseWrapper>) {
     // Wait until the migration is done
     loop {
-        tracing::info!("Waiting for migration to complete...");
+        tracing::info!("Checking if migration is applied...");
         if database.migrations_applied().await {
             break;
         }
