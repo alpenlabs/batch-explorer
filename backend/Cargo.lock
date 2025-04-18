@@ -447,6 +447,7 @@ dependencies = [
  "database",
  "dotenvy",
  "fullnode-client",
+ "hex",
  "model",
  "rand",
  "reqwest",

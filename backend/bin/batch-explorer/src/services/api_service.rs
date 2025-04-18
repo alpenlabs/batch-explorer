@@ -7,12 +7,12 @@ use database::services::checkpoint_service::CheckpointService;
 use model::pgu64::PgU64;
 use super::QueryParams;
 use super::SearchQuery;
-
+use hex;
 pub async fn checkpoints(State(database): State<Arc<DatabaseWrapper>>, Query(params): Query<QueryParams>) -> Json<serde_json::Value> {
     let current_page = params.p.unwrap_or(1);
     let page_size = params.ps.unwrap_or(10);
     let error_msg = params.error_msg.clone();
-    tracing::info!("error_msg: {:?}", error_msg);
+    tracing::debug!("error_msg: {:?}", error_msg);
 
     let checkpoint_db = CheckpointService::new(&database.db);
     let paginated_data = checkpoint_db
@@ -44,22 +44,31 @@ pub async fn search(
     
     // Check if it's a valid block number
     if let Ok(block_number) = query.parse::<u64>() {
-        tracing::info!("Searching for block number: {}", block_number);
+        tracing::info!("Search request for block number: {}", block_number);
         let block_number = PgU64(block_number).to_i64();
         if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_height(block_number).await {
             let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
             return Json(json!({"result": checkpoint_idx}));
         }
     }
-    // Check if it's a valid block hash
-    tracing::info!("Searching for block hash: {}", query);
+
     // Remove the "0x" prefix if present
     if query.starts_with("0x") {
         query = query.trim_start_matches("0x");
     }
-    if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_hash(query).await {
-        let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
-        return Json(json!({"result": checkpoint_idx})); 
+
+    // Check if the length is 64 characters (32 bytes)
+    if query.len() == 64 {
+        // Check if it's a valid hex string
+        if hex::decode(query).is_ok() {
+            tracing::info!("Search request for block hash: {}", query);
+            if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_hash(query).await {
+                let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
+                return Json(json!({"result": checkpoint_idx}));
+            } else {
+                tracing::info!("No checkpoint found for block hash: {}", query);
+            }
+        }
     }
     Json(json!({ "error": "Invalid search entry" }))
 }

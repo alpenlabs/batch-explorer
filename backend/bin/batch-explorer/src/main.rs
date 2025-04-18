@@ -3,7 +3,7 @@ mod utils;
 // mod cors;
 
 use axum::{routing::get, Router};
-use database::connection::DatabaseWrapper;
+use database::{connection::DatabaseWrapper, services::utils::wait_until_migration};
 use fullnode_client::fetcher::StrataFetcher;
 use reqwest::Method;
 use services::{block_service::run_block_fetcher, checkpoint_service::{start_checkpoint_status_updater_task, start_checkpoint_fetcher}};
@@ -31,6 +31,9 @@ async fn main() {
     // Initialize database and fetcher
     let database = Arc::new(DatabaseWrapper::new(&config.database_url).await);
     let fetcher = Arc::new(StrataFetcher::new(config.strata_fullnode));
+
+
+    wait_until_migration(&database).await;
 
     // Channels for communication between checkpoint fetcher and block fetcher
     let (tx, rx) = mpsc::channel(100);
