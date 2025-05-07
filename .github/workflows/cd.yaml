@@ -7,7 +7,7 @@ on:
   # pull_request:
   #   branches:
   #     - main
-  #   types: 
+  #   types:
   #     - closed
   workflow_dispatch:
     inputs:
@@ -18,7 +18,7 @@ on:
         type: choice
         options:
           - staging
-          # currently we do not support cd to production, its only for future reference 
+          # currently we do not support cd to production, its only for future reference
           - production
 env:
   CI: false
@@ -96,14 +96,20 @@ jobs:
         run: |
           IMAGE_TAG=${COMMIT::7}
           SERVICE="${{ matrix.service }}"
-          echo "Building and pushing $SERVICE image with tag $IMAGE_TAG"
+          echo "Building and pushing $SERVICE image with tag $IMAGE_TAG and latest"
 
           DOCKERFILE_PATH="$SERVICE/Dockerfile"
           CONTEXT_DIR="$SERVICE"
           ECR_REPOSITORY="$ECR_REPOSITORY_PREFIX/${SERVICE}"
 
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f $DOCKERFILE_PATH $CONTEXT_DIR
+          # Build with both tags
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+                      -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+                      -f $DOCKERFILE_PATH $CONTEXT_DIR
+
+          # Push both tags
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
   update-helm-values:
     name: Update Helm Values
     needs: [build-and-push, detect-changes]
@@ -138,10 +144,10 @@ jobs:
           VALUES_FILE="deployments/clusters/$CLUSTER_NAME/values/strata-apps-values.yaml"
 
           echo "Updating frontend tag in $VALUES_FILE"
-          yq eval -i  ".batchExpFe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE" 
+          yq eval -i  ".batchExpFe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE"
 
           echo "Updating backend tag in $VALUES_FILE"
-          yq eval -i  ".batchExpBe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE" 
+          yq eval -i  ".batchExpBe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE"
 
       - name: Commit and push changes
         env:
@@ -151,7 +157,7 @@ jobs:
         run: |
           SHORT_TAG="${COMMIT//[^a-zA-Z0-9._-]/}"
           SHORT_TAG="${SHORT_TAG:0:7}"
-          
+
           cd deployments
           git config user.name "$GH_ACTIONS_USER_NAME"
           git config user.email "$GH_ACTIONS_USER_NAME@alpenlabs.io"
