@@ -4,16 +4,19 @@ import Header from "./components/Header";
 import PaginatedData from "./components/Paginator";
 import SearchSection from "./components/SearchSection";
 import styles from "./styles/App.module.css";
+import { ConfigProvider } from "./providers/ConfigProvider";
 
 const App = () => {
   return (
-    <Router>
-      <main className={styles.container}>
-        <Header />
-        <SearchSection />
-        <PaginatedData />
-      </main >
-    </Router>
+    <ConfigProvider>
+      <Router>
+        <main className={styles.container}>
+          <Header />
+          <SearchSection />
+          <PaginatedData />
+        </main >
+      </Router>
+    </ConfigProvider>
   );
 };
 

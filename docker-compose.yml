@@ -48,12 +48,6 @@ services:
       - backend
     ports:
       - "5173:5173"
-    environment:
-      VITE_API_BASE_URL: http://localhost:3000
-      VITE_BLOCKSCOUT_BASE_URL: https://explorer.testnet-staging.stratabtc.org/
-      VITE_MEMPOOL_BASE_URL: https://bitcoin.testnet-staging.stratabtc.org/
-      VITE_REFRESH_INTERVAL: 10000
-    command: ["npm", "run", "dev", "--", "--host"]
 
 volumes:
   postgres_data:
