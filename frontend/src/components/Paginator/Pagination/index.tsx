@@ -16,7 +16,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, firstPage, totalPa
     const endPage = Math.min(totalPages, startPage + pageWindowSize - 1);
 
     const navigate = useNavigate();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [_, setSearchParams] = useSearchParams();
     const [editablePage, setEditablePage] = useState<number | string>(currentPage);
     const [showAlert, setShowAlert] = useState(false);
 
