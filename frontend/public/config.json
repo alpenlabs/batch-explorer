@@ -1,0 +1,7 @@
+{
+    "apiBaseUrl": "http://localhost:3000",
+    "bitcoinExplorerBaseUrl": "https://bitcoin.testnet-staging.stratabtc.org",
+    "alpenExplorerBaseUrl": "https://explorer.testnet-staging.stratabtc.org",
+    "refreshIntervalS": 120,
+    "environment": "staging"
+}

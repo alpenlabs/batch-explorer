@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from '../styles/SearchSection.module.css';
+import { useConfig } from "../hooks/useConfig";
 
 const SearchSection = () => {
     const [query, setQuery] = useState("");
@@ -12,10 +13,9 @@ const SearchSection = () => {
         if (!query.trim()) return;
 
         try {
-            // modify the code to get base url from .env file
-            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+            const { apiBaseUrl } = useConfig();
             const response = await fetch(
-                `${baseUrl}/api/search?query=${query.trim()}&ps=1`);
+                `${apiBaseUrl}/api/search?query=${query.trim()}&ps=1`);
             const result = await response.json();
 
             if (result.error) {

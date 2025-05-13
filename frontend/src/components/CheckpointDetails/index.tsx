@@ -4,6 +4,8 @@ import styles from "../../styles/CheckpointDetails.module.css";
 import { RpcCheckpointInfoBatchExp } from "../../types";
 import { truncateTxid} from "../../utils/lib";
 import Pagination from "../Paginator/Pagination/index";
+import { useConfig } from "../../hooks/useConfig";
+
 const CheckpointDetails = () => {
     const [searchParams] = useSearchParams();
     const page = searchParams.get("p"); // Get the "p" query parameter
@@ -14,9 +16,7 @@ const CheckpointDetails = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [firstPage, setFirstPage] = useState(0);
     const rowsPerPage = 1; // Fixed value
-
-    const MEMPOOL_BASE_URL = import.meta.env.VITE_MEMPOOL_BASE_URL || "https://default-mempool-url.com";
-    const BLOCKSCOUT_BASE_URL = import.meta.env.VITE_BLOCKSCOUT_BASE_URL || "https://default-blockscout-url.com";
+    const { apiBaseUrl, alpenExplorerBaseUrl, bitcoinExplorerBaseUrl } = useConfig();
 
     useEffect(() => {
         // Convert the query param `p` to a number
@@ -30,9 +30,8 @@ const CheckpointDetails = () => {
         console.log("currentPage", currentPage);
         const fetchData = async () => {
             try {
-                const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
                 const response = await fetch(
-                    `${baseUrl}/api/checkpoint?p=${currentPage}`
+                    `${apiBaseUrl}/api/checkpoint?p=${currentPage}`
                 );
                 const result = await response.json();
                 setData(result.result.items[0]);
@@ -61,7 +60,7 @@ const CheckpointDetails = () => {
                     {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" &&
                     checkpoint.l1_reference.txid !== "-" ? (
                     <a
-                        href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`}
+                        href={`${bitcoinExplorerBaseUrl}/tx/${checkpoint.l1_reference?.txid}`}
                         target="_blank"
                         rel="noreferrer"
                     >
@@ -79,7 +78,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Signet start block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[0]}`}
+                            href={`${bitcoinExplorerBaseUrl}/block/${checkpoint.l1_range[0]}`}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -91,7 +90,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Signet end block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[1]}`}
+                            href={`${bitcoinExplorerBaseUrl}/block/${checkpoint.l1_range[1]}`}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -103,7 +102,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Alpen start block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[0]}`}
+                            href={`${alpenExplorerBaseUrl}/block/${checkpoint.l2_range[0]}`}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -115,7 +114,7 @@ const CheckpointDetails = () => {
                     <span className={styles.checkpointLabel}>Alpen end block:</span>
                     <span className={styles.checkpointValue}>
                         <a
-                            href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[1]}`}
+                            href={`${alpenExplorerBaseUrl}/block/${checkpoint.l2_range[1]}`}
                             target="_blank"
                             rel="noreferrer"
                         >

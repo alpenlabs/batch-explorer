@@ -4,6 +4,8 @@ import { RpcCheckpointInfoBatchExp } from "../../../types";
 import { truncateTxid } from "../../../utils/lib";
 import Pagination from "../../Paginator/Pagination";
 import styles from "../../../styles/Table.module.css";
+import { useConfig } from "../../../hooks/useConfig";
+
 const TableBody: React.FC = () => {
     const [data, setData] = useState<RpcCheckpointInfoBatchExp[]>([]);
     const [rowsPerPage] = useState(10); // Fixed value
@@ -14,9 +16,7 @@ const TableBody: React.FC = () => {
     // Get `p` from URL and ensure it's a valid number
     const pageFromUrl = Number(searchParams.get("p")) || 1;
     const [currentPage, setCurrentPage] = useState(pageFromUrl);
-
-    const MEMPOOL_BASE_URL = import.meta.env.VITE_MEMPOOL_BASE_URL || "https://default-mempool-url.com";
-    const BLOCKSCOUT_BASE_URL = import.meta.env.VITE_BLOCKSCOUT_BASE_URL || "https://default-blockscout-url.com";
+    const { apiBaseUrl, alpenExplorerBaseUrl, bitcoinExplorerBaseUrl, refreshIntervalS } = useConfig();
 
     useEffect(() => {
         if (currentPage !== pageFromUrl) {
@@ -31,9 +31,8 @@ const TableBody: React.FC = () => {
         const fetchData = async () => {
             try {
                 console.log("fetching data...");
-                const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
                 const response = await fetch(
-                    `${baseUrl}/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
+                    `${apiBaseUrl}/api/checkpoints?p=${currentPage}&ps=${rowsPerPage}`
                 );
                 const result = await response.json();
                 setData(result.result.items);
@@ -46,8 +45,8 @@ const TableBody: React.FC = () => {
 
         fetchData();
 
-        const refreshDuration = import.meta.env.VITE_REFRESH_INTERVAL || 30000;
-        const interval = setInterval(fetchData, refreshDuration);
+        // convert refreshIntervalS to ms
+        const interval = setInterval(fetchData, refreshIntervalS * 1000);
 
         return () => clearInterval(interval); // Clear interval when unmounting or dependencies change
     }, [currentPage, rowsPerPage]); // Trigger fetch when `currentPage` changes
@@ -88,7 +87,7 @@ const TableBody: React.FC = () => {
                                     {checkpoint.l1_reference && checkpoint.l1_reference.txid && checkpoint.l1_reference.txid !== "N/A" &&
                                         checkpoint.l1_reference.txid !== "-" ? (
                                         <a
-                                            href={`${MEMPOOL_BASE_URL}tx/${checkpoint.l1_reference?.txid}`}
+                                            href={`${bitcoinExplorerBaseUrl}/tx/${checkpoint.l1_reference?.txid}`}
                                             target="_blank"
                                             rel="noreferrer"
                                         >
@@ -100,22 +99,22 @@ const TableBody: React.FC = () => {
                                 </td>
                                 <td className={styles.tableCell}>{checkpoint.confirmation_status}</td>
                                 <td className={styles.tableCell}>
-                                    <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
+                                    <a href={`${bitcoinExplorerBaseUrl}/block/${checkpoint.l1_range[0]}`} target="_blank" rel="noreferrer">
                                         {checkpoint.l1_range[0]}
                                     </a>
                                 </td>
                                 <td className={styles.tableCell}>
-                                    <a href={`${MEMPOOL_BASE_URL}block/${checkpoint.l1_range[1]}`} target="_blank" rel="noreferrer">
+                                    <a href={`${bitcoinExplorerBaseUrl}/block/${checkpoint.l1_range[1]}`} target="_blank" rel="noreferrer">
                                         {checkpoint.l1_range[1]}
                                     </a>
                                 </td>
                                 <td className={styles.tableCell}>
-                                    <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
+                                    <a href={`${alpenExplorerBaseUrl}/block/${checkpoint.l2_range[0]}`} target="_blank" rel="noreferrer">
                                         {checkpoint.l2_range[0]}
                                     </a>
                                 </td>
                                 <td className={styles.tableCell}>
-                                    <a href={`${BLOCKSCOUT_BASE_URL}block/${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
+                                    <a href={`${alpenExplorerBaseUrl}/block/${checkpoint.l2_range[1]}`} target="_blank" rel="noreferrer">
                                         {checkpoint.l2_range[1]}
                                     </a>
                                 </td>
