@@ -8,18 +8,17 @@ The easiest way to get everything up is to run
 ## For development
 
 1. Make sure you have the following installed:
-Node.js (≥ v18) – Install via nvm.
 
-Rust (≥ 1.74) – Using [the Rust installer](https://rustup.rs).
-
-PostgreSQL (via Homebrew or system package manager)
+* Node.js (≥ v18) – Install via nvm.
+* Rust (≥ 1.74) – Install using [the Rust installer](https://rustup.rs).
+* PostgreSQL (via Homebrew or system package manager)
 
 ```sh
 brew install postgresql@15
 brew services start postgresql@15
 ```
 
-SQLx CLI (for running migrations):
+* SQLx CLI (for running migrations):
 
 ```sh
 cargo install sqlx-cli --no-default-features --features postgres
