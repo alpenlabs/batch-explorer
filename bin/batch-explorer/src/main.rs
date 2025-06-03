@@ -8,8 +8,8 @@ use tower_http::services::ServeDir;
 use services::{block_service::run_block_fetcher, checkpoint_service::start_checkpoint_fetcher, template_service::initialize_templates};
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use tracing::{info, Level};
-use tracing_subscriber::FmtSubscriber;
+use tracing::info;
+use tracing_subscriber::{fmt, EnvFilter};
 use utils::config::Config;
 use dotenvy::dotenv;
 use clap::Parser;
@@ -19,10 +19,12 @@ async fn main() {
     let config = Config::parse();
 
     // Initialize logging
-    let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::DEBUG)
+    let subscriber = fmt::Subscriber::builder()
+        .with_env_filter(EnvFilter::from_default_env()) // <-- enables RUST_LOG
         .finish();
-    tracing::subscriber::set_global_default(subscriber).expect("Failed to set logging subscriber");
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("Failed to set logging subscriber");
 
     // Initialize database and fetcher
     let database = Arc::new(DatabaseWrapper::new(&config.database_url).await);

@@ -26,18 +26,19 @@ impl<'a> CheckpointService<'a> {
     pub async fn insert_checkpoint(&self, checkpoint: RpcCheckpointInfo) {
         let idx: i64 = PgU64(checkpoint.idx).to_i64();
 
-        if let Some(previous_idx) = idx.checked_sub(1){
-            let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
+        // FIXME: Uncomment this once checkpoints are fixed in devnet
+        // if let Some(previous_idx) = idx.checked_sub(1){
+        //     let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
 
-            // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
-            if !previous_checkpoint_exists {
-                error!(
-                    "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
-                    checkpoint.idx, previous_idx
-                );
-                return;
-            }
-        }
+        //     // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
+        //     if !previous_checkpoint_exists {
+        //         error!(
+        //             "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
+        //             checkpoint.idx, previous_idx
+        //         );
+        //         return;
+        //     }
+        // }
 
         // Insert the checkpoint
         let active_model: ActiveModel = checkpoint.into();
