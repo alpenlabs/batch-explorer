@@ -2,6 +2,7 @@ pub use sea_orm_migration::prelude::*;
 
 mod m20220101_000001_create_checkpoint_table;
 mod m20241226_100451_create_blocks_table;
+mod m20241227_000001_drop_unique_l2_blockid_checkpoint_table;
 
 pub struct Migrator;
 
@@ -11,6 +12,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20220101_000001_create_checkpoint_table::Migration),
             Box::new(m20241226_100451_create_blocks_table::Migration),
+            Box::new(m20241227_000001_drop_unique_l2_blockid_checkpoint_table::Migration),
         ]
     }
 }
