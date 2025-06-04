@@ -43,6 +43,9 @@
         <div class="checkpoint-row">
             <span class="checkpoint-label">Strata start block:</span>
             <span class="checkpoint-value">
+                {% if checkpoint.idx >= 1770 and checkpoint.idx <= 1818 %}
+                -
+                {% else %}
                 <a 
                   href="{{env.blockscout_url}}block/{{ checkpoint.l2_range[0] }}" 
                   target="_blank" 
@@ -50,11 +53,15 @@
                 >
                     {{ checkpoint.l2_range[0] }}
                 </a>
+                {% endif %}
             </span>
         </div>
         <div class="checkpoint-row">
             <span class="checkpoint-label">Strata end block:</span>
             <span class="checkpoint-value">
+                {% if checkpoint.idx >= 1770 and checkpoint.idx <= 1818 %}
+                -
+                {% else %}
                 <a 
                   href="{{env.blockscout_url}}block/{{ checkpoint.l2_range[1] }}" 
                   target="_blank" 
@@ -62,6 +69,7 @@
                 >
                     {{ checkpoint.l2_range[1] }}
                 </a>
+                {% endif %}
             </span>
         </div>
     {% else %}

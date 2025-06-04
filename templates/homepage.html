@@ -59,16 +59,24 @@
       
           <!-- Strata start block -->
           <td class="tableCell">
+            {% if checkpoint.idx >= 1770 and checkpoint.idx <= 1818 %}
+              -
+            {% else %}
             <a href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[0] }}" target="_blank" rel="noreferrer">
               {{ checkpoint.l2_range[0] }}
             </a>
+            {% endif %}
           </td>
       
           <!-- Strata end block -->
           <td class="tableCell">
+            {% if checkpoint.idx >= 1770 and checkpoint.idx <= 1818 %}
+             -
+            {% else %}
             <a href="{{ env.blockscout_url }}/block/{{ checkpoint.l2_range[1] }}" target="_blank" rel="noreferrer">
               {{ checkpoint.l2_range[1] }}
             </a>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

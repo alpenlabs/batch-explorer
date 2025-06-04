@@ -18,12 +18,11 @@ impl<'a> BlockService<'a> {
         let height = active_model.height.clone().unwrap();
         let block_id = active_model.block_hash.clone().unwrap();
 
-        // FIXME: Uncomment this once blocks are fixed in devnet
-        // // ensure that blocks exist incrementally and continuously
-        // let can_insert_block = self.can_insert_block(height).await;
-        // if !can_insert_block {
-        //     panic!("last_block_height does not match the expected height!"); 
-        // }
+        // ensure that blocks exist incrementally and continuously
+        let can_insert_block = self.can_insert_block(height).await;
+        if !can_insert_block {
+            panic!("last_block_height does not match the expected height!"); 
+        }
 
 
         active_model.checkpoint_idx = Set(checkpoint_idx);

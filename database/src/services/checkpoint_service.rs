@@ -6,6 +6,7 @@ use sea_orm::{
 use tracing::{error, info};
 use model::pgu64::PgU64;
 use crate::services::pagination::PaginationInfo;
+use super::utils::resolve_order;
 pub struct CheckpointService<'a> {
     pub db: &'a DatabaseConnection,
 }
@@ -26,19 +27,18 @@ impl<'a> CheckpointService<'a> {
     pub async fn insert_checkpoint(&self, checkpoint: RpcCheckpointInfo) {
         let idx: i64 = PgU64(checkpoint.idx).to_i64();
 
-        // FIXME: Uncomment this once checkpoints are fixed in devnet
-        // if let Some(previous_idx) = idx.checked_sub(1){
-        //     let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
+        if let Some(previous_idx) = idx.checked_sub(1){
+            let previous_checkpoint_exists = self.checkpoint_exists(previous_idx).await;
 
-        //     // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
-        //     if !previous_checkpoint_exists {
-        //         error!(
-        //             "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
-        //             checkpoint.idx, previous_idx
-        //         );
-        //         return;
-        //     }
-        // }
+            // checkpoints must be continuous, better to restart to re-sync from a valid checkpoint
+            if !previous_checkpoint_exists {
+                error!(
+                    "Cannot insert checkpoint with idx {}: previous checkpoint with idx {} does not exist",
+                    checkpoint.idx, previous_idx
+                );
+                return;
+            }
+        }
 
         // Insert the checkpoint
         let active_model: ActiveModel = checkpoint.into();
@@ -123,10 +123,12 @@ impl<'a> CheckpointService<'a> {
         current_page: u64,
         page_size: u64,
         absolute_first_page: u64,
+        order: Option<&str>
     ) -> PaginationInfo<RpcCheckpointInfo> {
         let total_checkpoints = self.get_total_checkpoint_count().await;
         let total_pages = (total_checkpoints as f64 / page_size as f64).ceil() as u64;
         let offset = (current_page - absolute_first_page) * page_size; // Adjust based on the first page
+        let order = resolve_order(order);
 
         // Convert `u64` to `i64` for compatibility with PostgreSQL
         let offset = offset.try_into().ok();
@@ -134,7 +136,7 @@ impl<'a> CheckpointService<'a> {
 
         let items = match Checkpoint::find()
             .filter(Expr::col(model::checkpoint::Column::Idx).is_not_null()) // Ensure idx is not NULL
-            .order_by(model::checkpoint::Column::Idx, sea_orm::Order::Desc) // Sort numerically
+            .order_by(model::checkpoint::Column::Idx, order) // Sort numerically
             .offset(offset)
             .limit(limit)
             .all(self.db)
