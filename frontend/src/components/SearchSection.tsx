@@ -1,19 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import styles from '../styles/SearchSection.module.css';
 import { useConfig } from "../hooks/useConfig";
+import styles from '../styles/SearchSection.module.css';
 
 const SearchSection = () => {
     const [query, setQuery] = useState("");
     const [error, setError] = useState(false); // State to track error visibility
     const navigate = useNavigate();
+    const { apiBaseUrl } = useConfig();
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!query.trim()) return;
 
         try {
-            const { apiBaseUrl } = useConfig();
             const response = await fetch(
                 `${apiBaseUrl}/api/search?query=${query.trim()}&ps=1`);
             const result = await response.json();
