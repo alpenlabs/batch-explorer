@@ -20,6 +20,11 @@ impl<'a> BlockService<'a> {
         let height = active_model.height.clone().unwrap();
         let block_id = active_model.block_hash.clone().unwrap();
 
+        // If block already exists locally do nothing
+        if self.block_exists(height).await{
+            tracing::debug!("Block already exists, height={}", PgU64::i64_to_u64(height));
+            return;
+        }
         // ensure that blocks exist incrementally and continuously
         let can_insert_block = self.can_insert_block(height).await;
         if !can_insert_block {
