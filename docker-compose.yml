@@ -1,11 +1,11 @@
 services:
   postgres:
     image: postgres:15
-    container_name: batch_explorer_postgres
+    container_name: checkpoint_explorer_postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: batch_explorer_db
+      POSTGRES_DB: checkpoint_explorer_db
     ports:
       - "5432:5432"
     volumes:
@@ -15,11 +15,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: batch_explorer_migration
+    container_name: checkpoint_explorer_migration
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
+      DATABASE_URL: postgres://postgres:password@postgres:5432/checkpoint_explorer_db
     command: ["./migration"]
     restart: "no"
 
@@ -27,9 +27,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: batch_explorer_backend
+    container_name: checkpoint_explorer_backend
     environment:
-      APP_DATABASE_URL: postgres://postgres:password@postgres:5432/batch_explorer_db
+      APP_DATABASE_URL: postgres://postgres:password@postgres:5432/checkpoint_explorer_db
       STRATA_FULLNODE: "https://rpc.testnet.alpenlabs.io/"
       APP_FETCH_INTERVAL: 5
       RUST_LOG: "info,sqlx::query=warn"
@@ -37,13 +37,13 @@ services:
       - "3000:3000"
     depends_on:
       - migration
-    command: ["./batch-explorer"]
+    command: ["./checkpoint-explorer"]
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: batch_explorer_frontend
+    container_name: checkpoint_explorer_frontend
     depends_on:
       - backend
     ports:

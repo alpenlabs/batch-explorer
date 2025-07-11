@@ -144,10 +144,10 @@ jobs:
           VALUES_FILE="deployments/clusters/$CLUSTER_NAME/values/strata-apps-values.yaml"
 
           echo "Updating frontend tag in $VALUES_FILE"
-          yq eval -i  ".batchExpFe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE"
+          yq eval -i  ".checkpointExpFe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE"
 
           echo "Updating backend tag in $VALUES_FILE"
-          yq eval -i  ".batchExpBe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE"
+          yq eval -i  ".checkpointExpBe.image.tag = \"$SHORT_TAG\"" "$VALUES_FILE"
 
       - name: Commit and push changes
         env:
