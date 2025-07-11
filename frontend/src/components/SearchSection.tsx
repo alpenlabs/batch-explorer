@@ -39,7 +39,7 @@ const SearchSection = () => {
     <div className={styles.searchSection}>
       <>
         <Link to="/" className={styles.title}>
-          <h1>Batch explorer</h1>
+          <h1>Checkpoint explorer</h1>
         </Link>
         <form onSubmit={handleSearch} className={styles.searchBox}>
           <input

@@ -59,7 +59,7 @@ const CheckpointDetails = () => {
           <span className={styles.checkpointValue}>{checkpoint.idx}</span>
         </div>
         <div className={styles.checkpointRow}>
-          <span className={styles.checkpointLabel}>Batch TXID:</span>
+          <span className={styles.checkpointLabel}>Checkpoint TXID:</span>
           {checkpoint.l1_reference &&
           checkpoint.l1_reference.txid &&
           checkpoint.l1_reference.txid !== "N/A" &&

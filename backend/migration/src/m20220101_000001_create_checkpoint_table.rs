@@ -35,7 +35,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Checkpoints::L2End).big_integer().not_null())
                     .col(
-                        ColumnDef::new(Checkpoints::BatchTxid)
+                        ColumnDef::new(Checkpoints::CheckpointTxid)
                             .string()
                             .not_null()
                             .default("-"),
@@ -98,6 +98,6 @@ enum Checkpoints {
     L1End,
     L2Start,
     L2End,
-    BatchTxid,
+    CheckpointTxid,
     Status,
 }

@@ -30,7 +30,7 @@ services:
     container_name: checkpoint_explorer_backend
     environment:
       APP_DATABASE_URL: postgres://postgres:password@postgres:5432/checkpoint_explorer_db
-      STRATA_FULLNODE: "https://rpc.testnet.alpenlabs.io/"
+      STRATA_FULLNODE: "https://rpc.testnet-staging.stratabtc.org/"
       APP_FETCH_INTERVAL: 5
       RUST_LOG: "info,sqlx::query=warn"
     ports:
