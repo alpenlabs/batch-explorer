@@ -1,14 +1,20 @@
 // services/api_service.rs
-use axum::{extract::{Query, State}, Json};
-use serde_json::json;
-use std::sync::Arc;
-use database::connection::DatabaseWrapper;
-use database::services::checkpoint_service::CheckpointService;
-use model::pgu64::PgU64;
 use super::QueryParams;
 use super::SearchQuery;
+use axum::{
+    extract::{Query, State},
+    Json,
+};
+use database::connection::DatabaseWrapper;
+use database::services::checkpoint_service::CheckpointService;
 use hex;
-pub async fn checkpoints(State(database): State<Arc<DatabaseWrapper>>, Query(params): Query<QueryParams>) -> Json<serde_json::Value> {
+use model::pgu64::PgU64;
+use serde_json::json;
+use std::sync::Arc;
+pub async fn checkpoints(
+    State(database): State<Arc<DatabaseWrapper>>,
+    Query(params): Query<QueryParams>,
+) -> Json<serde_json::Value> {
     let current_page = params.p.unwrap_or(1);
     let page_size = params.ps.unwrap_or(10);
     let error_msg = params.error_msg.clone();
@@ -16,12 +22,15 @@ pub async fn checkpoints(State(database): State<Arc<DatabaseWrapper>>, Query(par
 
     let checkpoint_db = CheckpointService::new(&database.db);
     let paginated_data = checkpoint_db
-        .get_paginated_checkpoints(current_page, page_size, 1, None) // Set absolute_first_page to 1 for batch tables
+        .get_paginated_checkpoints(current_page, page_size, 1, None) // Set absolute_first_page to 1 for checkpoint tables
         .await;
     Json(json!({ "result": paginated_data }))
 }
 
-pub async fn checkpoint(State(database): State<Arc<DatabaseWrapper>>, Query(params): Query<QueryParams>) -> Json<serde_json::Value> {
+pub async fn checkpoint(
+    State(database): State<Arc<DatabaseWrapper>>,
+    Query(params): Query<QueryParams>,
+) -> Json<serde_json::Value> {
     let current_page = params.p.unwrap_or(0); // Default to page 0
     let page_size = 1; // Set constant page size=1 for detail page
 
@@ -34,19 +43,21 @@ pub async fn checkpoint(State(database): State<Arc<DatabaseWrapper>>, Query(para
     Json(json!({ "result": paginated_data }))
 }
 
-
 pub async fn search(
-    State(database): State<Arc<DatabaseWrapper>>, 
-    Query(params): Query<SearchQuery>
+    State(database): State<Arc<DatabaseWrapper>>,
+    Query(params): Query<SearchQuery>,
 ) -> Json<serde_json::Value> {
     let mut query = params.query.trim();
     let checkpoint_db = CheckpointService::new(&database.db);
-    
+
     // Check if it's a valid block number
     if let Ok(block_number) = query.parse::<u64>() {
         tracing::info!("Search request for block number: {}", block_number);
         let block_number = PgU64(block_number).to_i64();
-        if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_height(block_number).await {
+        if let Ok(Some(checkpoint_idx)) = checkpoint_db
+            .get_checkpoint_idx_by_block_height(block_number)
+            .await
+        {
             let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
             return Json(json!({"result": checkpoint_idx}));
         }
@@ -62,7 +73,9 @@ pub async fn search(
         // Check if it's a valid hex string
         if hex::decode(query).is_ok() {
             tracing::info!("Search request for block hash: {}", query);
-            if let Ok(Some(checkpoint_idx)) = checkpoint_db.get_checkpoint_idx_by_block_hash(query).await {
+            if let Ok(Some(checkpoint_idx)) =
+                checkpoint_db.get_checkpoint_idx_by_block_hash(query).await
+            {
                 let checkpoint_idx = PgU64::from_i64(checkpoint_idx).0;
                 return Json(json!({"result": checkpoint_idx}));
             } else {

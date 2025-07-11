@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Copy Cargo manifest files to leverage Docker caching
 COPY Cargo.toml Cargo.lock ./
-COPY bin/batch-explorer/Cargo.toml bin/batch-explorer/
+COPY bin/checkpoint-explorer/Cargo.toml bin/checkpoint-explorer/
 # FIXME: we can optimize in terms of lines of code by using a wildcard
 COPY database/Cargo.toml database/
 COPY fullnode-client/Cargo.toml fullnode-client/
@@ -32,11 +32,11 @@ RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/
 WORKDIR /usr/src/app
 
 # Copy the pre-built binaries from the build stage
-COPY --from=builder /usr/src/app/target/debug/batch-explorer .
+COPY --from=builder /usr/src/app/target/debug/checkpoint-explorer .
 COPY --from=builder /usr/src/app/target/debug/migration .
 COPY .env* .
-# Expose the application port (default is 3000 for batch-explorer)
+# Expose the application port (default is 3000 for checkpoint-explorer)
 EXPOSE 3000
 
 # Default command for the runtime container
-CMD ["./batch-explorer"]
+CMD ["./checkpoint-explorer"]

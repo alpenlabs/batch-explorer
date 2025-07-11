@@ -21,7 +21,7 @@ pub struct Config {
     #[arg(
         long,
         env = "APP_DATABASE_URL",
-        default_value = "postgres://postgres:password@localhost:5432/batch_explorer_db",
+        default_value = "postgres://postgres:password@localhost:5432/checkpoint_explorer_db",
         help = "PostgreSQL database URL"
     )]
     pub database_url: String,

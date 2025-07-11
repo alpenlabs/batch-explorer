@@ -1,10 +1,10 @@
 [package]
 edition = "2021"
-name = "batch-explorer"
+name = "checkpoint-explorer"
 version = "0.1.0"
 
 [[bin]]
-name = "batch-explorer"
+name = "checkpoint-explorer"
 path = "src/main.rs"
 
 [dependencies]

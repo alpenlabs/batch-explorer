@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use reqwest::Client;
 use serde_json::{json, Value};
-use tracing::{info, error};
+use tracing::{error, info};
 /// `StrataFetcher` struct for fetching checkpoint and block data
 pub struct StrataFetcher {
     client: Client,
@@ -31,7 +31,7 @@ impl StrataFetcher {
             "params": [],
             "id": 1
         });
-    
+
         let response = self
             .client
             .post(&self.endpoint)
@@ -39,10 +39,13 @@ impl StrataFetcher {
             .send()
             .await
             .with_context(|| format!("Failed to send request for method: {}", method))?;
-    
+
         let status = response.status();
-        let text = response.text().await.context("Failed to read response body")?;
-    
+        let text = response
+            .text()
+            .await
+            .context("Failed to read response body")?;
+
         if !status.is_success() {
             error!(
                 "Request to {} failed with status {}: {}",
@@ -54,10 +57,10 @@ impl StrataFetcher {
                 text
             ));
         }
-    
-        let json_response: Value = serde_json::from_str(&text)
-            .context("Failed to parse JSON response")?;
-    
+
+        let json_response: Value =
+            serde_json::from_str(&text).context("Failed to parse JSON response")?;
+
         match json_response.get("result") {
             Some(Value::Null) => {
                 info!("No latest index found, returning None.");
@@ -66,7 +69,10 @@ impl StrataFetcher {
             Some(Value::Number(n)) => n.as_u64().map(Some).ok_or_else(|| {
                 anyhow::anyhow!("Invalid numeric format in response: {}", json_response)
             }),
-            _ => Err(anyhow::anyhow!("Unexpected response format: {}", json_response)),
+            _ => Err(anyhow::anyhow!(
+                "Unexpected response format: {}",
+                json_response
+            )),
         }
     }
 
@@ -100,8 +106,8 @@ impl StrataFetcher {
             .context("Request returned an error status")?
             .json()
             .await
-            .context("Failed to parse JSON response")?; 
-        
+            .context("Failed to parse JSON response")?;
+
         match response.get("result") {
             Some(Value::Null) | None => {
                 anyhow::bail!("No data exists for index ID: {}", idx);
@@ -112,7 +118,10 @@ impl StrataFetcher {
                     Ok(data) => Ok(data),
                     Err(e) => {
                         tracing::error!("Deserialization failed for idx {}: {:?}", idx, e);
-                        Err(anyhow::anyhow!("Failed to deserialize response data: {:?}", e))
+                        Err(anyhow::anyhow!(
+                            "Failed to deserialize response data: {:?}",
+                            e
+                        ))
                     }
                 }
             }

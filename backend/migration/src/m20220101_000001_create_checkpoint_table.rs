@@ -36,15 +36,15 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Checkpoints::L2End).big_integer().not_null())
                     .col(
                         ColumnDef::new(Checkpoints::BatchTxid)
-                        .string()
-                        .not_null()
-                        .default("-"),
+                            .string()
+                            .not_null()
+                            .default("-"),
                     )
                     .col(
                         ColumnDef::new(Checkpoints::Status)
-                        .string()
-                        .not_null()
-                        .default("-"),
+                            .string()
+                            .not_null()
+                            .default("-"),
                     )
                     .to_owned(),
             )

@@ -437,31 +437,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
-name = "batch-explorer"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "clap",
- "config",
- "database",
- "dotenvy",
- "fullnode-client",
- "hex",
- "model",
- "rand",
- "reqwest",
- "sea-orm",
- "serde",
- "serde_json",
- "tokio",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "url",
-]
-
-[[package]]
 name = "bigdecimal"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -630,6 +605,31 @@ name = "cfg_aliases"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
+
+[[package]]
+name = "checkpoint-explorer"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "clap",
+ "config",
+ "database",
+ "dotenvy",
+ "fullnode-client",
+ "hex",
+ "model",
+ "rand",
+ "reqwest",
+ "sea-orm",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+]
 
 [[package]]
 name = "chrono"

@@ -93,7 +93,7 @@ pub struct Model {
     pub l1_end: i64,
     pub l2_start: i64,
     pub l2_end: i64,
-    pub batch_txid: String,
+    pub checkpoint_txid: String,
     pub status: String,
 }
 
@@ -108,7 +108,7 @@ impl From<RpcCheckpointInfo> for ActiveModel {
             l1_end: Set(PgU64(info.l1_range.1.height).to_i64()),
             l2_start: Set(PgU64(info.l2_range.0.slot).to_i64()),
             l2_end: Set(PgU64(info.l2_range.1.slot).to_i64()),
-            batch_txid: Set(info
+            checkpoint_txid: Set(info
                 .l1_reference
                 .as_ref()
                 .map_or("-".to_string(), |c| c.txid.clone())), // Extracting `txid`
@@ -122,7 +122,7 @@ impl From<RpcCheckpointInfo> for ActiveModel {
 
 /// Represents the checkpoint information returned by the RPC to the frontend.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct RpcCheckpointInfoBatchExp {
+pub struct RpcCheckpointInfoCheckpointExp {
     /// The index of the checkpoint
     pub idx: u64,
     /// The L1 height range that the checkpoint covers (start, end)
@@ -135,7 +135,7 @@ pub struct RpcCheckpointInfoBatchExp {
     pub confirmation_status: Option<RpcCheckpointConfStatus>,
 }
 
-impl From<Model> for RpcCheckpointInfoBatchExp {
+impl From<Model> for RpcCheckpointInfoCheckpointExp {
     fn from(model: Model) -> Self {
         Self {
             idx: PgU64::from_i64(model.idx).0,
@@ -150,7 +150,7 @@ impl From<Model> for RpcCheckpointInfoBatchExp {
             l1_reference: Some(RpcCheckpointL1Ref {
                 block_height: 0,
                 block_id: "dummy".to_string(),
-                txid: model.batch_txid.clone(),
+                txid: model.checkpoint_txid.clone(),
                 wtxid: "dummy".to_string(),
             }),
             confirmation_status: model.status.parse().ok(), // Convert status string to `RpcCheckpointConfStatus`
