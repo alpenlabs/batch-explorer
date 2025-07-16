@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,8 +9,8 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-        "batches.testnet.alpenlabs.io",
-        "batches.testnet-staging.stratabtc.org",
+      "checkpoints.testnet.alpenlabs.io",
+      "checkpoints.testnet-staging.stratabtc.org",
     ],
   },
 });

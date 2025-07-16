@@ -16,7 +16,7 @@ impl DatabaseWrapper {
             sea_orm::DatabaseBackend::Postgres,
             "SELECT COUNT(*) as count FROM seaql_migrations",
         );
-    
+
         match self.db.query_one(stmt).await {
             Ok(Some(row)) => {
                 let count: i64 = row.try_get("", "count").unwrap_or(0);

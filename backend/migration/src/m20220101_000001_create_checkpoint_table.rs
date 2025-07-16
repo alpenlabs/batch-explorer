@@ -35,16 +35,16 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Checkpoints::L2End).big_integer().not_null())
                     .col(
-                        ColumnDef::new(Checkpoints::BatchTxid)
-                        .string()
-                        .not_null()
-                        .default("-"),
+                        ColumnDef::new(Checkpoints::CheckpointTxid)
+                            .string()
+                            .not_null()
+                            .default("-"),
                     )
                     .col(
                         ColumnDef::new(Checkpoints::Status)
-                        .string()
-                        .not_null()
-                        .default("-"),
+                            .string()
+                            .not_null()
+                            .default("-"),
                     )
                     .to_owned(),
             )
@@ -98,6 +98,6 @@ enum Checkpoints {
     L1End,
     L2Start,
     L2End,
-    BatchTxid,
+    CheckpointTxid,
     Status,
 }

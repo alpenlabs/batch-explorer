@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router } from "react-router-dom";
 import Header from "./components/Header";
 import PaginatedData from "./components/Paginator";
@@ -14,7 +13,7 @@ const App = () => {
           <Header />
           <SearchSection />
           <PaginatedData />
-        </main >
+        </main>
       </Router>
     </ConfigProvider>
   );

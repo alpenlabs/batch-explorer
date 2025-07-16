@@ -30,6 +30,6 @@ Thumbs.db
 
 .vscode/*
 
-batches_db
+checkpoints_db
 
 .env

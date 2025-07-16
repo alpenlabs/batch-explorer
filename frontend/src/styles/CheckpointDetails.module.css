@@ -1,61 +1,60 @@
 /* Checkpoint page */
 .checkpointContainer {
-    padding: 20px;
-    margin: 30px 20%;
-    border-collapse: collapse;
+  padding: 20px;
+  margin: 30px 20%;
+  border-collapse: collapse;
 }
 
 .checkpointRow {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  overflow: hidden;
 }
 
 .checkpointRow:not(:last-child) {
-    border-bottom: 1px solid #ECECEC;
+  border-bottom: 1px solid #ececec;
 }
 
 .checkpointLabel {
-    font-weight: bold;
-    color: black;
+  font-weight: bold;
+  color: black;
 }
 
 .checkpointValue {
-    /* Slightly lighter gray for values */
-    color: black;
-    text-align: right;
-    /* Prevent long text from breaking the layout */
-    word-break: break-word;
-    padding-left: 10px;
+  /* Slightly lighter gray for values */
+  color: black;
+  text-align: right;
+  /* Prevent long text from breaking the layout */
+  word-break: break-word;
+  padding-left: 10px;
 }
 
 .customAlert {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background-color: white;
-    color: black;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 16px;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    opacity: 0.8;
-
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: white;
+  color: black;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  opacity: 0.8;
 }
 
 .noData {
-    text-align: center;
-    font-size: 20px;
-    color: black;
-    margin-top: 20px;
+  text-align: center;
+  font-size: 20px;
+  color: black;
+  margin-top: 20px;
 }
 
 @media (max-width: 900px) {
-    .checkpointContainer {
-        margin: 30px 0%;
-        padding-right: 0;
-        padding-left: 0;
-    }
+  .checkpointContainer {
+    margin: 30px 0%;
+    padding-right: 0;
+    padding-left: 0;
+  }
 }

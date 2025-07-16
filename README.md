@@ -1,4 +1,4 @@
-# Batch Explorer
+# Checkpoint Explorer
 
 ## How to Run
 
@@ -30,7 +30,7 @@ cargo install sqlx-cli --no-default-features --features postgres
 $ psql postgres << EOF
 CREATE USER postgres WITH PASSWORD 'password';
 ALTER USER postgres WITH SUPERUSER;
-CREATE DATABASE batch_explorer_db OWNER postgres;
+CREATE DATABASE checkpoint_explorer_db OWNER postgres;
 EOF
 ```
 
@@ -38,18 +38,18 @@ EOF
 
 ```sh
 cd backend
-export DATABASE_URL=postgres://postgres:password@localhost:5432/batch_explorer_db
+export DATABASE_URL=postgres://postgres:password@localhost:5432/checkpoint_explorer_db
 cargo run --bin migration
 ```
 
 4. Run the backend with
 
 ```sh
-export APP_DATABASE_URL=postgres://postgres:password@localhost:5432/batch_explorer_db
+export APP_DATABASE_URL=postgres://postgres:password@localhost:5432/checkpoint_explorer_db
 export STRATA_FULLNODE=https://rpc.testnet-staging.stratabtc.org
 export APP_FETCH_INTERVAL=5
 
-cargo run --bin batch-explorer
+cargo run --bin checkpoint-explorer
 ```
 
 5. Run the frontend with

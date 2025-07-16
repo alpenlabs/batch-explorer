@@ -2,10 +2,10 @@ use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "Batch explorer",
+    name = "Checkpoint explorer",
     author = "Your Name",
     version = "1.0",
-    about = "A Batch explorer Application"
+    about = "A Checkpoint explorer Application"
 )]
 pub struct Config {
     /// The URL of the Strata Fullnode
@@ -21,7 +21,7 @@ pub struct Config {
     #[arg(
         long,
         env = "APP_DATABASE_URL",
-        default_value = "postgres://postgres:password@localhost:5432/batch_explorer_db",
+        default_value = "postgres://postgres:password@localhost:5432/checkpoint_explorer_db",
         help = "PostgreSQL database URL"
     )]
     pub database_url: String,
